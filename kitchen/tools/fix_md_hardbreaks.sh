@@ -12,7 +12,9 @@
 # STATUS-LOG.md, and a site build must not rewrite them.
 #
 # Skips a leading front matter block (--- ... ---): it is YAML, not Markdown.
-# Skips fenced code blocks (``` or ~~~). Does not touch list items,
+# Skips fenced code blocks (``` or ~~~). Skips raw HTML: a line that starts
+# with <, and everything inside <style>, <script> and <pre> up to the closing
+# tag — trailing spaces mean nothing there. Does not touch list items,
 # headings, blockquotes, table rows, or link/image reference lines (badges,
 # shields, footnote-style refs) — a following non-blank line after these is
 # normal Markdown syntax, not a soft-break hazard. Does not touch lines that
@@ -26,9 +28,9 @@ fix_one() {
     local f="$1"
     awk '
         function is_special(line) {
-            return (line ~ /^[[:space:]]*([-*+][[:space:]]|[0-9]+[.)][[:space:]]|#|>|\||\[)/)
+            return (line ~ /^[[:space:]]*([-*+][[:space:]]|[0-9]+[.)][[:space:]]|#|>|\||\[|<)/)
         }
-        BEGIN { in_fence = 0 }
+        BEGIN { in_fence = 0; raw_end = "" }
         {
             lines[NR] = $0
         }
@@ -50,6 +52,14 @@ fix_one() {
                     continue
                 }
                 if (in_fence) {
+                    print line
+                    continue
+                }
+                if (raw_end == "" && match(line, /<(style|script|pre)[[:space:]>]/)) {
+                    raw_end = "</" substr(line, RSTART + 1, RLENGTH - 2) ">"
+                }
+                if (raw_end != "") {
+                    if (index(line, raw_end)) raw_end = ""
                     print line
                     continue
                 }

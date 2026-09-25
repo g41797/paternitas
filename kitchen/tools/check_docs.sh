@@ -117,10 +117,28 @@ banned=(drain DLL seam seamless sweep settle settled underneath hatch parked
         lifecycle ledger ownership robust seamlessly comprehensive
         leverage efficient powerful facilitate utilize ensure performant
         ergonomic idiomatic streamline orchestrate sophisticated intuitive
-        scalable unlock empower harness deliver idempotent paradigm mindset
-        gained wire wired wires wiring)
+        scalable unlock empower harness deliver fed arm leg idempotent fires
+        faces pitch paradigm mindset gained wire wired wires wiring)
 
-for w in "${banned[@]}"; do
+# The other forms of the words above. -w matches whole words only, so each
+# form is listed.
+banned_forms=(drains drained draining dlls seams sweeps swept sweeping
+        settles settling hatches lifecycles ledgers robustly robustness
+        comprehensively leverages leveraged leveraging efficiently efficiency
+        powerfully facilitates facilitated facilitating utilizes utilized
+        utilizing utilization ensures ensured ensuring ergonomics
+        ergonomically idiomatically streamlines streamlined streamlining
+        orchestrates orchestrated orchestrating orchestration intuitively
+        scalability unlocks unlocked unlocking empowers empowered empowering
+        harnesses harnessed harnessing delivers delivered delivering delivery
+        arms armed arming legs idempotency idempotence fire fired firing face
+        faced facing pitches pitched paradigms mindsets gain gains gaining)
+
+# The multi-word entries. A phrase split across two lines is missed.
+banned_phrases=("on purpose" "object model" "execution context"
+        "execution model" "programming model")
+
+for w in "${banned[@]}" "${banned_forms[@]}" "${banned_phrases[@]}"; do
     while IFS= read -r line; do
         report "BANNED     $w  $line"
     done < <(grep -rniw --include='*.md' --include='*.zig' \
