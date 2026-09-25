@@ -1,0 +1,55 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'examples/**'
+      - 'kitchen/**'
+      - 'build.zig'
+      - 'build.zig.zon'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: mlugg/setup-zig@v2.2.1
+        with:
+          version: 0.16.0
+
+      - name: Regenerate Autodoc Artifacts
+        run: ./kitchen/tools/docs_zig.sh
+
+      - name: Regenerate Examples Catalog
+        run: ./kitchen/tools/gen_examples_docs.sh
+
+      - name: Fix Blank-Line-Before-List
+        run: ./kitchen/tools/fix_md_lists.sh
+
+      - name: Fix Staccato Hard-Breaks
+        run: ./kitchen/tools/fix_md_hardbreaks.sh
+
+      - name: Build MkDocs Site
+        run: |
+          pip install mkdocs-material
+          cd kitchen && mkdocs build -f mkdocs.yml
+
+      - name: Remove Unused Material Default Favicon
+        run: rm -f docs/assets/images/favicon.png
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - uses: actions/deploy-pages@v4

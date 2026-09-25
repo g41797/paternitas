@@ -1,0 +1,63 @@
+site_name: paternitas
+docs_dir: ./docs
+site_dir: ../docs
+site_description: Paternitas
+repo_url: https://github.com/g41797/paternitas/
+repo_name: paternitas on GitHub
+
+theme:
+  name: material
+  logo: assets/images/favicon.ico
+  favicon: assets/images/favicon.ico
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: lime
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.top
+    - navigation.instant
+    - toc.follow
+    - content.code.copy
+    - navigation.footer
+nav:
+  - Home: index.md
+  - Examples: examples/examples.md
+
+hooks:
+  - hooks/count_lines.py
+
+plugins:
+  - search
+
+extra:
+  generator: false
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+copyright: >
+  Copyright &copy; 2026 g41797
