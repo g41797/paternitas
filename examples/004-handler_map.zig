@@ -34,52 +34,52 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
         PingInfo.anchor(&ping),
     };
 
-    var tally: Tally = .{};
-    for (received) |a| try dispatch(&handlers, a, &tally);
+    var counts: Counts = .{};
+    for (received) |a| try dispatch(&handlers, a, &counts);
 
-    if (tally.messages != 1 or tally.jobs != 1 or tally.unhandled != 1) return error.WrongCount;
+    if (counts.messages != 1 or counts.jobs != 1 or counts.unhandled != 1) return error.WrongCount;
 
-    try checkedForm(&message);
+    try checkFromAny(&message);
 }
 
 /// The dispatch step. No Parent type appears here.
-fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *paternitas.Anchor, tally: *Tally) !void {
+fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *paternitas.Anchor, counts: *Counts) !void {
     const any: paternitas.AnyParent = a.toAny() orelse return error.Unstamped;
     const h: Handler = handlers.get(any.type_id) orelse {
         std.log.info("no handler for {s}", .{a.typeName()});
-        tally.*.unhandled += 1;
+        counts.*.unhandled += 1;
         return;
     };
-    h(any.ptr, tally);
+    h(any.ptr, counts);
 }
 
 /// `fromAny` compares the id first. A view of another type gives null.
-fn checkedForm(message: *Message) !void {
+fn checkFromAny(message: *Message) !void {
     const any: paternitas.AnyParent = MessageInfo.toAny(message);
     if (MessageInfo.fromAny(any) != message) return error.WrongParent;
     if (JobInfo.fromAny(any) != null) return error.WrongParent;
 }
 
-const Tally: type = struct {
+const Counts: type = struct {
     messages: usize = 0,
     jobs: usize = 0,
     unhandled: usize = 0,
 };
 
-const Handler: type = *const fn (parent: *anyopaque, tally: *Tally) void;
+const Handler: type = *const fn (parent: *anyopaque, counts: *Counts) void;
 
 // The cast is unchecked. The map matched the id, so it is correct by
 // registration.
-fn onMessage(parent: *anyopaque, tally: *Tally) void {
+fn onMessage(parent: *anyopaque, counts: *Counts) void {
     const m: *Message = @ptrCast(@alignCast(parent));
     std.log.info("message: {s}", .{m.*.text});
-    tally.*.messages += 1;
+    counts.*.messages += 1;
 }
 
-fn onJob(parent: *anyopaque, tally: *Tally) void {
+fn onJob(parent: *anyopaque, counts: *Counts) void {
     const j: *Job = @ptrCast(@alignCast(parent));
     std.log.info("job: {d}", .{j.*.id});
-    tally.*.jobs += 1;
+    counts.*.jobs += 1;
 }
 
 const Message: type = struct {

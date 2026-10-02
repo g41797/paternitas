@@ -1,9 +1,9 @@
 //! A Link of a Node that is not a std Node does not compile.
 
-const MyNode = struct { next: ?*MyNode = null };
+const OtherNode = struct { next: ?*OtherNode = null };
 
 comptime {
-    _ = p.Link(MyNode);
+    _ = p.Link(OtherNode);
 }
 
 const p = @import("paternitas");

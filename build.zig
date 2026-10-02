@@ -125,7 +125,7 @@ fn addNegative(
         .{ .file = "negative/compile/bare_node.zig", .says = "no Link, so it cannot be a Paternitas Parent" },
         .{ .file = "negative/compile/two_links.zig", .says = "more than one Link, and exactly one is allowed" },
         .{ .file = "negative/compile/wrong_node.zig", .says = "found '*DoublyLinkedList.Node'" },
-        .{ .file = "negative/compile/link_other_node.zig", .says = "Link(link_other_node.MyNode): not a std Node, so it cannot be a Paternitas Link" },
+        .{ .file = "negative/compile/link_other_node.zig", .says = "Link(link_other_node.OtherNode): not a std Node, so it cannot be a Paternitas Link" },
     };
 
     for (refused_at_compile_time) |case| {

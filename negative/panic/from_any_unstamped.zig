@@ -7,8 +7,8 @@ const Msg = struct { link: p.SLink = .{} };
 
 pub fn main() void {
     var m: Msg = .{};
-    const forged: p.AnyParent = .{ .ptr = &m, .type_id = p.Info(Msg).typeId() };
-    _ = p.Info(Msg).fromAny(forged);
+    const hand_built: p.AnyParent = .{ .ptr = &m, .type_id = p.Info(Msg).typeId() };
+    _ = p.Info(Msg).fromAny(hand_built);
 }
 
 const p = @import("paternitas");

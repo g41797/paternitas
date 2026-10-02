@@ -41,19 +41,19 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
     var buffer: [4]*paternitas.Anchor = undefined;
     var queue: Queue = .init(&buffer);
 
-    try sendAway(&timeouts, &queue, io, &connections[1]);
-    try comeBack(&timeouts, &queue, io);
+    try removeAndSend(&timeouts, &queue, io, &connections[1]);
+    try receiveAndAppend(&timeouts, &queue, io);
     try checkOrder(&timeouts, &.{ 1, 3, 2 });
 }
 
 /// Out of the list, into the queue. Only the pointer travels.
-fn sendAway(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: *Connection) !void {
+fn removeAndSend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: *Connection) !void {
     timeouts.remove(ConnectionInfo.node(c));
     try queue.putOne(io, ConnectionInfo.anchor(c));
 }
 
 /// Out of the queue, back into the list, with a new deadline.
-fn comeBack(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) !void {
+fn receiveAndAppend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) !void {
     const a: *paternitas.Anchor = try queue.getOne(io);
     const c: *Connection = ConnectionInfo.fromAnchor(a) orelse return error.WrongParent;
 

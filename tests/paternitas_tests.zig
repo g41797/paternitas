@@ -175,8 +175,8 @@ test "is, isId and parentFromNodeUnchecked on a stamped Parent" {
     MI.stamp(&m);
     JI.stamp(&j);
 
-    const mn: *const std.SinglyLinkedList.Node = MI.node(&m);
-    try testing.expect(MI.is(mn));
+    const m_node: *const std.SinglyLinkedList.Node = MI.node(&m);
+    try testing.expect(MI.is(m_node));
     try testing.expect(JI.is(JI.node(&j)));
 
     try testing.expect(MI.isId(MI.typeId()));
@@ -228,7 +228,7 @@ test "AnyParent dispatch through a map, no Info call at dispatch" {
     MI.stamp(&m);
     JI.stamp(&j);
 
-    const H: type = struct {
+    const Handlers: type = struct {
         var seen_msg: ?*Msg = null;
         var seen_job: u32 = 0;
 
@@ -237,16 +237,16 @@ test "AnyParent dispatch through a map, no Info call at dispatch" {
         }
 
         fn onJob(p: *anyopaque) void {
-            const jj: *Job = @ptrCast(@alignCast(p));
-            seen_job = jj.*.id;
+            const job: *Job = @ptrCast(@alignCast(p));
+            seen_job = job.*.id;
         }
     };
 
     const Handler: type = *const fn (*anyopaque) void;
     var map: std.AutoHashMap(TypeId, Handler) = .init(testing.allocator);
     defer map.deinit();
-    try map.put(MI.typeId(), H.onMsg);
-    try map.put(JI.typeId(), H.onJob);
+    try map.put(MI.typeId(), Handlers.onMsg);
+    try map.put(JI.typeId(), Handlers.onJob);
 
     var q: Chain = .{};
     q.append(MI.anchor(&m));
@@ -256,8 +256,8 @@ test "AnyParent dispatch through a map, no Info call at dispatch" {
         const h: Handler = map.get(any.type_id).?;
         h(any.ptr);
     }
-    try testing.expect(H.seen_msg.? == &m);
-    try testing.expect(H.seen_job == 42);
+    try testing.expect(Handlers.seen_msg.? == &m);
+    try testing.expect(Handlers.seen_job == 42);
 }
 
 test "toAny and fromAny" {
@@ -269,8 +269,8 @@ test "toAny and fromAny" {
     try testing.expect(MI.fromAny(any).? == &m);
     try testing.expect(JI.fromAny(any) == null);
 
-    const via: AnyParent = MI.anchor(&m).toAny().?;
-    try testing.expect(via.ptr == any.ptr and via.type_id == any.type_id);
+    const from_anchor: AnyParent = MI.anchor(&m).toAny().?;
+    try testing.expect(from_anchor.ptr == any.ptr and from_anchor.type_id == any.type_id);
 
     var unstamped: Msg = .{ .text = "y" };
     try testing.expect(MI.anchor(&unstamped).toAny() == null);
@@ -283,10 +283,10 @@ test "*Anchor and AnyParent in a tagged union" {
 
     var m: Msg = .{ .text = "x" };
     MI.stamp(&m);
-    const evs = [_]Event{ .{ .tick = 1 }, .{ .anchor = MI.anchor(&m) }, .{ .view = MI.toAny(&m) } };
+    const events: [3]Event = .{ .{ .tick = 1 }, .{ .anchor = MI.anchor(&m) }, .{ .view = MI.toAny(&m) } };
 
     var hits: u32 = 0;
-    for (evs) |e| switch (e) {
+    for (events) |e| switch (e) {
         .tick => {},
         .anchor => |a| hits += @intFromBool(MI.fromAnchor(a) != null),
         .view => |v| hits += @intFromBool(MI.fromAny(v) != null),
@@ -302,19 +302,19 @@ test "the stored offset finds next for both kinds, and so does nextField" {
     MI.stamp(&m);
     JI.stamp(&j);
 
-    const ma: *Anchor = MI.anchor(&m);
-    const ja: *Anchor = JI.anchor(&j);
-    const mi: *const TypeInfo = ma.info().?;
-    const ji: *const TypeInfo = ja.info().?;
+    const m_anchor: *Anchor = MI.anchor(&m);
+    const j_anchor: *Anchor = JI.anchor(&j);
+    const m_info: *const TypeInfo = m_anchor.info().?;
+    const j_info: *const TypeInfo = j_anchor.info().?;
     const m_next: usize = @intFromPtr(&MI.node(&m).*.next);
     const j_next: usize = @intFromPtr(&JI.node(&j).*.next);
 
     // The fallback step of nextField, with the stored offset.
-    try testing.expect(@intFromPtr(container._nextFieldAt(ma, mi.*.node_next_offset)) == m_next);
-    try testing.expect(@intFromPtr(container._nextFieldAt(ja, ji.*.node_next_offset)) == j_next);
+    try testing.expect(@intFromPtr(container._nextFieldAt(m_anchor, m_info.*.node_next_offset)) == m_next);
+    try testing.expect(@intFromPtr(container._nextFieldAt(j_anchor, j_info.*.node_next_offset)) == j_next);
 
-    try testing.expect(@intFromPtr(mi.nextField(ma)) == m_next);
-    try testing.expect(@intFromPtr(ji.nextField(ja)) == j_next);
+    try testing.expect(@intFromPtr(m_info.nextField(m_anchor)) == m_next);
+    try testing.expect(@intFromPtr(j_info.nextField(j_anchor)) == j_next);
 }
 
 const paternitas = @import("paternitas");

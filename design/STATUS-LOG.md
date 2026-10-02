@@ -4,6 +4,31 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-02 — PTRN 02, plain names
+
+The owner asked what `Tally` is, then asked for clever names to become plain
+English. Opus 5.5. No behaviour change.
+
+| file | was | now |
+|---|---|---|
+| example 002 | `recognize` | `recoverAndCount` |
+| example 003 | `sendAway`, `comeBack` | `removeAndSend`, `receiveAndAppend` |
+| example 004 | `Tally`, `tally`, `checkedForm` | `Counts`, `counts`, `checkFromAny` |
+| `src/container.zig` | `shift`, private | `addOffset` |
+| tests | `H`, `jj`, `via`, `evs` | `Handlers`, `job`, `from_anchor`, `events` |
+| tests | `ma`, `ja`, `mi`, `ji`, `mn` | `m_anchor`, `j_anchor`, `m_info`, `j_info`, `m_node` |
+| negatives | `forged`, `Bad`, `Two`, `MyNode` | `hand_built`, `BareNode`, `TwoLinks`, `OtherNode` |
+
+- `Counts` in 004 now matches 002.
+- `build.zig`: the expected message of `link_other_node` names `OtherNode`.
+- `events` in the tests got an explicit type. Rules Part 2.
+
+Checks.
+
+- Six gates pass. 22 tests in all four modes. 9 negatives.
+
+---
+
 ## 2026-10-02 — PTRN 02, the ruling after the gates
 
 The owner asked why `nameOf` sat on the root API page, not on `Anchor`'s.

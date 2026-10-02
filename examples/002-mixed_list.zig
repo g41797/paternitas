@@ -24,7 +24,7 @@ pub fn mixed_list(allocator: std.mem.Allocator, io: std.Io) !void {
     list.append(JobInfo.node(&job));
 
     var counts: Counts = .{};
-    while (list.popFirst()) |node| try recognize(node, &counts);
+    while (list.popFirst()) |node| try recoverAndCount(node, &counts);
 
     if (counts.messages != 1 or counts.jobs != 1) return error.WrongCount;
 }
@@ -35,7 +35,7 @@ const Counts: type = struct {
 };
 
 /// Asks each Parent type in turn. A Node no type claims is an error.
-fn recognize(node: *std.DoublyLinkedList.Node, counts: *Counts) !void {
+fn recoverAndCount(node: *std.DoublyLinkedList.Node, counts: *Counts) !void {
     if (MessageInfo.parentFromNode(node)) |m| {
         std.log.info("message: {s}", .{m.*.text});
         counts.*.messages += 1;

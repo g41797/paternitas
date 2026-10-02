@@ -55,7 +55,7 @@ pub const TypeInfo = struct {
     /// For code that knows nothing of paternitas, such as a C callback's
     /// `void*`.
     pub inline fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque {
-        return shift(a, -@as(isize, @intCast(ti.*.anchor_offset)));
+        return addOffset(a, -@as(isize, @intCast(ti.*.anchor_offset)));
     }
 
     /// The dispatch view of the Parent behind this Anchor.
@@ -93,10 +93,10 @@ pub const uniform_next_offset: ?isize =
 /// `pub` only so a test can run it with `node_next_offset`: on every tested
 /// target `nextField` uses `uniform_next_offset`.
 pub inline fn _nextFieldAt(a: *Anchor, off: isize) *?*anyopaque {
-    return @ptrCast(@alignCast(shift(a, off)));
+    return @ptrCast(@alignCast(addOffset(a, off)));
 }
 
-inline fn shift(a: *Anchor, off: isize) *anyopaque {
+inline fn addOffset(a: *Anchor, off: isize) *anyopaque {
     return @ptrFromInt(@intFromPtr(a) +% @as(usize, @bitCast(off)));
 }
 
