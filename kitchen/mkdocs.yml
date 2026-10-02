@@ -34,7 +34,13 @@ theme:
     - navigation.footer
 nav:
   - Home: index.md
-  - Examples: examples/examples.md
+  - Examples:
+      - examples/001-stamp_and_recover.md
+      - examples/002-mixed_list.md
+      - examples/003-timeout_list.md
+      - examples/004-handler_map.md
+      - examples/005-anchor_in_union.md
+      - examples/006-anchor_chain.md
 
 hooks:
   - hooks/count_lines.py

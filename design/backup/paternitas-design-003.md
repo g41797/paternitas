@@ -7,7 +7,7 @@ Change from 002: the decisions of ADPT 01, and the rules file is 003.
 
 - Current state is not here. It is in [STATUS.md](STATUS.md).
 - The narrative is not here. It is in [STATUS-LOG.md](STATUS-LOG.md).
-- The rules are in [rules-003.md](rules-003.md).
+- The rules are in [rules-004.md](rules-004.md).
 - A big task gets its own versioned `.md` under `design/`, linked from here.
 
 ---
@@ -123,7 +123,7 @@ rulings, 2026-09-25.
 
 ADPT 01 tuned the workflow before any real code. Owner's rulings, 2026-09-25.
 The process rulings are in the rules file. The list is in
-[adpt-01-intent-002.md](adpt-01-intent-002.md).
+[backup/adpt-01-intent-002.md](backup/adpt-01-intent-002.md).
 
 ### The gates
 

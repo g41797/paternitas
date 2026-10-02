@@ -13,6 +13,7 @@
 # Exempt from both checks:
 #   - design/STATUS-LOG.md and design/backup/ — they record what is gone.
 #   - design/paternitas-001.md — kept untouched, by the owner's ruling.
+#   - design/source/ — a copy of the owner's outside work, kept as is.
 # Exempt from check 2 only:
 #   - design/rules-NNN.md — it has to name every banned word. Scan it by hand.
 #
@@ -144,7 +145,7 @@ for w in "${banned[@]}" "${banned_forms[@]}" "${banned_phrases[@]}"; do
     done < <(grep -rniw --include='*.md' --include='*.zig' \
         --exclude='STATUS-LOG.md' --exclude='paternitas-001.md' \
         --exclude='rules-[0-9][0-9][0-9].md' \
-        --exclude-dir=backup --exclude-dir=.zig-cache --exclude-dir=zig-out \
+        --exclude-dir=backup --exclude-dir=source --exclude-dir=.zig-cache --exclude-dir=zig-out \
         --exclude-dir=.git --exclude-dir=.idea --exclude-dir=apidocs \
         -- "$w" "$repo_root/design" "$repo_root/src" "$repo_root/tests" \
                 "$repo_root/examples" "$repo_root/kitchen" "$repo_root/README.md" \

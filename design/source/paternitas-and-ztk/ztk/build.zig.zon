@@ -1,0 +1,20 @@
+.{
+    .name = .matryoshka,
+    .version = "0.0.1",
+
+    // The same fingerprint as the old tree's. The two are separate builds and
+    // never appear in one dependency graph, and this tree replaces that one.
+    .fingerprint = 0x6bdbe6e4b2bd4cc2,
+
+    .minimum_zig_version = "0.16.0",
+
+    .dependencies = .{
+        .paternitas = .{ .path = "../paternitas" },
+    },
+
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}

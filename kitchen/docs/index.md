@@ -23,7 +23,7 @@ hide:
 
 <div class="hero-buttons-top">
   <a href="apidocs/" class="hero-loc-badge">{{ src_loc() }} Lines Of Code</a>
-  <a href="examples/examples/" class="hero-loc-badge">Examples</a>
+  <a href="examples/001-stamp_and_recover/" class="hero-loc-badge">Examples</a>
 </div>
 
 </div>

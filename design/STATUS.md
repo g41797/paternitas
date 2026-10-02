@@ -6,10 +6,14 @@ Current state only. Updated in place. The narrative is in
 ## Start here — every session
 
 1. Read this file in full.
-2. Read Part 0 of [rules-003.md](rules-003.md).
-3. Read the plan, [implementation-plan-004.md](implementation-plan-004.md), for
+2. Read Part 0 of [rules-005.md](rules-005.md).
+3. Read the plan, [implementation-plan-009.md](implementation-plan-009.md), for
    the stage the owner names. Not before they name it.
-4. Read the head of [STATUS-LOG.md](STATUS-LOG.md) when the stage needs the
+4. Read the design, [paternitas-design-007.md](paternitas-design-007.md), for
+   a stage that writes code or docs.
+5. Read [paternitas-intake-001.md](paternitas-intake-001.md) for the ztk
+   stage: the outside work and the questions left for it.
+6. Read the head of [STATUS-LOG.md](STATUS-LOG.md) when the stage needs the
    last stage's account.
 
 **No stage starts because a document says it is next.** The owner names it.
@@ -18,34 +22,39 @@ Current state only. Updated in place. The narrative is in
 
 | what | where |
 |---|---|
-| rules | [rules-003.md](rules-003.md) |
-| design decisions, and what paternitas keeps from ztk | [paternitas-design-003.md](paternitas-design-003.md) |
-| the plan | [implementation-plan-004.md](implementation-plan-004.md) |
+| rules | [rules-005.md](rules-005.md) |
+| design decisions, and what paternitas keeps from ztk | [paternitas-design-007.md](paternitas-design-007.md) |
+| the plan | [implementation-plan-009.md](implementation-plan-009.md) |
+| the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
+| the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
+| the outside work itself, as it came | `design/source/` |
 | the narrative | [STATUS-LOG.md](STATUS-LOG.md) |
-| the advice collected by the owner — not read until after ADPT 01 | `paternitas-001.md` |
+| the advice collected by the owner, read in AUDT 01 | `paternitas-001.md` |
 | superseded versions | `design/backup/` |
 
 ## Current state
 
-- INTR 15 is done, 2026-09-25. The development process lives here now.
-- The sources are placeholders. They implement nothing.
-- Gates: all five pass.
-- Tests: 2 pass, in all four optimization modes.
-  - `tests/paternitas_tests.zig`: 1.
-  - `tests/examples_tests.zig`: 1.
-- Cross-compile passes for x86_64-macos, aarch64-macos, x86_64-windows.
-- The site builds, and `mkdocs build --strict` passes.
-- CI has not run yet. The owner pushes.
+- PTRN 02 is done, 2026-10-02.
+- The code: `src/paternitas.zig`, `src/container.zig`. Design 007.
+- Every `pub` declaration has a `///`. The root `//!` has a usage block.
+- Six examples in `examples/`, each with a test wrapper and a site page.
+- The README replaces `WIP`.
+- Gates: all six pass.
+- Tests: 22 pass, in all four optimization modes. 16 unit, 6 examples.
+- Negatives: 9 programs, 5 compile, 4 run, in all four modes.
+- The site builds. `mkdocs build --strict` passes.
+- The API and example pages load in headless Chrome, with no console errors.
 
 ## Open items
 
-1. GitHub Pages must be set to deploy from GitHub Actions. Owner's action.
+1. CI and GitHub Pages: accepted by the owner as they are, not checked by
+   Claude. To look at again later.
+2. `design/source/` stays until after the ztk stage. Owner's ruling,
+   2026-10-02. Then the owner removes it.
 
 ## Next
 
-**ADPT 01 — adaptation.** Opus 5.5. The charter is in
-[implementation-plan-004.md](implementation-plan-004.md).
-
-- In progress. The owner's answers are in
-  [adpt-01-intent-002.md](adpt-01-intent-002.md).
-- Parts 1 and 2 now. Part 3 after the owner's push.
+**LOOK 01 — the picture and the logo.** The charter is in
+[implementation-plan-009.md](implementation-plan-009.md). The owner names the
+model. Claude's proposal: Opus 5.5, since it writes the README and site text
+around the picture. It starts when the owner names it.
