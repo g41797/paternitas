@@ -9,17 +9,36 @@
 //! - handle each event, and recover the `Download` with `fromAnchor`
 //! - check that it is the same `Download`, not a copy
 
+/// Too large to copy around.
+const Download: type = struct {
+    link: paternitas.SLink = .{},
+    buffer: [4096]u8 = undefined,
+    received: usize = 0,
+};
+const TypedDownload: type = paternitas.Typed(Download);
+
+const Event: type = union(enum) {
+    tick: u64,
+    resize: Size,
+    parent: *paternitas.Anchor,
+};
+
+const Size: type = struct {
+    width: u16,
+    height: u16,
+};
+
 pub fn anchor_in_union(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
     _ = io;
 
     var download: Download = .{};
-    DownloadInfo.stamp(&download);
+    TypedDownload.stamp(&download);
 
     const sent: [3]Event = .{
         .{ .tick = 1 },
         .{ .resize = .{ .width = 80, .height = 24 } },
-        .{ .parent = DownloadInfo.anchor(&download) },
+        .{ .parent = TypedDownload.anchor(&download) },
     };
 
     // A copy, as a queue makes. Each Event is small. The Download is not in it.
@@ -38,32 +57,12 @@ fn handle(e: Event) !void {
         .tick => |t| std.log.info("tick {d}", .{t}),
         .resize => |s| std.log.info("resize {d}x{d}", .{ s.width, s.height }),
         .parent => |a| {
-            const d: *Download = DownloadInfo.fromAnchor(a) orelse return error.UnknownParent;
+            const d: *Download = TypedDownload.fromAnchor(a) orelse return error.UnknownParent;
             d.*.received += 1;
             std.log.info("download, {d} bytes of buffer", .{d.*.buffer.len});
         },
     }
 }
-
-const Event: type = union(enum) {
-    tick: u64,
-    resize: Size,
-    parent: *paternitas.Anchor,
-};
-
-const Size: type = struct {
-    width: u16,
-    height: u16,
-};
-
-/// Too large to copy around.
-const Download: type = struct {
-    link: paternitas.SLink = .{},
-    buffer: [4096]u8 = undefined,
-    received: usize = 0,
-};
-
-const DownloadInfo: type = paternitas.Info(Download);
 
 const paternitas = @import("paternitas");
 const std = @import("std");

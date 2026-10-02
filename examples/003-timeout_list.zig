@@ -14,14 +14,24 @@
 //! ```
 //!  timeout list:   c1 <-> c2 <-> c3
 //!                          |
-//!                          |  remove, Info.anchor
+//!                          |  remove, Typed.anchor
 //!                          v
 //!  queue:              [*Anchor]
 //!                          |
-//!                          |  getOne, Info.fromAnchor
+//!                          |  getOne, Typed.fromAnchor
 //!                          v
 //!  timeout list:   c1 <-> c3 <-> c2
 //! ```
+
+/// A `DLink`, so the timeout list can remove it from anywhere.
+const Connection: type = struct {
+    id: u32,
+    deadline: u64,
+    link: paternitas.DLink = .{},
+};
+const TypedConnection: type = paternitas.Typed(Connection);
+
+const Queue: type = std.Io.Queue(*paternitas.Anchor);
 
 pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
@@ -34,8 +44,8 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
 
     var timeouts: std.DoublyLinkedList = .{};
     for (&connections) |*c| {
-        ConnectionInfo.stamp(c);
-        timeouts.append(ConnectionInfo.node(c));
+        TypedConnection.stamp(c);
+        timeouts.append(TypedConnection.node(c));
     }
 
     var buffer: [4]*paternitas.Anchor = undefined;
@@ -48,17 +58,17 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
 
 /// Out of the list, into the queue. Only the pointer travels.
 fn removeAndSend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: *Connection) !void {
-    timeouts.remove(ConnectionInfo.node(c));
-    try queue.putOne(io, ConnectionInfo.anchor(c));
+    timeouts.remove(TypedConnection.node(c));
+    try queue.putOne(io, TypedConnection.anchor(c));
 }
 
 /// Out of the queue, back into the list, with a new deadline.
 fn receiveAndAppend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) !void {
     const a: *paternitas.Anchor = try queue.getOne(io);
-    const c: *Connection = ConnectionInfo.fromAnchor(a) orelse return error.WrongParent;
+    const c: *Connection = TypedConnection.fromAnchor(a) orelse return error.WrongParent;
 
     c.*.deadline += 100;
-    timeouts.append(ConnectionInfo.node(c));
+    timeouts.append(TypedConnection.node(c));
 
     std.log.info("connection {d} is back, deadline {d}", .{ c.*.id, c.*.deadline });
 }
@@ -67,23 +77,12 @@ fn checkOrder(timeouts: *const std.DoublyLinkedList, expected: []const u32) !voi
     var i: usize = 0;
     var it: ?*std.DoublyLinkedList.Node = timeouts.first;
     while (it) |node| : (it = node.*.next) {
-        const c: *Connection = ConnectionInfo.parentFromNode(node) orelse return error.WrongParent;
+        const c: *Connection = TypedConnection.parentFromNode(node) orelse return error.WrongParent;
         if (i == expected.len or c.*.id != expected[i]) return error.WrongOrder;
         i += 1;
     }
     if (i != expected.len) return error.WrongOrder;
 }
-
-/// A `DLink`, so the timeout list can remove it from anywhere.
-const Connection: type = struct {
-    id: u32,
-    deadline: u64,
-    link: paternitas.DLink = .{},
-};
-
-const ConnectionInfo: type = paternitas.Info(Connection);
-
-const Queue: type = std.Io.Queue(*paternitas.Anchor);
 
 const paternitas = @import("paternitas");
 const std = @import("std");

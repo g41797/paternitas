@@ -4,8 +4,8 @@ const Msg = struct { link: p.SLink = .{} };
 
 pub fn main() void {
     var m: Msg = .{};
-    p.Info(Msg).stamp(&m);
-    const a = p.Info(Msg).anchor(&m);
+    p.Typed(Msg).stamp(&m);
+    const a = p.Typed(Msg).anchor(&m);
     _ = a.info().?.node(a, std.DoublyLinkedList.Node);
 }
 

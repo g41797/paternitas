@@ -41,7 +41,7 @@ Parent
 - **Anchor** — one stamped word. Its address is the erased reference to the
   Parent.
 - **TypeId** — the address of the Parent type's `TypeInfo`.
-- **`Info(P)`** — the typed helper for one Parent type, built at comptime.
+- **`Typed(P)`** — the typed helper for one Parent type, built at comptime.
 - **AnyParent** — the dispatch view: the Parent address and its TypeId.
 
 ## A first look
@@ -51,16 +51,16 @@ const Message = struct {
     text: []const u8,
     link: paternitas.DLink = .{},
 };
-const MessageInfo = paternitas.Info(Message);
+const TypedMessage = paternitas.Typed(Message);
 
 var message: Message = .{ .text = "hello" };
-MessageInfo.stamp(&message);
+TypedMessage.stamp(&message);
 
 var list: std.DoublyLinkedList = .{};
-list.append(MessageInfo.node(&message));
+list.append(TypedMessage.node(&message));
 
 // Null when the Node belongs to another Parent type.
-const m: ?*Message = MessageInfo.parentFromNode(list.popFirst().?);
+const m: ?*Message = TypedMessage.parentFromNode(list.popFirst().?);
 ```
 
 The std list, its calls and its Node type stay as they are.
@@ -69,7 +69,7 @@ The std list, its calls and its Node type stay as they are.
 
 Application code.
 
-- `Info(P)`, `SLink`, `DLink`, `*Anchor`, `AnyParent`.
+- `Typed(P)`, `SLink`, `DLink`, `*Anchor`, `AnyParent`.
 - Recover a Parent from a Node, from an Anchor, or from an AnyParent.
 - Each recovery checks the type first.
 

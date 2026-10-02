@@ -6,7 +6,7 @@ const Msg = struct {
 
 export fn run() bool {
     var n: std.DoublyLinkedList.Node = .{};
-    return p.Info(Msg).is(&n);
+    return p.Typed(Msg).is(&n);
 }
 
 const p = @import("paternitas");

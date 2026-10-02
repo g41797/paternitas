@@ -5,7 +5,7 @@ Opus 5.5.
 
 - Rules: [rules-005.md](rules-005.md).
 - Plan: [implementation-plan-009.md](implementation-plan-009.md).
-- Design: [paternitas-design-007.md](paternitas-design-007.md).
+- Design: [paternitas-design-007.md](backup/paternitas-design-007.md).
 
 ---
 

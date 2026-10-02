@@ -5,8 +5,8 @@ const Job = struct { link: p.DLink = .{} };
 
 pub fn main() void {
     var j: Job = .{};
-    p.Info(Job).stamp(&j);
-    _ = p.Info(Msg).mustFromAnchor(p.Info(Job).anchor(&j));
+    p.Typed(Job).stamp(&j);
+    _ = p.Typed(Msg).mustFromAnchor(p.Typed(Job).anchor(&j));
 }
 
 const p = @import("paternitas");

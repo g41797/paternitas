@@ -4,6 +4,31 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-02 — PTRN 02, Info becomes Typed
+
+A PTRN 02 follow-up. The owner did not like `MessageInfo`, and brought a
+review that proposed `Helper`. Opus 5.5. No behaviour change.
+
+- `Info(P)` is now `Typed(P)`. `MessageInfo` is now `TypedMessage`, and so
+  on for each Parent. Tests: `MI`, `JI`, `AI`, `BI` are now `TypedMsg`,
+  `TypedJob`, `TypedA`, `TypedB`.
+- `Helper` was not taken. ztk has `ParentHelper(P)` and `XxxHelper` consts
+  in 97 files. Checked in `design/source/paternitas-and-ztk/ztk/`.
+- `TypeInfo` and `Anchor.info()` keep their names.
+- The examples 003 to 006 follow the owner's edit of 002: the types first,
+  each Parent with its `Typed` const, then the `pub fn`, then the private
+  fns. 001 keeps its types inside the function. 002 lost its double blank
+  lines.
+- Design 008. 007 is in `design/backup/`. The reasons are in "Decisions of
+  PTRN 02".
+- Left as records: the audit report, the intake, `design/source/`, this log.
+
+Checks.
+
+- Six gates pass. 22 tests in all four modes. 9 negatives.
+
+---
+
 ## 2026-10-02 — PTRN 02, plain names
 
 The owner asked what `Tally` is, then asked for clever names to become plain

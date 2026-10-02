@@ -1,4 +1,4 @@
-//! Dispatch through a `TypeId -> handler` map, with no `Info` call at dispatch.
+//! Dispatch through a `TypeId -> handler` map, with no `Typed` call at dispatch.
 //!
 //! The consumer keeps a map.
 //! Each handler knows its own Parent type.
@@ -11,27 +11,52 @@
 //! - count the `Ping`: no handler is registered for it
 //! - check one view with `fromAny`, the checked form
 
+const Message: type = struct {
+    text: []const u8,
+    link: paternitas.SLink = .{},
+};
+const TypedMessage: type = paternitas.Typed(Message);
+
+const Job: type = struct {
+    link: paternitas.DLink = .{},
+    id: u32,
+};
+const TypedJob: type = paternitas.Typed(Job);
+
+const Ping: type = struct {
+    link: paternitas.SLink = .{},
+};
+const TypedPing: type = paternitas.Typed(Ping);
+
+const Counts: type = struct {
+    messages: usize = 0,
+    jobs: usize = 0,
+    unhandled: usize = 0,
+};
+
+const Handler: type = *const fn (parent: *anyopaque, counts: *Counts) void;
+
 pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = io;
 
     var handlers: std.AutoHashMap(paternitas.TypeId, Handler) = .init(allocator);
     defer handlers.deinit();
 
-    // Registration: the only `Info` calls.
-    try handlers.put(MessageInfo.typeId(), onMessage);
-    try handlers.put(JobInfo.typeId(), onJob);
+    // Registration: the only `Typed` calls.
+    try handlers.put(TypedMessage.typeId(), onMessage);
+    try handlers.put(TypedJob.typeId(), onJob);
 
     var message: Message = .{ .text = "hello" };
     var job: Job = .{ .id = 42 };
     var ping: Ping = .{};
-    MessageInfo.stamp(&message);
-    JobInfo.stamp(&job);
-    PingInfo.stamp(&ping);
+    TypedMessage.stamp(&message);
+    TypedJob.stamp(&job);
+    TypedPing.stamp(&ping);
 
     const received: [3]*paternitas.Anchor = .{
-        MessageInfo.anchor(&message),
-        JobInfo.anchor(&job),
-        PingInfo.anchor(&ping),
+        TypedMessage.anchor(&message),
+        TypedJob.anchor(&job),
+        TypedPing.anchor(&ping),
     };
 
     var counts: Counts = .{};
@@ -55,18 +80,10 @@ fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *pa
 
 /// `fromAny` compares the id first. A view of another type gives null.
 fn checkFromAny(message: *Message) !void {
-    const any: paternitas.AnyParent = MessageInfo.toAny(message);
-    if (MessageInfo.fromAny(any) != message) return error.WrongParent;
-    if (JobInfo.fromAny(any) != null) return error.WrongParent;
+    const any: paternitas.AnyParent = TypedMessage.toAny(message);
+    if (TypedMessage.fromAny(any) != message) return error.WrongParent;
+    if (TypedJob.fromAny(any) != null) return error.WrongParent;
 }
-
-const Counts: type = struct {
-    messages: usize = 0,
-    jobs: usize = 0,
-    unhandled: usize = 0,
-};
-
-const Handler: type = *const fn (parent: *anyopaque, counts: *Counts) void;
 
 // The cast is unchecked. The map matched the id, so it is correct by
 // registration.
@@ -81,24 +98,6 @@ fn onJob(parent: *anyopaque, counts: *Counts) void {
     std.log.info("job: {d}", .{j.*.id});
     counts.*.jobs += 1;
 }
-
-const Message: type = struct {
-    text: []const u8,
-    link: paternitas.SLink = .{},
-};
-
-const Job: type = struct {
-    link: paternitas.DLink = .{},
-    id: u32,
-};
-
-const Ping: type = struct {
-    link: paternitas.SLink = .{},
-};
-
-const MessageInfo: type = paternitas.Info(Message);
-const JobInfo: type = paternitas.Info(Job);
-const PingInfo: type = paternitas.Info(Ping);
 
 const paternitas = @import("paternitas");
 const std = @import("std");

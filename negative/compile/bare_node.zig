@@ -5,7 +5,7 @@ const BareNode = struct {
 };
 
 comptime {
-    _ = p.Info(BareNode).typeId();
+    _ = p.Typed(BareNode).typeId();
 }
 
 const p = @import("paternitas");

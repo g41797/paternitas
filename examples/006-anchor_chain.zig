@@ -15,30 +15,17 @@
 //!  top --> job.anchor --next--> message.anchor --next--> null
 //! ```
 
-pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
-    _ = allocator;
-    _ = io;
+const Message: type = struct {
+    text: []const u8,
+    link: paternitas.SLink = .{},
+};
+const TypedMessage: type = paternitas.Typed(Message);
 
-    var message: Message = .{ .text = "hello" };
-    var job: Job = .{ .id = 42 };
-    MessageInfo.stamp(&message);
-    JobInfo.stamp(&job);
-
-    var stack: Stack = .{};
-    try stack.push(MessageInfo.anchor(&message));
-    try stack.push(JobInfo.anchor(&job));
-
-    const first: *paternitas.Anchor = try stack.pop() orelse return error.StackEmpty;
-    const j: *Job = JobInfo.fromAnchor(first) orelse return error.WrongOrder;
-
-    const second: *paternitas.Anchor = try stack.pop() orelse return error.StackEmpty;
-    const m: *Message = MessageInfo.fromAnchor(second) orelse return error.WrongOrder;
-
-    if (try stack.pop() != null) return error.StackNotEmpty;
-    if ((try chainWord(first)).* != null or (try chainWord(second)).* != null) return error.ChainWordLeft;
-
-    std.log.info("popped job {d}, then message {s}", .{ j.*.id, m.*.text });
-}
+const Job: type = struct {
+    link: paternitas.DLink = .{},
+    id: u32,
+};
+const TypedJob: type = paternitas.Typed(Job);
 
 /// A last-in, first-out stack of Anchors. It allocates nothing.
 const Stack: type = struct {
@@ -59,6 +46,31 @@ const Stack: type = struct {
     }
 };
 
+pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
+    _ = allocator;
+    _ = io;
+
+    var message: Message = .{ .text = "hello" };
+    var job: Job = .{ .id = 42 };
+    TypedMessage.stamp(&message);
+    TypedJob.stamp(&job);
+
+    var stack: Stack = .{};
+    try stack.push(TypedMessage.anchor(&message));
+    try stack.push(TypedJob.anchor(&job));
+
+    const first: *paternitas.Anchor = try stack.pop() orelse return error.StackEmpty;
+    const j: *Job = TypedJob.fromAnchor(first) orelse return error.WrongOrder;
+
+    const second: *paternitas.Anchor = try stack.pop() orelse return error.StackEmpty;
+    const m: *Message = TypedMessage.fromAnchor(second) orelse return error.WrongOrder;
+
+    if (try stack.pop() != null) return error.StackNotEmpty;
+    if ((try chainWord(first)).* != null or (try chainWord(second)).* != null) return error.ChainWordLeft;
+
+    std.log.info("popped job {d}, then message {s}", .{ j.*.id, m.*.text });
+}
+
 /// The chain word of `a`, typed as this stack keeps it: the next Anchor.
 ///
 /// An unstamped Anchor has no `TypeInfo`, so no chain word.
@@ -66,19 +78,6 @@ fn chainWord(a: *paternitas.Anchor) !*?*paternitas.Anchor {
     const ti: *const paternitas.container.TypeInfo = a.info() orelse return error.Unstamped;
     return @ptrCast(ti.nextField(a));
 }
-
-const Message: type = struct {
-    text: []const u8,
-    link: paternitas.SLink = .{},
-};
-
-const Job: type = struct {
-    link: paternitas.DLink = .{},
-    id: u32,
-};
-
-const MessageInfo: type = paternitas.Info(Message);
-const JobInfo: type = paternitas.Info(Job);
 
 const paternitas = @import("paternitas");
 const std = @import("std");

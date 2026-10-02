@@ -6,7 +6,7 @@ const TwoLinks = struct {
 };
 
 comptime {
-    _ = p.Info(TwoLinks).typeId();
+    _ = p.Typed(TwoLinks).typeId();
 }
 
 const p = @import("paternitas");

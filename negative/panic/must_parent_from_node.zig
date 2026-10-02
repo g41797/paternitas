@@ -4,7 +4,7 @@ const Msg = struct { link: p.SLink = .{} };
 
 pub fn main() void {
     var m: Msg = .{};
-    _ = p.Info(Msg).mustParentFromNode(p.Info(Msg).node(&m));
+    _ = p.Typed(Msg).mustParentFromNode(p.Typed(Msg).node(&m));
 }
 
 const p = @import("paternitas");

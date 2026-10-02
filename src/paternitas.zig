@@ -10,19 +10,19 @@
 //!     text: []const u8,
 //!     link: paternitas.DLink = .{},
 //! };
-//! const MessageInfo = paternitas.Info(Message);
+//! const TypedMessage = paternitas.Typed(Message);
 //!
 //! var message: Message = .{ .text = "hello" };
-//! MessageInfo.stamp(&message);
-//! list.append(MessageInfo.node(&message));
+//! TypedMessage.stamp(&message);
+//! list.append(TypedMessage.node(&message));
 //!
 //! // Null when the Node belongs to another Parent type.
-//! const m: ?*Message = MessageInfo.parentFromNode(list.popFirst().?);
+//! const m: ?*Message = TypedMessage.parentFromNode(list.popFirst().?);
 //! ```
 //!
 //! - `Link` pairs a std Node with an `Anchor`. A Parent embeds one.
 //! - `Anchor` is one stamped word. Its address is the erased reference.
-//! - `Info(P)` is the typed helper, built at comptime.
+//! - `Typed(P)` is the typed helper, built at comptime.
 //! - `AnyParent` is the dispatch view: the Parent address and its TypeId.
 //! - `container.TypeInfo` describes one Parent type. Its address is the
 //!   `TypeId`. For container authors only.
@@ -50,7 +50,7 @@ pub const TypeId = ?*const anyopaque;
 /// - The address says where the Parent is.
 /// - The stamped value says what it is.
 pub const Anchor = struct {
-    /// Written by `Info(P).stamp` only. Read it through `typeId()`.
+    /// Written by `Typed(P).stamp` only. Read it through `typeId()`.
     ///
     /// Zig has no private fields. A hand-written value passes every id check.
     _type_id: TypeId = null,
@@ -109,7 +109,7 @@ pub fn Link(comptime N: type) type {
     return struct {
         /// The std Node. A std list links it.
         node: N = .{},
-        /// The stamped word. `Info(P).stamp` writes it.
+        /// The stamped word. `Typed(P).stamp` writes it.
         anchor: Anchor = .{},
 
         /// The Node type, `N`.
@@ -162,7 +162,7 @@ fn findLink(comptime P: type) []const u8 {
 ///
 /// `P` is a struct with exactly one `SLink` or `DLink` field, any name, any
 /// position. Zero, two, or a non-struct is a compile error naming the type.
-pub fn Info(comptime P: type) type {
+pub fn Typed(comptime P: type) type {
     const field: []const u8 = comptime findLink(P);
     const L: type = @FieldType(P, field);
 
@@ -171,7 +171,7 @@ pub fn Info(comptime P: type) type {
         pub const Node: type = L.Node;
 
         // Never read or written. Its address keeps `desc` unique. A `const`
-        // tag would be merged with the tag of every other `Info`.
+        // tag would be merged with the tag of every other `Typed`.
         var tag: u8 = 0;
 
         const desc: TypeInfo = .{

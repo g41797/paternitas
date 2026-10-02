@@ -10,18 +10,37 @@
 //! - ask each Parent type in turn: `Message`, then `Job`
 //! - check that each type recovered its own Parent once
 
+const Message: type = struct {
+    text: []const u8,
+    link: paternitas.DLink = .{},
+};
+const TypedMessage: type = paternitas.Typed(Message);
+
+const Job: type = struct {
+    link: paternitas.DLink = .{},
+    id: u32,
+    attempts: u32 = 0,
+};
+const TypedJob: type = paternitas.Typed(Job);
+
+const Counts: type = struct {
+    messages: usize = 0,
+    jobs: usize = 0,
+};
+
 pub fn mixed_list(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
     _ = io;
 
     var message: Message = .{ .text = "hello" };
+    TypedMessage.stamp(&message);
+
     var job: Job = .{ .id = 42 };
-    MessageInfo.stamp(&message);
-    JobInfo.stamp(&job);
+    TypedJob.stamp(&job);
 
     var list: std.DoublyLinkedList = .{};
-    list.append(MessageInfo.node(&message));
-    list.append(JobInfo.node(&job));
+    list.append(TypedMessage.node(&message));
+    list.append(TypedJob.node(&job));
 
     var counts: Counts = .{};
     while (list.popFirst()) |node| try recoverAndCount(node, &counts);
@@ -29,40 +48,20 @@ pub fn mixed_list(allocator: std.mem.Allocator, io: std.Io) !void {
     if (counts.messages != 1 or counts.jobs != 1) return error.WrongCount;
 }
 
-const Counts: type = struct {
-    messages: usize = 0,
-    jobs: usize = 0,
-};
-
 /// Asks each Parent type in turn. A Node no type claims is an error.
 fn recoverAndCount(node: *std.DoublyLinkedList.Node, counts: *Counts) !void {
-    if (MessageInfo.parentFromNode(node)) |m| {
+    if (TypedMessage.parentFromNode(node)) |m| {
         std.log.info("message: {s}", .{m.*.text});
         counts.*.messages += 1;
         return;
     }
-    if (JobInfo.parentFromNode(node)) |j| {
+    if (TypedJob.parentFromNode(node)) |j| {
         std.log.info("job: {d}", .{j.*.id});
         counts.*.jobs += 1;
         return;
     }
     return error.UnknownParent;
 }
-
-// The Link is last here and first in `Job`. Its position does not matter.
-const Message: type = struct {
-    text: []const u8,
-    link: paternitas.DLink = .{},
-};
-
-const Job: type = struct {
-    link: paternitas.DLink = .{},
-    id: u32,
-    attempts: u32 = 0,
-};
-
-const MessageInfo: type = paternitas.Info(Message);
-const JobInfo: type = paternitas.Info(Job);
 
 const paternitas = @import("paternitas");
 const std = @import("std");

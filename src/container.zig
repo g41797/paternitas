@@ -8,7 +8,7 @@
 //! - Where its Parent starts.
 //! - Which Node kind it carries.
 //!
-//! Application code does not need this namespace. It uses `Info(P)`, the
+//! Application code does not need this namespace. It uses `Typed(P)`, the
 //! Link types, `*Anchor`, `AnyParent` and `Anchor.toAny()`.
 //!
 //! Reach it through `Anchor.info()`.
@@ -18,7 +18,7 @@ const _doc_stub = void;
 /// Which std Node a Link carries.
 pub const NodeKind = enum { single, double };
 
-/// One Parent type's description. One `const` per type, built by `Info`.
+/// One Parent type's description. One `const` per type, built by `Typed`.
 ///
 /// Its address is the `TypeId`.
 pub const TypeInfo = struct {

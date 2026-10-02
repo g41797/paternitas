@@ -12,27 +12,26 @@ pub fn stamp_and_recover(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
     _ = io;
 
+    const Message: type = struct {
+        text: []const u8,
+        link: paternitas.DLink = .{},
+    };
+
+    const TypedMessage: type = paternitas.Typed(Message);
+
     var message: Message = .{ .text = "hello" };
-    MessageInfo.stamp(&message);
+    TypedMessage.stamp(&message);
 
     var list: std.DoublyLinkedList = .{};
-    list.append(MessageInfo.node(&message));
+    list.append(TypedMessage.node(&message));
 
     const node: *std.DoublyLinkedList.Node = list.popFirst() orelse return error.ListEmpty;
-    const recovered: *Message = MessageInfo.parentFromNode(node) orelse return error.WrongParent;
+    const recovered: *Message = TypedMessage.parentFromNode(node) orelse return error.WrongParent;
 
     if (recovered != &message) return error.WrongParent;
 
     std.log.info("recovered: {s}", .{recovered.*.text});
 }
-
-/// A Parent: a struct with exactly one Link.
-const Message: type = struct {
-    text: []const u8,
-    link: paternitas.DLink = .{},
-};
-
-const MessageInfo: type = paternitas.Info(Message);
 
 const paternitas = @import("paternitas");
 const std = @import("std");
