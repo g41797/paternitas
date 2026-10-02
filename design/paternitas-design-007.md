@@ -7,6 +7,7 @@ Change from 006: PTRN 02. Owner's rulings, 2026-10-02.
 
 - The examples: six, flat, one file each.
 - The README has no install section yet.
+- `nameOf` moves into `Anchor`, as `typeName()`.
 - "Decisions of PTRN 02" has the list.
 
 Change from 005, kept: PTRN 01. Owner's rulings, 2026-10-02.
@@ -191,6 +192,7 @@ pub const Anchor = struct {
     _type_id: TypeId = null,
 
     pub inline fn typeId(a: *const Anchor) TypeId;
+    pub fn typeName(a: *const Anchor) []const u8;
     pub inline fn info(a: *const Anchor) ?*const container.TypeInfo;
     pub inline fn toAny(a: *Anchor) ?AnyParent;
 };
@@ -207,6 +209,7 @@ What it is.
 The calls.
 
 - `typeId()` — the stamped id. Null when unstamped.
+- `typeName()` — the type name, or `<unstamped>`. For panic and log text.
 - `info()` — the type's `TypeInfo`. Null when unstamped. For container
   authors.
 - `toAny()` — the dispatch view, without knowing the type. Null when
@@ -610,15 +613,6 @@ Link
 - No const recovery forms. AUDT 01, T6. The reason is the same as for
   `AnyParent.ptr`.
 
-### `nameOf`
-
-```zig
-pub fn nameOf(a: *const Anchor) []const u8;
-```
-
-- The type name behind an Anchor, or `<unstamped>`.
-- For panic and log text.
-
 ---
 
 ## Container rule for Nodes
@@ -938,7 +932,7 @@ Other facts.
 
 ## API
 
-Every function is `inline`, except `nameOf`. AUDT 01, A7.
+Every function is `inline`, except `Anchor.typeName`. AUDT 01, A7.
 
 ```zig
 // ---- paternitas: application API
@@ -949,11 +943,10 @@ pub const Anchor = struct {
     _type_id: TypeId = null,        // written by stamp only
 
     pub fn typeId(a: *const Anchor) TypeId;
+    pub fn typeName(a: *const Anchor) []const u8;              // or "<unstamped>"
     pub fn toAny(a: *Anchor) ?AnyParent;                       // dispatch, type unknown
     pub fn info(a: *const Anchor) ?*const container.TypeInfo;  // container authors
 };
-
-pub fn nameOf(a: *const Anchor) []const u8;   // type name, or "<unstamped>"
 
 pub const AnyParent = struct {     // dispatch view, one way, built by toAny only
     ptr: *anyopaque,
@@ -1048,7 +1041,7 @@ Added by AUDT 01.
 - Two modules, the same root file name, the same type name: two TypeIds. A1.
 - The success path of `mustFromAnchor` and `mustParentFromNode`. A5.
 - `is` true. `isId` and `parentFromNodeUnchecked` directly. A5.
-- `nameOf` of a stamped Anchor. A5.
+- `Anchor.typeName` of a stamped Anchor. A5.
 - `TypeInfo.node` for a `DLink` Parent. A5.
 - `Anchor.typeId()`. A11.
 - The fallback step of `nextField`, with the stored offset, for both kinds.
@@ -1212,6 +1205,11 @@ Docs and examples. Owner's rulings, 2026-10-02. The intent:
 - The landing page: only the Examples button target changed. The rest is
   LOOK 01.
 - The root `//!` has a fenced usage block.
+- `nameOf` became `Anchor.typeName()`. Owner's ruling, after the gates.
+  - Reason: autodoc shows a declaration where it is declared. A file-scope
+    `nameOf` sat on the root page, away from `Anchor`.
+  - The name pairs with `typeId()`.
+  - The outside design had it at file scope, with no reason given.
 - An example's `//!` intro has one sentence or two per line.
   - Reason: the site's hard-break fixer breaks a wrapped line in the middle
     of a sentence.

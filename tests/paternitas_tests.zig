@@ -150,7 +150,7 @@ test "unstamped" {
     try testing.expect(MI.parentFromNode(MI.node(&m)) == null);
     try testing.expect(MI.fromAnchor(MI.anchor(&m)) == null);
     try testing.expect(MI.anchor(&m).info() == null);
-    try testing.expectEqualStrings("<unstamped>", paternitas.nameOf(MI.anchor(&m)));
+    try testing.expectEqualStrings("<unstamped>", MI.anchor(&m).typeName());
 }
 
 test "stamp leaves a linked Node intact" {
@@ -201,12 +201,12 @@ test "mustFromAnchor and mustParentFromNode return the Parent on a match" {
     try testing.expect(JI.mustParentFromNode(JI.node(&j)) == &j);
 }
 
-test "nameOf a stamped Anchor" {
+test "typeName of a stamped Anchor" {
     std.testing.log_level = .debug;
 
     var j: Job = .{ .id = 5 };
     JI.stamp(&j);
-    try testing.expectEqualStrings(@typeName(Job), paternitas.nameOf(JI.anchor(&j)));
+    try testing.expectEqualStrings(@typeName(Job), JI.anchor(&j).typeName());
 }
 
 test "TypeInfo.node for a DLink Parent" {

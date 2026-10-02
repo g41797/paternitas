@@ -60,6 +60,12 @@ pub const Anchor = struct {
         return a.*._type_id;
     }
 
+    /// The type name behind this Anchor, or `<unstamped>`. For panic and log
+    /// text.
+    pub fn typeName(a: *const Anchor) []const u8 {
+        return if (a.info()) |i| i.*.name else "<unstamped>";
+    }
+
     /// This Parent type's description. Null when unstamped.
     ///
     /// For container authors. Application code does not need it.
@@ -150,11 +156,6 @@ fn findLink(comptime P: type) []const u8 {
         return found orelse
             @compileError(@typeName(P) ++ ": no Link, so it cannot be a Paternitas Parent");
     }
-}
-
-/// The type name behind an Anchor, or `<unstamped>`.
-pub fn nameOf(a: *const Anchor) []const u8 {
-    return if (a.info()) |i| i.*.name else "<unstamped>";
 }
 
 /// The typed helper for one Parent type.
@@ -276,7 +277,7 @@ pub fn Info(comptime P: type) type {
         }
 
         fn wrongType(comptime call: []const u8, found: *const Anchor) noreturn {
-            std.debug.panic(call ++ ": asked for {s}, found {s}", .{ @typeName(P), nameOf(found) });
+            std.debug.panic(call ++ ": asked for {s}, found {s}", .{ @typeName(P), found.typeName() });
         }
     };
 }

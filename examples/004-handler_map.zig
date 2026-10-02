@@ -46,7 +46,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
 fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *paternitas.Anchor, tally: *Tally) !void {
     const any: paternitas.AnyParent = a.toAny() orelse return error.Unstamped;
     const h: Handler = handlers.get(any.type_id) orelse {
-        std.log.info("no handler for {s}", .{paternitas.nameOf(a)});
+        std.log.info("no handler for {s}", .{a.typeName()});
         tally.*.unhandled += 1;
         return;
     };

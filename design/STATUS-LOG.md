@@ -4,6 +4,30 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-02 — PTRN 02, the ruling after the gates
+
+The owner asked why `nameOf` sat on the root API page, not on `Anchor`'s.
+Opus 5.5.
+
+- Autodoc shows a declaration where it is declared. `nameOf` was at file
+  scope.
+- No reason was recorded. It came from the outside design.
+
+The owner's ruling: move it into `Anchor`, as `typeName()`, now.
+
+- `src/paternitas.zig`: `Anchor.typeName`. Still not `inline`, as A7 had it.
+  `wrongType` calls `found.typeName()`.
+- Callers: two tests, example 004. The test is renamed "typeName of a stamped
+  Anchor".
+- Design 007, edited in place, since no stage ran after it was written.
+- The audit report keeps `nameOf`. It records the finding as it was.
+
+Checks.
+
+- Six gates pass. 22 tests in all four modes.
+
+---
+
 ## 2026-10-02 — PTRN 02, docs and examples
 
 PTRN 02 is closed. Opus 5.5. Intent and the owner's answers:
