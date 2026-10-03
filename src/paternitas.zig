@@ -3,14 +3,51 @@
 
 //! Get your struct back from a std list Node, with a type check.
 //!
-//! `@fieldParentPtr` returns whatever type you ask for. When one list has
-//! two struct types, it can give you the wrong one, and nothing warns you.
-//! paternitas checks the type first.
+//! The problem:
+//!
+//! - Zig's std lists are intrusive. Your struct holds a Node, and the list
+//!   links the Nodes.
+//! - To get your struct back, you call `@fieldParentPtr`. It returns
+//!   whatever type you ask for.
+//! - When one list holds two struct types, you can get the wrong one. It
+//!   compiles, it runs, and nothing warns you.
+//!
+//! The fix: put a TypedNode where the Node was. It is the same std Node,
+//! with the struct's type kept next to it.
+//!
+//! ```
+//! before                       after
+//! Message                      Message
+//! +--------------------+       +---------------------------+
+//! | text               |       | text                      |
+//! | node  <-- the list |       | tnode: DoublyTypedNode    |
+//! +--------------------+       | +-----------------------+ |
+//!                              | | node   <-- the list   | |
+//!                              | | anchor  type: Message | |
+//!                              | +-----------------------+ |
+//!                              +---------------------------+
+//! ```
+//!
+//! Before:
 //!
 //! ```zig
 //! const Message = struct {
 //!     text: []const u8,
-//!     tnode: paternitas.DoublyTypedNode = .{}, // where the std Node was
+//!     node: std.DoublyLinkedList.Node = .{},
+//! };
+//!
+//! var message: Message = .{ .text = "hello" };
+//! list.append(&message.node);
+//!
+//! const m: *Message = @fieldParentPtr("node", list.popFirst().?);
+//! ```
+//!
+//! After:
+//!
+//! ```zig
+//! const Message = struct {
+//!     text: []const u8,
+//!     tnode: paternitas.DoublyTypedNode = .{},
 //! };
 //! const TypedMessage = paternitas.Typed(Message);
 //!
@@ -18,26 +55,29 @@
 //! TypedMessage.setTypeId(&message);
 //! list.append(TypedMessage.node(&message));
 //!
-//! // null when the Node is in a struct of another type
-//! const m: ?*Message = TypedMessage.parentFromNode(list.popFirst().?);
+//! const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 //! ```
 //!
-//! How to use it:
+//! Do it this way, for each struct in the list:
 //!
-//! - Put a `SinglyTypedNode` or a `DoublyTypedNode` in your struct, where
-//!   the std Node was. paternitas calls that struct the Parent.
-//! - Declare `Typed` once per struct type.
-//! - Call `setTypeId` once on each struct, before it goes in a list. It
-//!   writes the struct's type into its TypedNode.
-//! - Give `node` to the std list.
-//! - Get the struct back with `parentFromNode`. You get null when the Node
-//!   is in a struct of another type.
+//! 1. `std.SinglyLinkedList.Node` becomes `paternitas.SinglyTypedNode`.
+//!    `std.DoublyLinkedList.Node` becomes `paternitas.DoublyTypedNode`.
+//! 2. Add `const TypedMessage = paternitas.Typed(Message);`, once.
+//! 3. Call `TypedMessage.setTypeId(&message)` once, after the struct is set
+//!    up and before it goes in a list.
+//! 4. `&message.node` becomes `TypedMessage.node(&message)`.
+//! 5. `@fieldParentPtr("node", n)` becomes `TypedMessage.mustParentFromNode(n)`.
+//!    It still returns `*Message`. A wrong type panics, in every build mode.
 //!
-//! When the type is not known yet, as in a queue that carries several struct
-//! types:
+//! The list itself does not change. The compiler stops at each place you
+//! missed in steps 4 and 5.
 //!
-//! - Pass the `*Anchor` that `anchor` gives you. Every Parent has one.
-//! - Get the struct back with `fromAnchor`. You get null for another type.
+//! Then, where a Node of another type is expected, use `parentFromNode`.
+//! It returns null for another type.
+//!
+//! When the type is not known yet, as in a queue that carries several
+//! struct types, pass the `*Anchor` that `anchor` gives you. Get the struct
+//! back with `fromAnchor`.
 //!
 //! paternitas has no list or queue of its own, and it allocates nothing.
 
@@ -56,6 +96,7 @@ pub const DTNode = DoublyTypedNode;
 /// struct, where the std Node was. Use `SinglyTypedNode` or
 /// `DoublyTypedNode`.
 ///
+/// - You do not call `TypedNode` yourself.
 /// - A Parent has exactly one.
 /// - It contains the std Node, and the place where `setTypeId` writes the
 ///   type.
@@ -100,11 +141,21 @@ pub fn Typed(comptime P: type) type {
         /// - Set up `p` first. `allocator.create` gives you undefined memory.
         /// - It changes nothing else in `p`. A Parent already in a list stays
         ///   there.
+        ///
+        /// ```zig
+        /// var message: Message = .{ .text = "hello" };
+        /// TypedMessage.setTypeId(&message);
+        /// list.append(TypedMessage.node(&message));
+        /// ```
         pub inline fn setTypeId(p: *P) void {
             @field(p.*, field).anchor._type_id = typeId();
         }
 
         /// Returns the Node of `p`. Give it to the std list.
+        ///
+        /// ```zig
+        /// list.append(TypedMessage.node(&message));
+        /// ```
         pub inline fn node(p: *P) *Node {
             return &@field(p.*, field).node;
         }
@@ -113,6 +164,12 @@ pub fn Typed(comptime P: type) type {
         /// another type, or when `setTypeId` was never called.
         ///
         /// The Node MUST be inside a `SinglyTypedNode` or `DoublyTypedNode`.
+        ///
+        /// ```zig
+        /// if (TypedMessage.parentFromNode(node)) |message| {
+        ///     // use message
+        /// }
+        /// ```
         pub inline fn parentFromNode(n: *Node) ?*P {
             if (!is(n)) return null;
             return parentFromNodeUnchecked(n);
@@ -149,6 +206,12 @@ pub fn Typed(comptime P: type) type {
 
         /// Returns the `P` behind the `*Anchor`. Returns null when it is
         /// another type, or when `setTypeId` was never called.
+        ///
+        /// ```zig
+        /// if (TypedMessage.fromAnchor(anchor)) |message| {
+        ///     // use message
+        /// }
+        /// ```
         pub inline fn fromAnchor(a: *Anchor) ?*P {
             if (!isId(a.typeId())) return null;
             const tn: *TN = @fieldParentPtr("anchor", a);
@@ -253,6 +316,8 @@ pub const Anchor = struct {
 /// A Parent's address and its type id, together. Use it to pick a handler by
 /// type.
 ///
+/// To pass a Parent through a queue or a map, use `*Anchor` instead.
+///
 /// - Look up the handler by `type_id`, and give it `ptr`.
 /// - Or get the typed pointer back with `Typed(P).fromAny`. You get null for
 ///   another type.
@@ -269,7 +334,8 @@ pub const AnyParent = struct {
 
 /// An id for a struct type. Each Parent type gets its own.
 ///
-/// - Use it as a map key, to find the handler for a type.
+/// - Use it as a map key, when Parents of several types share a map or a
+///   dispatch table.
 /// - Null means no type: `setTypeId` was never called on that struct.
 /// - It is valid only while the program runs. Do not save it or send it.
 /// - A shared library gets a different id for the same type.
@@ -304,7 +370,6 @@ fn findTypedNode(comptime P: type) []const u8 {
 }
 
 /// Panics when runtime safety is on, and compiles to nothing otherwise.
-/// That way the optimizer never treats a broken contract as an assumption.
 inline fn check(ok: bool, msg: []const u8) void {
     if (std.debug.runtime_safety and !ok) @panic(msg);
 }

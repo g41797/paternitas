@@ -84,6 +84,71 @@ What changed:
 
 The list is still the plain std list. Its calls do not change.
 
+## Move your code to paternitas
+
+Put a TypedNode where the Node was. It is the same std Node, with the
+struct's type kept next to it.
+
+```
+before                       after
+Message                      Message
++--------------------+       +---------------------------+
+| text               |       | text                      |
+| node  <-- the list |       | tnode: DoublyTypedNode    |
++--------------------+       | +-----------------------+ |
+                             | | node   <-- the list   | |
+                             | | anchor  type: Message | |
+                             | +-----------------------+ |
+                             +---------------------------+
+```
+
+Before:
+
+```zig
+const Message = struct {
+    text: []const u8,
+    node: std.DoublyLinkedList.Node = .{},
+};
+
+var message: Message = .{ .text = "hello" };
+list.append(&message.node);
+
+const m: *Message = @fieldParentPtr("node", list.popFirst().?);
+```
+
+After:
+
+```zig
+const Message = struct {
+    text: []const u8,
+    tnode: paternitas.DoublyTypedNode = .{},
+};
+const TypedMessage = paternitas.Typed(Message);
+
+var message: Message = .{ .text = "hello" };
+TypedMessage.setTypeId(&message);
+list.append(TypedMessage.node(&message));
+
+const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
+```
+
+Do it this way, for each struct in the list:
+
+1. `std.SinglyLinkedList.Node` becomes `paternitas.SinglyTypedNode`.
+   `std.DoublyLinkedList.Node` becomes `paternitas.DoublyTypedNode`.
+2. Add `const TypedMessage = paternitas.Typed(Message);`, once.
+3. Call `TypedMessage.setTypeId(&message)` once, after the struct is set
+   up and before it goes in a list.
+4. `&message.node` becomes `TypedMessage.node(&message)`.
+5. `@fieldParentPtr("node", n)` becomes `TypedMessage.mustParentFromNode(n)`.
+   It still returns `*Message`. A wrong type panics, in every build mode.
+
+The list itself does not change. The compiler stops at each place you
+missed in steps 4 and 5.
+
+Then, where a Node of another type is expected, use `parentFromNode`.
+It returns null for another type.
+
 ## When you must not copy
 
 Some items must not be copied: a mutex, a file handle, a large buffer. A

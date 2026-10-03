@@ -83,6 +83,40 @@ The checks after the gates also pass.
   rename tables of design 010, rules 007, the plan and this entry.
 - The banned-word gate is clean. The added ztk lines were scanned by hand.
 
+- After the close, the owner added a rule. A comment answers "What do I
+  need to know to use this?", not "How did the paternitas implementation
+  achieve this?". It is in rules 008, Part 3. Rules 007 is in
+  `design/backup/`.
+- The owner then had three comments fixed under the new rule. The reason
+  for `check` was already in design 010, "Checks".
+  - `uniform_next_offset` no longer says what `nextField` costs, or that
+    it is for tests and the curious.
+  - The `TypeInfo` fields `anchor_offset` and `node_next_offset` no longer
+    say which call uses them.
+  - The private `check` no longer explains the optimizer.
+- The owner then sent a rewrite of both files' comments. It did not compile
+  (`pub` on fields, a lost `}`), used the old `link:` field, undid the three
+  fixes and dropped facts a user needs. The owner had its good parts merged
+  instead.
+  - Examples on `setTypeId`, `node`, `parentFromNode`, `fromAnchor`,
+    `TypeInfo.nextField` and `TypeInfo.node`. They compile as a test in the
+    scratchpad.
+  - `TypedNode` is not called directly. `TypeInfo` is not made by the user.
+    `AnyParent` points to `*Anchor` for queues and maps. `TypeId` names the
+    shared map or dispatch table.
+- The owner found the module header jumped to the fix. It now goes: the
+  problem, an ASCII diagram (struct with a Node, struct with a TypedNode),
+  the code before and after, and five steps to do the move by hand.
+  - Step 5 uses `mustParentFromNode`. It still returns `*Message`, so the
+    code around the call does not change. `parentFromNode` comes after,
+    where another type is expected.
+  - A missed `&message.node` or `@fieldParentPtr` no longer compiles. A
+    scratch test confirmed it.
+  - The README gets the same diagram, code and steps, in "Move your code to
+    paternitas".
+  - Both snippets compile and pass as tests in the scratchpad. The API page
+    shows the diagram and the list in headless Chrome.
+
 | step | result |
 |---|---|
 | Post-stage cleanup | no edits: the stage was only renames |

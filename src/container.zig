@@ -19,17 +19,17 @@ const _doc_stub = void;
 
 /// What paternitas knows about one Parent type. Get it with `anchor.info()`.
 ///
-/// There is one per Parent type, and it lives as long as the program.
+/// - There is one per Parent type, and it lives as long as the program.
+/// - paternitas makes it. You do not make one.
 pub const TypeInfo = struct {
     /// Do not use.
     _tag: *const u8,
     /// The Parent's type name. For logs and panic messages.
     name: []const u8,
-    /// The distance from the start of the Parent to its Anchor. `parent`
-    /// uses it.
+    /// The distance from the start of the Parent to its Anchor.
     anchor_offset: usize,
     /// The distance from the Anchor to the Node's `next` field. It can be
-    /// negative. `nextField` uses it.
+    /// negative.
     node_next_offset: isize,
     /// `.single` for `SinglyTypedNode`, `.double` for `DoublyTypedNode`.
     node_kind: NodeKind,
@@ -42,6 +42,10 @@ pub const TypeInfo = struct {
     ///   up to your container.
     /// - A std list uses the same word. A Parent MUST NOT be in your
     ///   container and in a std list at the same time.
+    ///
+    /// ```zig
+    /// info.nextField(anchor).* = next_anchor;
+    /// ```
     pub inline fn nextField(ti: *const TypeInfo, a: *Anchor) *?*anyopaque {
         const off: isize = if (uniform_next_offset) |u| u else ti.*.node_next_offset;
         return _nextFieldAt(a, off);
@@ -51,6 +55,10 @@ pub const TypeInfo = struct {
     ///
     /// Panics in every build mode when `N` is the wrong Node type for this
     /// Parent.
+    ///
+    /// ```zig
+    /// const n: *std.DoublyLinkedList.Node = info.node(anchor, std.DoublyLinkedList.Node);
+    /// ```
     pub inline fn node(ti: *const TypeInfo, a: *Anchor, comptime N: type) *N {
         const TN: type = TypedNode(N);
         if (ti.*.node_kind != TN.kind)
@@ -72,10 +80,9 @@ pub const TypeInfo = struct {
 };
 
 /// Not null when the `next` field sits at the same distance from the Anchor
-/// in every Parent. Then `nextField` costs one addition.
+/// in every Parent.
 ///
-/// You do not need it to use `nextField`. It is here for tests and for the
-/// curious.
+/// You do not need it to use `nextField`.
 pub const uniform_next_offset: ?isize =
     if (SinglyTypedNode.node_next_offset == DoublyTypedNode.node_next_offset) SinglyTypedNode.node_next_offset else null;
 

@@ -1,8 +1,16 @@
-# paternitas — Rules (006)
+# paternitas — Rules (008)
 
 All coding, doc, and process rules for paternitas.
 
-Change from 005: a PTRN 02 follow-up. The owner found the text correct but
+Change from 007: the owner added a rule to Part 3, "What a comment says".
+A comment answers "What do I need to know to use this?", not "How did the
+paternitas implementation achieve this?". 2026-10-03.
+
+Change from 006, kept: NAME 01. `Link` is now `TypedNode`, and `stamp` is now
+`setTypeId`. The examples in Part 3 and Part 5 use the new names. No rule
+changed.
+
+Change from 005, kept: a PTRN 02 follow-up. The owner found the text correct but
 not human, and written for the wrong reader. Part 5 gets "Three kinds of
 documentation" and "Human voice". Part 3 says example steps are commands,
 and that a comment stands alone. Part 2 gets "Order in a source file" and the
@@ -40,7 +48,7 @@ Source: a trimmed copy of the Matryoshka rules,
   implementation invariants, its patterns and its provenance.
 - What was added: the git rules, and the stage sequence in Part 1.
 
-Companion: [paternitas-design-009.md](paternitas-design-009.md) — the design
+Companion: [paternitas-design-010.md](paternitas-design-010.md) — the design
 decisions and what paternitas keeps from ztk.
 
 ---
@@ -284,6 +292,9 @@ Layout of an example file, top to bottom.
 
 Staccato applies. It is defined once, in Part 5.
 
+- A comment answers the question "What do I need to know to use this?". It
+  does not answer "How did the paternitas implementation achieve this?".
+  - The how belongs in the design. Part 5, "Three kinds of documentation".
 - Do not explain WHAT. Names do that.
 - Explain WHY only if non-obvious.
 - No multi-paragraph docstrings.
@@ -294,10 +305,10 @@ Staccato applies. It is defined once, in Part 5.
 - A comment stands alone. It uses only words the reader already has, and
   names the reader can see in the code.
   - A reader lands on any declaration's page straight from a search.
-  - A paternitas term, like Anchor or `stamp`, is explained where it is
-    declared and in the root `//!`. Nowhere else does a comment lean on it.
-  - Say what the caller sees: "`stamp` was never called on it", not
-    "unstamped".
+  - A paternitas term, like Anchor or `setTypeId`, is explained where it
+    is declared and in the root `//!`. Nowhere else does a comment lean on it.
+  - Say what the caller sees: "`setTypeId` was never called on it", not
+    a coined adjective for that state.
 - File-header `//!` standard: model on `std.Io`'s own file header.
   - A header that reads as one run-on paragraph across several `//!` lines is
     a violation, even if each line is short.
@@ -470,7 +481,7 @@ Before and after, from our own text.
 | before | after |
 |---|---|
 | `/// A TypeId is the address of a Parent type's TypeInfo.` | `/// Identifies a Parent type. Equal ids mean the same type.` |
-| README: "An Anchor is one word that `stamp` writes." | README: the ziggit footgun in code, then the same code with paternitas. |
+| README: "An Anchor is one word that `setTypeId` writes." | README: the ziggit footgun in code, then the same code with paternitas. |
 
 ### Human voice
 
@@ -482,7 +493,7 @@ about that.
   "The owner did not take it." is.
 - No labels in place of sentences. "Reason:", "The principle.", "Checks."
   each stand for a sentence. Write that sentence.
-  - `MUST` stays, inside a sentence: "The Node MUST live in a Link."
+  - `MUST` stays, inside a sentence: "The Node MUST live in a TypedNode."
 - Say a thing once. A date or "the owner's ruling" goes at the top of a
   section, not on every bullet.
 - No slogans. If a line sounds clever and needs a second read, write the
