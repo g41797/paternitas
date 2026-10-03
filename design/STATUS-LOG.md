@@ -4,6 +4,172 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — README: "Where it came from", the ztk line
+
+The owner's new line said "Now ztk uses it as an 3rd party package". It
+is now "ztk will use it as a third-party package":
+
+- the grammar is fixed;
+- the tense is fixed. The ZTK stage has not run, and the ztk repo does
+  not use Paternitas yet.
+
+---
+
+## 2026-10-03 — README: "Where it came from", after the owner's edit
+
+The owner reworked the section. Claude fixed:
+
+- the stray indent and the missing period on the trigger line;
+- "exctracted";
+- the "bla bla bla" placeholder, now: "so that any Zig program can use
+  it", with "only `std`" and "ztk uses it as an outside package";
+- the missing period after "fatherhood" in "Why Paternitas".
+
+---
+
+## 2026-10-03 — README: "Where it came from", last section
+
+At the owner's request:
+
+- the line otk (Odin), 3tk (C3), ztk (Zig), then Paternitas, with the
+  three repo links;
+- the ziggit footgun post as the trigger.
+
+The lineage was read from matryoshka-otk's `polytag.md` and
+matryoshka-3tk's `design/3tk-api-008.md`. The repo URLs come from their
+local `.git/config`. Nothing remote was checked.
+
+---
+
+## 2026-10-03 — README: Intrusive, a struct that must not be copied
+
+At the owner's request, Intrusive's "What you get" now says that a struct
+which must not be copied can still be in a list. Examples: it has a mutex,
+other code points into it, or it is too large to copy.
+
+---
+
+## 2026-10-03 — README: the Paternitas block under Type-erased removed
+
+The owner removed it. Its first bullet ("writes the type … when you create
+the struct") contradicted "Paternitas does not mark a new struct by
+itself". The section now ends with the cost. All six gates pass.
+
+---
+
+## 2026-10-03 — README: ChatGPT's review, two points taken
+
+The owner brought ChatGPT's README review. Claude checked it against the
+README, the code and the rules.
+
+- Most points were rejected.
+  - Some contradict the owner's rulings: "show the solution first" breaks
+    rules Part 5 (explain before use); the `Typed(P)` bullets; the jokes;
+    the Latin.
+  - Some are wrong: "one struct can have several links" is false, since a
+    second TypedNode is a compile error.
+- Two were taken:
+  - The prose no longer says "P" after its one definition. It says "your
+    struct" in four places.
+  - "A new struct has no type" became "Paternitas does not mark a new
+    struct by itself".
+
+---
+
+## 2026-10-03 — README: an opening block
+
+At the owner's request there is a short opening before "Two words first":
+
+- the claim, "safer to use";
+- what safer means;
+- where the reader meets these containers;
+- "Do not leave", with the promise that the next section explains the
+  two words;
+- the owner's joke about a first big Zig system.
+
+It names "intrusive" and "type-erased" before they are explained. That is
+the owner's exception to rules Part 5, and it holds only for this opening.
+No title, at the owner's choice.
+
+---
+
+## 2026-10-03 — type-erased: the infrastructure does not change
+
+The owner's fact: code built on an intrusive, type-erased container does
+not depend on the user's struct types.
+
+- README, Type-erased, "What you get": the code built on the list never
+  names your struct types. Adding or changing a struct does not change
+  that code.
+- A contrast with a tagged union:
+  - a new type is a new field;
+  - every `switch` without `else` must handle it;
+  - the container's type changes.
+- A small program does not show it. A large system does.
+- The Paternitas block: the check sits in your code, at the two ends.
+- The `//!` header: one line on the same fact.
+- The recap table was not touched. A plain std list has this property too.
+
+---
+
+## 2026-10-03 — the value, said where the reader decides
+
+The owner: the added value, a safer program, was stated only in the recap
+table. Now it is also:
+
+- at the end of "The problem": "you get null, or a panic that names both
+  types. Never garbage";
+- after the program: "A Node in the wrong type gives null, not garbage";
+- in the `//!` header, before "The fix";
+- in the migration, the owner's joke: "It may save your life. At least
+  your weekend."
+
+---
+
+## 2026-10-03 — README: "Do you need it?" as No / Yes
+
+The owner found the section messy: it mixed four things. It now has two
+parallel blocks, No and Yes. The cost lines and the "comes back as
+itself" line are gone: the recap table and the program already say them.
+
+---
+
+## 2026-10-03 — README: "Recap: why you need all this mess"
+
+A new section between the migration and "Do you need it?". It is a table
+of nine rows, plain std list against Paternitas, and one line on what it
+does not fix: a struct that is already gone. The owner found that line
+unclear. It repeated "What Paternitas does not do", so it was removed.
+
+- The type check does not depend on the build mode. `parentFromNode` calls
+  `is`, which is one pointer compare.
+- The panic text was checked from `$S/docex` in ReleaseFast:
+  "mustParentFromNode: asked for wrong.Job, found wrong.Message".
+
+## 2026-10-03 — README: wording fixes after the owner's edits
+
+- `Typed(P)`: "It does the housekeeping for you:". The old "so you do
+  not:" did not fit the bullets that follow it.
+- The TypedNode, the owner's edit:
+  - "A struct has exactly one TypedNode": the grammar is fixed, and the
+    compiler enforces it.
+  - The double spaces are gone.
+  - The short names `DTNode` / `STNode` stay out of the README, by the
+    owner's choice.
+- Advanced topics: the grammar of the owner's "adventure" line is fixed.
+
+## 2026-10-03 — README: "What goes in your code"
+
+The owner found the TypedNode bullets in the wrong place, inside "What is
+`Typed(P)`?".
+
+- The section is now "What goes in your code", with two subsections in
+  the order the section announces them: "The TypedNode" and "`Typed(P)`".
+  "All the calls, at a glance" follows.
+- The migration's cross-reference follows the new name.
+
+All six gates pass.
+
 ## 2026-10-03 — README: an honest migration, smaller fixes
 
 The owner edited the README and asked for advice. Five fixes, all applied:

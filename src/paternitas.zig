@@ -8,6 +8,8 @@
 //! - Intrusive: the Node lives in your struct. The list copies nothing and
 //!   allocates nothing.
 //! - Type-erased: the list sees only Nodes, never your struct's type.
+//!   Code built on the list does not change when you add or change a
+//!   struct type.
 //!
 //! Paternitas keeps both, and lets you check the type again.
 //!
@@ -18,6 +20,9 @@
 //! - `@fieldParentPtr` returns whatever type you ask for. Ask for a Job when
 //!   it is a Message, and you read a Message as a Job. It compiles, it runs,
 //!   and nothing warns you.
+//!
+//! With Paternitas, a wrong type gives null, or a panic that names both
+//! types. In every build mode.
 //!
 //! The fix: put a TypedNode where the Node was. The migration is
 //! mechanical: find and replace, five times.

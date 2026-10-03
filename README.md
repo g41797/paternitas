@@ -1,4 +1,21 @@
 
+---
+
+_Paternitas_ makes 
+
+- **intrusive**
+- **type-erased containers** 
+- **safer** to use in Zig
+- Zig's std linked lists are such containers.
+
+
+"Intrusive" and "type-erased" sound scary? 
+
+Do not leave. The next section explains both.
+
+Read on. One day you will build your **first big Zig system**. 
+
+Then you will remember this strange name, and use **_Paternitas_**.
 
 ---
 
@@ -35,8 +52,9 @@ What you get:
 
 - The list allocates nothing for each item.
 - Nothing is copied. Your struct stays at its address.
-- One struct can be in several lists at once.
-  - It needs one Node for each list.
+  - A struct that must not be copied can still be in a list.
+  - Examples: it has a mutex, other code points into it, or it is too
+    large to copy.
 
 What it costs:
 
@@ -54,8 +72,6 @@ If you come from C, this is Linux's `list_head` with `container_of`.
 - Zig calls the struct that contains a field the field's _parent_.
 - `@fieldParentPtr` goes from the field to its parent.
 - Your `Message` is the _Parent_ of its Node.
-- Paternitas finds the _Parent_ of a Node, and checks its type.
-- Hence the name (*Paternitas* is Latin for "fatherhood").
 
 ---
 
@@ -71,16 +87,26 @@ What you get:
 
 - One `std.DoublyLinkedList` serves every struct type.
 - There is one copy of its code.
+- The code built on the list never names your struct types.
+  - Examples: a queue, a scheduler, a dispatcher.
+  - Add a struct type: that code does not change.
+  - Change a struct: that code does not change.
+
+Compare one container of a tagged union of all your types:
+
+- A new type is a new union field.
+- Every `switch` over the union without `else` must handle it.
+- The container's type changes with the union.
+
+A small program does not show the difference. A large system does:
+
+- Struct types are added and changed all the time.
+- The infrastructure built on the list stays fixed.
 
 What it costs:
 
 - The type is gone.
 - A Node comes out of the list. Only you know which struct it is in.
-
-Paternitas keeps the erasure, and adds a check.
-
-- It writes the type into your struct, when you create the struct.
-- It checks the type, when the Node comes out.
 
 ---
 
@@ -123,6 +149,9 @@ const j: *Job = @fieldParentPtr("node", node); // it is a Message
 - `j` points into a Message.
 - `j.id` reads whatever bytes are there.
 - Nothing tells you.
+
+Paternitas makes that wrong guess safe: you get null, or a panic that
+names both types. Never garbage.
 
 
 ---
@@ -176,13 +205,14 @@ pub fn main() void {
 }
 ```
 
+- A Node in the wrong type gives null, not garbage.
 - The list is still the plain std list.
 - Its calls do not change.
 
 ---
 
 
-## What is `Typed(P)`?
+## What goes in your code
 
 ---
 
@@ -204,31 +234,38 @@ const TypedMessage = paternitas.Typed(Message);
 
 ---
 
+### The TypedNode
 
-- `DoublyTypedNode` is for `std.DoublyLinkedList`.
-- `SinglyTypedNode` is for `std.SinglyLinkedList`.
-- `DTNode` and `STNode` are the short names.
+---
+
+- A struct has exactly one _**TypedNode**_.
+  - `paternitas.DoublyTypedNode` instead of `std.DoublyLinkedList.Node`.
+  - `paternitas.SinglyTypedNode` instead of `std.SinglyLinkedList.Node`.
 - The field can have any name.
 - The field can be anywhere in the struct.
-- A struct has one TypedNode.
+
+
+---
+
+### `Typed(P)`
 
 ---
 
 
-`Typed(P)` is a helper. It does the housekeeping, so you do not:
+`Typed(P)` is a helper. It does the housekeeping for you:
 
-- It finds the TypedNode field in P, by its type.
+- It finds the TypedNode field in your struct, by its type.
 - It does the `@fieldParentPtr` arithmetic.
-- It writes P's type into the TypedNode.
+- It writes your struct's type into the TypedNode.
 - It checks the type when the Node comes back.
 
 It gives you four calls.
 
-`setTypeId(&p)` writes P's type into its TypedNode.
+`setTypeId(&p)` writes your struct's type into its TypedNode.
 
 - Call it right after you create the struct.
   - Even when every field has its default value.
-  - A new struct has no type.
+  - Paternitas does not mark a new struct by itself.
 - Without it, every check returns null.
 
 ```zig
@@ -265,7 +302,7 @@ return error.UnknownParent;
 
 - Another type panics.
 - It panics in every build mode.
-- Use it where only P can be.
+- Use it where only your struct's type can be.
 
 ```zig
 const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
@@ -308,6 +345,9 @@ For the taste (or smell). The details are in the API docs.
 
 ---
 
+
+Ten minutes of find and replace. It may save your life. At least your
+weekend.
 
 The migration is mechanical.
 
@@ -392,7 +432,27 @@ The five steps, for each struct in the list:
 - `mustParentFromNode` still returns `*Message`.
   - A wrong type panics, in every build mode.
 - Several types in one list? Use `parentFromNode` instead.
-  - Ask each type in turn, as in "What is `Typed(P)`?".
+  - Ask each type in turn, as in "What goes in your code".
+
+
+---
+
+## Recap: why you need all this mess
+
+---
+
+
+| | plain std list | with Paternitas |
+|---|---|---|
+| a wrong type | compiles, runs, reads garbage | null, or a panic |
+| the panic says | nothing | "asked for Job, found Message" |
+| where the bug shows | later, somewhere else | at the call that got it wrong |
+| release builds | no check | the same check, in every build mode |
+| several types in one list | you track the type yourself | you ask: "is this a Message?" |
+| the field name | in every `@fieldParentPtr("node", n)` | once, in the struct |
+| the cost | none | one pointer compare per check |
+| your list | std | still std, with the same calls |
+| your memory | yours | still yours. Nothing is allocated |
 
 
 ---
@@ -402,25 +462,16 @@ The five steps, for each struct in the list:
 ---
 
 
-You do not need Paternitas when:
+**No**, when each list carries one struct type, and you know which one.
 
-- each list carries one struct type, and
-- you know which one.
+- Plain `@fieldParentPtr` is enough.
 
-Plain `@fieldParentPtr` is fine there.
+**Yes**, when:
 
-You need it when one std list carries several struct types.
-
-- Example: Messages and Jobs in a mailbox.
-- Each comes back as itself, or you get null.
-
-To pass a struct through a queue, a map or a union field, see "Advanced
-topics".
-
-A type check costs one pointer compare.
-
-- No type names to compare.
-- No table to register in.
+- one std list carries several struct types, as Messages and Jobs in a
+  mailbox, or
+- a struct goes through a queue, a map or a union field. See "Advanced
+  topics".
 
 
 ---
@@ -451,7 +502,9 @@ A type check costs one pointer compare.
 
 You do not need these to migrate a std list.
 
-- `AnyParent`: pass a struct through a queue, a map or a union field.
+But if you want an adventure, and you are brave enough for a deep dive:
+
+- `AnyParent`: pass your struct through a queue, a map or a union field.
   - Examples [003](https://g41797.github.io/paternitas/examples/003-timeout_list/)
     and [005](https://g41797.github.io/paternitas/examples/005-large_struct_in_union/).
 - A handler per type.
@@ -472,6 +525,7 @@ Have fun.
 
 ---
 
+*Paternitas* is Latin for "fatherhood".
 
 Paternitas is about finding the Parent of an unknown Node.
 
@@ -542,3 +596,26 @@ const paternitas = @import("paternitas");
 - Zig 0.16.0.
 - Only `std`.
 - There is no release tag yet. `zig fetch` takes the main branch.
+
+
+---
+
+## Where it came from
+
+---
+
+The trigger was the Ziggit post
+[New LinkedList API footgun](https://ziggit.dev/t/new-linkedlist-api-footgun/10853).
+
+_Paternitas_ grew out of **_Matryoshka_**, a toolkit for background processes:
+
+- [matryoshka-otk](https://github.com/g41797/matryoshka-otk), in Odin: the
+  first code with this approach. A hand-made tag per type.
+- [matryoshka-3tk](https://github.com/g41797/matryoshka-3tk), in C3: C3's
+  own `typeid`, and one helper per type.
+- [matryoshka-ztk](https://github.com/g41797/matryoshka-ztk), in Zig: the
+  same idea, with Zig's comptime. Still in progress.
+
+_Paternitas_ was extracted from ztk, so that any Zig program can use it.
+
+ztk will use it as a third-party package.
