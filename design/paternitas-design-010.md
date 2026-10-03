@@ -11,6 +11,8 @@ Change from 009: NAME 01, 2026-10-03.
 - `stamp` is now `setTypeId`.
 - The names say what each thing is. No behaviour changed.
 - "Decisions of NAME 01" has the table and the reasons.
+- After the close, the owner asked for `parentFromAnchor` and
+  `mustParentFromAnchor`, in place of `fromAnchor` and `mustFromAnchor`.
 
 Change from 008, kept: a PTRN 02 follow-up on the user docs, 2026-10-03.
 
@@ -561,8 +563,8 @@ setTypeId(*P)                 -> void
 anchor(*P)                    -> *Anchor
 node(*P)                      -> *Node
 is(*const Node)               -> bool
-fromAnchor(*Anchor)           -> ?*P
-mustFromAnchor(*Anchor)       -> *P
+parentFromAnchor(*Anchor)     -> ?*P
+mustParentFromAnchor(*Anchor) -> *P
 toAny(*P)                     -> AnyParent
 fromAny(AnyParent)            -> ?*P
 parentFromNode(*Node)         -> ?*P
@@ -603,7 +605,7 @@ parentFromNodeUnchecked(*Node)-> *P
 - It takes `*const Node`, per AUDT 01, T6.
 - The Node lives in a TypedNode. See "Container rule for Nodes".
 
-### `fromAnchor`, `mustFromAnchor`
+### `parentFromAnchor`, `mustParentFromAnchor`
 
 ```text
 *Anchor
@@ -615,12 +617,12 @@ parentFromNodeUnchecked(*Node)-> *P
 *P
 ```
 
-- `mustFromAnchor` panics on a mismatch, in every build mode.
+- `mustParentFromAnchor` panics on a mismatch, in every build mode.
 - The panic text names the type asked for and the type found.
 
 ```text
-mustFromAnchor: asked for app.Message, found app.Job
-mustFromAnchor: asked for app.Message, found <no type>
+mustParentFromAnchor: asked for app.Message, found app.Job
+mustParentFromAnchor: asked for app.Message, found <no type>
 ```
 
 ### `toAny`, `fromAny`
@@ -648,7 +650,7 @@ TypedNode
 
 - The unchecked read uses only the TypedNode layout.
 - The Parent layout is used only after the type matches.
-- `mustParentFromNode` panics on a mismatch, like `mustFromAnchor`.
+- `mustParentFromNode` panics on a mismatch, like `mustParentFromAnchor`.
 - `parentFromNodeUnchecked` skips the check. The caller already knows the
   type, and the name says so.
 - There are no const recovery forms, per AUDT 01, T6. The reason is the same
@@ -701,7 +703,7 @@ var q: Queue(*paternitas.Anchor) = ...;
 Recovery is one call.
 
 ```zig
-if (TypedMessage.fromAnchor(a)) |m| { ... }
+if (TypedMessage.parentFromAnchor(a)) |m| { ... }
 ```
 
 - The check reads the Anchor word, in the Parent's memory.
@@ -816,7 +818,7 @@ An `AnyParent` is a view.
 ```text
 std list Node --Typed(P).parentFromNode--> *P --Typed(P).anchor--> *Anchor --> queue
 
-queue --> *Anchor --Typed(P).fromAnchor--> *P --Typed(P).node--> std list Node
+queue --> *Anchor --Typed(P).parentFromAnchor--> *P --Typed(P).node--> std list Node
 ```
 
 Dispatch works without `P`.
@@ -866,7 +868,7 @@ paternitas has two kinds of runtime check.
 
 Type recognition is part of the API.
 
-- `fromAnchor`, `fromAny`, `parentFromNode` and `is` return null or false on
+- `parentFromAnchor`, `fromAny`, `parentFromNode` and `is` return null or false on
   a mismatch, in every build mode.
 - The `must` forms and the kind check in `TypeInfo.node` panic in every build
   mode.
@@ -1014,8 +1016,8 @@ pub fn Typed(comptime P: type) type;
 //   anchor(p: *P) *Anchor
 //   node(p: *P) *Node
 //   is(n: *const Node) bool
-//   fromAnchor(a: *Anchor) ?*P
-//   mustFromAnchor(a: *Anchor) *P
+//   parentFromAnchor(a: *Anchor) ?*P
+//   mustParentFromAnchor(a: *Anchor) *P
 //   toAny(p: *P) AnyParent
 //   fromAny(any: AnyParent) ?*P
 //   parentFromNode(n: *Node) ?*P
@@ -1089,7 +1091,7 @@ AUDT 01 added these tests. Each names its finding.
 
 - Two modules with the same root file name and the same type name get two
   TypeIds. A1.
-- The success path of `mustFromAnchor` and `mustParentFromNode` works. A5.
+- The success path of `mustParentFromAnchor` and `mustParentFromNode` works. A5.
 - `is` returns true. `isId` and `parentFromNodeUnchecked` are tested
   directly. A5.
 - `Anchor.typeName` after `setTypeId` returns the name. A5.
@@ -1120,7 +1122,7 @@ These programs must not compile, and must fail with the given message.
 
 These programs must abort in every build mode, and say why on stderr.
 
-- `mustFromAnchor` on another type names both types.
+- `mustParentFromAnchor` on another type names both types.
 - `mustParentFromNode` on a Parent without `setTypeId` names `<no type>`.
 - `TypeInfo.node` with the wrong Node kind aborts.
 
@@ -1172,7 +1174,7 @@ paternitas                               ztk
 TypeId, TypeInfo, Anchor                 Slot: one place per item
 SinglyTypedNode, DoublyTypedNode         chain convention: the tail points
 Typed: setTypeId, anchor, node, is,        to itself; isLinked, unlink
-  fromAnchor, parentFromNode             Queue, stack, Mbox, Pool
+  parentFromAnchor, parentFromNode       Queue, stack, Mbox, Pool
 TypeInfo.nextField: where next is        what goes in next
 contract-check policy                    create / destroy, init / finish,
                                            allocator, Io, border checks
@@ -1239,7 +1241,7 @@ TypeInfo.parent(anchor) == address of Parent
 
 ```text
 *Node   -- Typed(P).parentFromNode() --> checked *P
-*Anchor -- Typed(P).fromAnchor()     --> checked *P
+*Anchor -- Typed(P).parentFromAnchor()     --> checked *P
 *Anchor -- TypeInfo.nextField()     --> where a container may chain
 *Anchor -- TypeInfo.toAny()         --> AnyParent for dispatch
 ```
@@ -1282,6 +1284,37 @@ A Link was the std Node with a type check added. Its new name says so.
 - The private names follow: `typedNodeOf`, and `TN` for the TypedNode type.
 - The ztk copy in `design/source/` has the new names in its code and text.
   Its own `design/` and its generated docs keep the old ones.
+
+After the close, the owner ruled on the Anchor, 2026-10-03.
+
+| old | new |
+|---|---|
+| `fromAnchor` | `parentFromAnchor` |
+| `mustFromAnchor` | `mustParentFromAnchor` |
+| the negative `must_from_anchor` | `must_parent_from_anchor` |
+
+- The name pairs with `parentFromNode`. `*Node` and `*Anchor` are both a
+  pointer into your struct, and both turn back into it with a type check.
+- `Anchor` keeps its name.
+  - A review the owner collected called it an "embedded type-erased
+    reference". "Type-erased" is wrong for paternitas: the type is kept in
+    the Anchor and checked. "Reference" names a pointer, and the user
+    writes `*Anchor`, so `*Ref` or `*Handle` would read as a pointer to a
+    pointer.
+  - `Hook` is the intrusive-container word, but in Boost.Intrusive a hook
+    is the node. `AnyNode` is not a Node. `TypeTag` names only the stored
+    type.
+- The `Anchor` doc opens with what it is to the user: the one fixed point
+  in your struct. Everything else is reached from it: the struct's type,
+  the struct itself, its Node.
+  - The owner's image: Archimedes, "Give me a place to stand, and I will
+    move the Earth". The README quotes it, in Latin and English. The API
+    doc states the idea plainly.
+- `*Anchor` carries the struct. `AnyParent` is for picking a handler by type
+  id. The module header and the `AnyParent` doc say so.
+- The README shows a queue of `*Anchor` from two struct types, in ASCII.
+- ztk's own `ParentHelper.fromAnchor` keeps its name. Only its call into
+  paternitas changed.
 
 ---
 

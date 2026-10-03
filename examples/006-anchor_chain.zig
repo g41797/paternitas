@@ -6,7 +6,7 @@
 //!
 //! - Write a `Stack` that keeps `*Anchor`s, chained through each item's `next` field.
 //! - Push a `Message` with a `SinglyTypedNode` and a `Job` with a `DoublyTypedNode`. Two Node types share one chain.
-//! - Pop each, and get it back with `fromAnchor`.
+//! - Pop each, and get it back with `parentFromAnchor`.
 //! - Check the order, and that each `next` field is null again.
 //!
 //! A std list uses the same `next` field. An item on this stack MUST NOT be in a std list.
@@ -60,10 +60,10 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
     try stack.push(TypedJob.anchor(&job));
 
     const first: *paternitas.Anchor = try stack.pop() orelse return error.StackEmpty;
-    const j: *Job = TypedJob.fromAnchor(first) orelse return error.WrongOrder;
+    const j: *Job = TypedJob.parentFromAnchor(first) orelse return error.WrongOrder;
 
     const second: *paternitas.Anchor = try stack.pop() orelse return error.StackEmpty;
-    const m: *Message = TypedMessage.fromAnchor(second) orelse return error.WrongOrder;
+    const m: *Message = TypedMessage.parentFromAnchor(second) orelse return error.WrongOrder;
 
     if (try stack.pop() != null) return error.StackNotEmpty;
     if ((try chainWord(first)).* != null or (try chainWord(second)).* != null) return error.ChainWordLeft;

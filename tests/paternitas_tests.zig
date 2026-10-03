@@ -115,8 +115,8 @@ test "two types with one name have two TypeIds" {
     TypedB.setTypeId(&b);
     var a: *Anchor = TypedB.anchor(&b);
     std.mem.doNotOptimizeAway(&a);
-    try testing.expect(TypedA.fromAnchor(a) == null);
-    try testing.expect(TypedB.fromAnchor(a).? == &b);
+    try testing.expect(TypedA.parentFromAnchor(a) == null);
+    try testing.expect(TypedB.parentFromAnchor(a).? == &b);
 }
 
 test "SinglyTypedNode and DoublyTypedNode Parents in one Anchor chain, then a std list" {
@@ -132,9 +132,9 @@ test "SinglyTypedNode and DoublyTypedNode Parents in one Anchor chain, then a st
     q.append(TypedJob.anchor(&j));
     const a: *Anchor = q.popFirst().?;
     const b: *Anchor = q.popFirst().?;
-    try testing.expect(TypedMsg.fromAnchor(a).? == &m);
-    try testing.expect(TypedJob.fromAnchor(a) == null);
-    try testing.expect(TypedJob.fromAnchor(b).?.*.id == 42);
+    try testing.expect(TypedMsg.parentFromAnchor(a).? == &m);
+    try testing.expect(TypedJob.parentFromAnchor(a) == null);
+    try testing.expect(TypedJob.parentFromAnchor(b).?.*.id == 42);
 
     var list: std.DoublyLinkedList = .{};
     list.append(TypedJob.node(&j));
@@ -148,7 +148,7 @@ test "without setTypeId, every check returns null or false" {
     var m: Msg = .{ .text = "x" };
     try testing.expect(!TypedMsg.is(TypedMsg.node(&m)));
     try testing.expect(TypedMsg.parentFromNode(TypedMsg.node(&m)) == null);
-    try testing.expect(TypedMsg.fromAnchor(TypedMsg.anchor(&m)) == null);
+    try testing.expect(TypedMsg.parentFromAnchor(TypedMsg.anchor(&m)) == null);
     try testing.expect(TypedMsg.anchor(&m).info() == null);
     try testing.expectEqualStrings("<no type>", TypedMsg.anchor(&m).typeName());
 }
@@ -187,7 +187,7 @@ test "is, isId and parentFromNodeUnchecked after setTypeId" {
     try testing.expect(TypedJob.parentFromNodeUnchecked(TypedJob.node(&j)) == &j);
 }
 
-test "mustFromAnchor and mustParentFromNode return the Parent on a match" {
+test "mustParentFromAnchor and mustParentFromNode return the Parent on a match" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "x" };
@@ -195,8 +195,8 @@ test "mustFromAnchor and mustParentFromNode return the Parent on a match" {
     TypedMsg.setTypeId(&m);
     TypedJob.setTypeId(&j);
 
-    try testing.expect(TypedMsg.mustFromAnchor(TypedMsg.anchor(&m)) == &m);
-    try testing.expect(TypedJob.mustFromAnchor(TypedJob.anchor(&j)) == &j);
+    try testing.expect(TypedMsg.mustParentFromAnchor(TypedMsg.anchor(&m)) == &m);
+    try testing.expect(TypedJob.mustParentFromAnchor(TypedJob.anchor(&j)) == &j);
     try testing.expect(TypedMsg.mustParentFromNode(TypedMsg.node(&m)) == &m);
     try testing.expect(TypedJob.mustParentFromNode(TypedJob.node(&j)) == &j);
 }
@@ -288,7 +288,7 @@ test "*Anchor and AnyParent in a tagged union" {
     var hits: u32 = 0;
     for (events) |e| switch (e) {
         .tick => {},
-        .anchor => |a| hits += @intFromBool(TypedMsg.fromAnchor(a) != null),
+        .anchor => |a| hits += @intFromBool(TypedMsg.parentFromAnchor(a) != null),
         .view => |v| hits += @intFromBool(TypedMsg.fromAny(v) != null),
     };
     try testing.expectEqual(@as(u32, 2), hits);

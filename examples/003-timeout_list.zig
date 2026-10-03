@@ -8,7 +8,7 @@
 //! - Call `setTypeId` on three `Connection`s and append them to the timeout list.
 //! - Remove the middle one from the list.
 //! - Send its `*Anchor` through a `std.Io.Queue`.
-//! - Receive the `*Anchor`, and get the `Connection` back with `fromAnchor`.
+//! - Receive the `*Anchor`, and get the `Connection` back with `parentFromAnchor`.
 //! - Give it a new deadline, and append it to the list again.
 //! - Check the order of the list.
 //!
@@ -19,7 +19,7 @@
 //!                          v
 //!  queue:              [*Anchor]
 //!                          |
-//!                          |  getOne, fromAnchor()
+//!                          |  getOne, parentFromAnchor()
 //!                          v
 //!  timeout list:   c1 <-> c3 <-> c2
 //! ```
@@ -68,7 +68,7 @@ fn removeAndSend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: 
 /// with a new deadline.
 fn receiveAndAppend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) !void {
     const a: *paternitas.Anchor = try queue.getOne(io);
-    const c: *Connection = TypedConnection.fromAnchor(a) orelse return error.WrongParent;
+    const c: *Connection = TypedConnection.parentFromAnchor(a) orelse return error.WrongParent;
 
     c.*.deadline += 100;
     timeouts.append(TypedConnection.node(c));

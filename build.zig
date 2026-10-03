@@ -152,7 +152,7 @@ fn addNegative(
     // `every_mode` is a contract check: it aborts where runtime safety is
     // on, and exits 0 elsewhere.
     const refused_at_run_time = [_]struct { file: []const u8, says: []const u8, every_mode: bool = true }{
-        .{ .file = "negative/panic/must_from_anchor.zig", .says = "mustFromAnchor: asked for must_from_anchor.Msg, found must_from_anchor.Job" },
+        .{ .file = "negative/panic/must_parent_from_anchor.zig", .says = "mustParentFromAnchor: asked for must_parent_from_anchor.Msg, found must_parent_from_anchor.Job" },
         .{ .file = "negative/panic/must_parent_from_node.zig", .says = "mustParentFromNode: asked for must_parent_from_node.Msg, found <no type>" },
         .{ .file = "negative/panic/wrong_node_kind.zig", .says = "TypeInfo.node: wrong_node_kind.Msg has another Node kind" },
         .{ .file = "negative/panic/from_any_no_type.zig", .says = "fromAny: setTypeId was never called on the Parent", .every_mode = false },

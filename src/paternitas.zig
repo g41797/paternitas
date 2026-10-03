@@ -77,7 +77,10 @@
 //!
 //! When the type is not known yet, as in a queue that carries several
 //! struct types, pass the `*Anchor` that `anchor` gives you. Get the struct
-//! back with `fromAnchor`.
+//! back with `parentFromAnchor`.
+//!
+//! - `*Anchor` carries the struct.
+//! - `AnyParent` is for picking a handler by type id.
 //!
 //! paternitas has no list or queue of its own, and it allocates nothing.
 
@@ -107,7 +110,8 @@ pub fn TypedNode(comptime N: type) type {
     return struct {
         /// The std Node that the list links.
         node: N = .{},
-        /// Where `setTypeId` writes the type.
+        /// The part of your struct that any code can point to. `setTypeId`
+        /// writes the struct's type into it. See `Anchor`.
         anchor: Anchor = .{},
 
         /// The std Node type.
@@ -136,7 +140,7 @@ pub fn Typed(comptime P: type) type {
         /// Writes the type of `p` into its TypedNode. Call it once, before
         /// `p` goes in a list or a queue.
         ///
-        /// - Without it, `parentFromNode`, `fromAnchor` and `fromAny` return
+        /// - Without it, `parentFromNode`, `parentFromAnchor` and `fromAny` return
         ///   null for `p`.
         /// - Set up `p` first. `allocator.create` gives you undefined memory.
         /// - It changes nothing else in `p`. A Parent already in a list stays
@@ -208,20 +212,20 @@ pub fn Typed(comptime P: type) type {
         /// another type, or when `setTypeId` was never called.
         ///
         /// ```zig
-        /// if (TypedMessage.fromAnchor(anchor)) |message| {
+        /// if (TypedMessage.parentFromAnchor(anchor)) |message| {
         ///     // use message
         /// }
         /// ```
-        pub inline fn fromAnchor(a: *Anchor) ?*P {
+        pub inline fn parentFromAnchor(a: *Anchor) ?*P {
             if (!isId(a.typeId())) return null;
             const tn: *TN = @fieldParentPtr("anchor", a);
             return @fieldParentPtr(field, tn);
         }
 
-        /// Like `fromAnchor`, but panics instead of returning null. It panics
+        /// Like `parentFromAnchor`, but panics instead of returning null. It panics
         /// in every build mode.
-        pub inline fn mustFromAnchor(a: *Anchor) *P {
-            return fromAnchor(a) orelse wrongType("mustFromAnchor", a);
+        pub inline fn mustParentFromAnchor(a: *Anchor) *P {
+            return parentFromAnchor(a) orelse wrongType("mustParentFromAnchor", a);
         }
 
         /// Returns the address and type id of `p`, to pick a handler by type.
@@ -272,15 +276,22 @@ pub fn Typed(comptime P: type) type {
     };
 }
 
-/// A pointer to a Parent whose type is checked when you get it back.
+/// The one fixed point in your struct. Everything else is reached from it:
+/// the struct's type, the struct itself, its Node.
 ///
-/// Every Parent has one, inside its `SinglyTypedNode` or
-/// `DoublyTypedNode`. Get it with `Typed(P).anchor(&p)`.
+/// Pass `*Anchor` where the code in between does not know your struct's
+/// type: a queue, a map, a union field, a C callback's context.
 ///
-/// - Pass `*Anchor` through a queue, a map or a union field that carries
-///   several struct types.
-/// - Get the Parent back with `Typed(P).fromAnchor`. You get null for
-///   another type.
+/// - Every struct with a TypedNode has one Anchor, inside the TypedNode.
+///   `setTypeId` writes the struct's type into it.
+/// - Get it with `TypedMessage.anchor(&message)`.
+/// - Get the struct back with `TypedMessage.parentFromAnchor(a)`. You get
+///   null for another type.
+/// - You never make an Anchor. You only pass `*Anchor`.
+///
+/// `*Anchor` works for any struct type the way `*Node` works for one list.
+/// Both point into your struct, and both turn back into your struct with a
+/// type check.
 pub const Anchor = struct {
     /// Do not write this field. `Typed(P).setTypeId` writes it. A value you
     /// write yourself passes every type check.
@@ -316,7 +327,11 @@ pub const Anchor = struct {
 /// A Parent's address and its type id, together. Use it to pick a handler by
 /// type.
 ///
-/// To pass a Parent through a queue or a map, use `*Anchor` instead.
+/// - `*Anchor` carries the struct. Use it to pass a Parent through a queue
+///   or a map.
+/// - `AnyParent` is for picking a handler by type id. It holds the address
+///   and the type id side by side, so the handler is chosen without reading
+///   the struct.
 ///
 /// - Look up the handler by `type_id`, and give it `ptr`.
 /// - Or get the typed pointer back with `Typed(P).fromAny`. You get null for

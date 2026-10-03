@@ -116,6 +116,40 @@ The checks after the gates also pass.
     paternitas".
   - Both snippets compile and pass as tests in the scratchpad. The API page
     shows the diagram and the list in headless Chrome.
+- The owner found the Anchor hard to understand, and sent a review from
+  another model. Claude's advice: the trouble was the explanation, not the
+  name. The docs gave the Anchor two roles and never joined them, and the
+  `Anchor` doc called a struct "a pointer". The owner ruled:
+  - The `Anchor` doc opens with "The part of your struct that any code can
+    point to, whatever the struct's type". `*Anchor` works for any struct
+    type the way `*Node` works for one list. The `TypedNode.anchor` field
+    doc matches.
+  - The README section "When you must not copy" has an ASCII diagram: two
+    structs, one queue of `*Anchor`, `parentFromAnchor`.
+  - The module header and the `AnyParent` doc: `*Anchor` carries the
+    struct, `AnyParent` is for picking a handler by type id.
+  - `fromAnchor` and `mustFromAnchor` are now `parentFromAnchor` and
+    `mustParentFromAnchor`, to pair with `parentFromNode`. The negative is
+    now `must_parent_from_anchor`, moved with `mv`. In the ztk copy only
+    the call into paternitas changed. ztk's own `fromAnchor` stays.
+  - `Anchor` keeps its name. The reasons are in design 010, "Decisions of
+    NAME 01". Design 010 was edited in place: it is this stage's version.
+  - All six gates pass. The ztk copy builds in Debug: 198 of 199 tests, one
+    skipped by design.
+  - The owner then asked for all four modes and the negatives in the ztk
+    copy. Both pass in all four modes: 198 of 199 tests each, and the
+    negative step exits 0 (34 of 34 steps in Debug and ReleaseSafe, 16 of 16
+    in ReleaseFast and ReleaseSmall, where the safety-only cases are not
+    built).
+- The owner gave the Anchor an image: Archimedes, "Give me a place to
+  stand, and I will move the Earth". The Anchor is the fixed point
+  everything is reached from: the type, the struct, its Node, its `next`.
+  - The `Anchor` doc now opens: "The one fixed point in your struct.
+    Everything else is reached from it."
+  - The README opens "When you must not copy" with the quote, in Latin and
+    English, and says the Anchor is that place in your struct.
+  - Plan 010 keeps the image for LOOK 01: a lever on a fixed point, or an
+    anchor.
 
 | step | result |
 |---|---|

@@ -62,6 +62,10 @@ Model: to be named by the owner. AUDT 01, T7. The stage name is a proposal.
 - The mask picture from `paternitas-001.md`: the list sees the mask, the
   helper recognizes who is behind it.
 - The logo idea: two masked Zig mascots and a thin thread.
+- The Anchor idea, from the owner at the end of NAME 01: Archimedes, "Give
+  me a place to stand, and I will move the Earth". The Anchor is the one
+  fixed point in your struct, and everything is reached from it. Images: a
+  lever on a fixed point, or an anchor. The README already quotes it.
 - The README, the site, the favicon.
 
 ## ZTK — later

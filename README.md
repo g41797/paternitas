@@ -151,6 +151,13 @@ It returns null for another type.
 
 ## When you must not copy
 
+> *Da ubi consistam, et terram movebo.*
+>
+> Give me a place to stand, and I will move the Earth. — Archimedes
+
+The Anchor is that place in your struct. Any code can hold it, whatever
+the struct's type. paternitas reaches everything else from it.
+
 Some items must not be copied: a mutex, a file handle, a large buffer. A
 queue that stores by value copies them. A queue of `*Connection` takes only
 one type.
@@ -158,6 +165,24 @@ one type.
 Send a `*paternitas.Anchor` instead. Every struct with a `SinglyTypedNode`
 or `DoublyTypedNode` has one, so one queue carries them all. The receiver
 gets the typed pointer back, with a type check.
+
+```
+Message                  Connection
++----------------+       +----------------+
+| tnode          |       | tnode          |
+|   node         |       |   node         |
+|   anchor <--+  |       |   anchor <--+  |
++-------------|--+       +-------------|--+
+              |                        |
+       *Anchor|                 *Anchor|
+     +--------+------------------------+--------+
+     |  one queue of *Anchor, any struct type   |
+     +--------------------+---------------------+
+                          |
+                          v
+       TypedConnection.parentFromAnchor(a)
+          -> *Connection, or null for another type
+```
 
 ```zig
 var buffer: [8]*paternitas.Anchor = undefined;
@@ -168,7 +193,7 @@ try queue.putOne(io, TypedConnection.anchor(&connection));
 
 // on the other side
 const a = try queue.getOne(io);
-if (TypedConnection.fromAnchor(a)) |c| {
+if (TypedConnection.parentFromAnchor(a)) |c| {
     // c is the same connection, not a copy
 }
 ```

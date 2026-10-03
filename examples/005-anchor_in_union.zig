@@ -7,7 +7,7 @@
 //! - Call `setTypeId` on a `Download`. It has a 4 KB buffer, too large to copy.
 //! - Build three `Event`s: a tick, a resize, and the `Download`'s `*Anchor`.
 //! - Copy the events into a second array, as a queue would.
-//! - Handle each event, and get the `Download` back with `fromAnchor`.
+//! - Handle each event, and get the `Download` back with `parentFromAnchor`.
 //! - Check that it is the same `Download`, not a copy.
 
 /// It is too large to copy. Events carry a pointer to it.
@@ -59,7 +59,7 @@ fn handle(e: Event) !void {
         .tick => |t| std.log.info("tick {d}", .{t}),
         .resize => |s| std.log.info("resize {d}x{d}", .{ s.width, s.height }),
         .parent => |a| {
-            const d: *Download = TypedDownload.fromAnchor(a) orelse return error.UnknownParent;
+            const d: *Download = TypedDownload.parentFromAnchor(a) orelse return error.UnknownParent;
             d.*.received += 1;
             std.log.info("download, {d} bytes of buffer", .{d.*.buffer.len});
         },

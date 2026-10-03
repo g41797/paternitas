@@ -69,7 +69,7 @@ pub fn ParentHelper(comptime Parent: type) type {
         /// Null when the Anchor belongs to another type. Reads the Anchor and
         /// changes nothing.
         pub inline fn fromAnchor(anchor: *Anchor) ?*Parent {
-            return P.fromAnchor(anchor);
+            return P.parentFromAnchor(anchor);
         }
 
         /// Your pointer, from a bare Anchor. Panics on another type.
