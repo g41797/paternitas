@@ -74,8 +74,8 @@
 //! 1. `std.SinglyLinkedList.Node` becomes `paternitas.SinglyTypedNode`.
 //!    `std.DoublyLinkedList.Node` becomes `paternitas.DoublyTypedNode`.
 //! 2. Add `const TypedMessage = paternitas.Typed(Message);`, once.
-//! 3. Call `TypedMessage.setTypeId(&message)` once, after the struct is set
-//!    up and before it goes in a list.
+//! 3. Call `TypedMessage.setTypeId(&message)` right after the struct is
+//!    created. Call it again after each whole-struct write, such as a reset.
 //! 4. `&message.node` becomes `TypedMessage.node(&message)`.
 //! 5. `@fieldParentPtr("node", n)` becomes `TypedMessage.mustParentFromNode(n)`.
 //!    It still returns `*Message`. A wrong type panics, in every build mode.
@@ -156,11 +156,15 @@ pub fn Typed(comptime P: type) type {
     const TN: type = @FieldType(P, field);
 
     return struct {
-        /// Writes the type of `p` into its TypedNode. Call it once, before
-        /// `p` goes in a list or a queue.
+        /// Writes the type of `p` into its TypedNode. Call it right after you
+        /// create `p`.
         ///
+        /// - A new `p` has no type, even when every field has its default value.
         /// - Without it, `parentFromNode`, `parentFromAnchor` and `fromAny` return
         ///   null for `p`.
+        /// - A whole-struct write erases the type: `message = .{ ... };`, or a
+        ///   reset, clear or zero-fill. Call it again after each one.
+        /// - Writing one field keeps the type.
         /// - Set up `p` first. `allocator.create` gives you undefined memory.
         /// - It changes nothing else in `p`. A Parent already in a list stays
         ///   there.

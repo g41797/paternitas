@@ -4,6 +4,57 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — README: an honest migration, smaller fixes
+
+The owner edited the README and asked for advice. Five fixes, all applied:
+
+- The migration said the compiler finds every miss. That is not true for
+  step 3.
+  - A scratch run in ReleaseFast showed that a missed `setTypeId` makes
+    `mustParentFromNode` panic: "asked for Message, found <no type>".
+  - The README now says so, and says what to add.
+- "Two words first": the type is written when you create the struct, not
+  when it goes in.
+- The whole-struct-write block moved below the four calls, as "Reset?".
+- The `parentFromNode` snippet is introduced with "Inside a function that
+  handles one Node".
+- Step 1: "Keep the field name, or rename it".
+
+All six gates pass.
+
+## 2026-10-03 — `setTypeId` right after creation, and after a reset
+
+The owner's rule, and a question: does a struct with default values need
+`setTypeId` too?
+
+- The answer is yes. A scratch run in `$S/docex` checked four cases:
+  - with default values and no `setTypeId`, the check gives null;
+  - after `setTypeId`, it gives the struct;
+  - after a write to one field, it still gives the struct;
+  - after a whole-struct write, `a = .{ ... }`, it gives null again.
+- Rules 013, Part 2: `setTypeId(&x)` goes on the line right after `x` is
+  created.
+  - This applies everywhere, even for default values.
+  - It goes again after a whole-struct write.
+  - Tests of what happens before `setTypeId`, or of a late `setTypeId`, are
+    the exception.
+  - Rules 012 is in `backup/`.
+- The code was reordered:
+  - in the README program;
+  - in examples 004 and 006;
+  - in seven tests in `tests/paternitas_tests.zig`.
+  - Two tests keep the late call on purpose. A first pass moved them, and
+    gate 1 caught one, "typeId is null before setTypeId". Both were put
+    back.
+- New wording on the whole-struct write:
+  - in the README `setTypeId` part, the calls table and the migration
+    bullets;
+  - in the `setTypeId` `///`;
+  - in step 3 of the `//!` header.
+- No example and no test writes a whole struct after `setTypeId`.
+
+All six gates pass. The site builds.
+
 ## 2026-10-03 — README after the owner's edit: install, advanced, style
 
 The owner edited the README, asked for advice, and chose items 2, 3, 4

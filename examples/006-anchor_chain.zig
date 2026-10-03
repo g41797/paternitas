@@ -52,8 +52,8 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = io;
 
     var message: Message = .{ .text = "hello" };
-    var job: Job = .{ .id = 42 };
     TypedMessage.setTypeId(&message);
+    var job: Job = .{ .id = 42 };
     TypedJob.setTypeId(&job);
 
     var stack: Stack = .{};

@@ -44,8 +44,8 @@ test "the Chain helper keeps order and clears the chain word" {
     std.testing.log_level = .debug;
 
     var m1: Msg = .{ .text = "1" };
-    var m2: Msg = .{ .text = "2" };
     TypedMsg.setTypeId(&m1);
+    var m2: Msg = .{ .text = "2" };
     TypedMsg.setTypeId(&m2);
 
     var q: Chain = .{};
@@ -123,8 +123,8 @@ test "SinglyTypedNode and DoublyTypedNode Parents in one Anchor chain, then a st
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "hi" };
-    var j: Job = .{ .id = 42 };
     TypedMsg.setTypeId(&m);
+    var j: Job = .{ .id = 42 };
     TypedJob.setTypeId(&j);
 
     var q: Chain = .{};
@@ -171,8 +171,8 @@ test "is, isId and parentFromNodeUnchecked after setTypeId" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "x" };
-    var j: Job = .{ .id = 3 };
     TypedMsg.setTypeId(&m);
+    var j: Job = .{ .id = 3 };
     TypedJob.setTypeId(&j);
 
     const m_node: *const std.SinglyLinkedList.Node = TypedMsg.node(&m);
@@ -191,8 +191,8 @@ test "mustParentFromAnchor and mustParentFromNode return the Parent on a match" 
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "x" };
-    var j: Job = .{ .id = 4 };
     TypedMsg.setTypeId(&m);
+    var j: Job = .{ .id = 4 };
     TypedJob.setTypeId(&j);
 
     try testing.expect(TypedMsg.mustParentFromAnchor(TypedMsg.anchor(&m)) == &m);
@@ -224,8 +224,8 @@ test "AnyParent dispatch through a map, no Typed call at dispatch" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "hi" };
-    var j: Job = .{ .id = 42 };
     TypedMsg.setTypeId(&m);
+    var j: Job = .{ .id = 42 };
     TypedJob.setTypeId(&j);
 
     const Handlers: type = struct {
@@ -298,8 +298,8 @@ test "the stored offset finds next for both kinds, and so does nextField" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "x" };
-    var j: Job = .{ .id = 1 };
     TypedMsg.setTypeId(&m);
+    var j: Job = .{ .id = 1 };
     TypedJob.setTypeId(&j);
 
     const m_anchor: *Anchor = TypedMsg.anchor(&m);

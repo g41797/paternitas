@@ -49,13 +49,13 @@ What it costs:
 
 If you come from C, this is Linux's `list_head` with `container_of`.
 
-Parent is Zig's word. Paternitas did not make it up.
+**_Parent_** is Zig's word. _Paternitas_ did not invent it.
 
-- Zig calls the struct that contains a field the field's parent.
+- Zig calls the struct that contains a field the field's _parent_.
 - `@fieldParentPtr` goes from the field to its parent.
-- Your `Message` is the Parent of its Node.
-- Paternitas finds the Parent of a Node, and checks its type.
-- Hence the name. *Paternitas* is Latin for "fatherhood".
+- Your `Message` is the _Parent_ of its Node.
+- Paternitas finds the _Parent_ of a Node, and checks its type.
+- Hence the name (*Paternitas* is Latin for "fatherhood").
 
 ---
 
@@ -79,7 +79,7 @@ What it costs:
 
 Paternitas keeps the erasure, and adds a check.
 
-- It writes the type into your struct, when the struct goes in.
+- It writes the type into your struct, when you create the struct.
 - It checks the type, when the Node comes out.
 
 ---
@@ -158,8 +158,8 @@ const TypedJob = paternitas.Typed(Job);
 
 pub fn main() void {
     var message: Message = .{ .text = "hi" };
-    var job: Job = .{ .id = 42 };
     TypedMessage.setTypeId(&message);
+    var job: Job = .{ .id = 42 };
     TypedJob.setTypeId(&job);
 
     var list: std.DoublyLinkedList = .{};
@@ -226,11 +226,13 @@ It gives you four calls.
 
 `setTypeId(&p)` writes P's type into its TypedNode.
 
-- Call it once.
-- Call it before the struct goes in a list.
+- Call it right after you create the struct.
+  - Even when every field has its default value.
+  - A new struct has no type.
 - Without it, every check returns null.
 
 ```zig
+var message: Message = .{ .text = "hi" };
 TypedMessage.setTypeId(&message);
 ```
 
@@ -244,6 +246,8 @@ list.append(TypedMessage.node(&message));
 
 - You get null when the Node is in another type.
 - Ask each type in turn.
+
+Inside a function that handles one Node:
 
 ```zig
 if (TypedMessage.parentFromNode(node)) |m| {
@@ -267,6 +271,14 @@ return error.UnknownParent;
 const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 ```
 
+Reset? A whole-struct write erases the type:
+
+- `message = .{ .text = "new" };`
+- a reset, clear or zero-fill of the whole struct
+
+Call `setTypeId` again after each one. Writing one field, such as
+`message.text = "new";`, keeps the type.
+
 ---
 
 ### All the calls, at a glance
@@ -278,7 +290,7 @@ For the taste (or smell). The details are in the API docs.
 
 | call | what you get |
 |---|---|
-| `TypedMessage.setTypeId(&message)` | the type written into the struct, once |
+| `TypedMessage.setTypeId(&message)` | the type written into the struct. Again after a whole-struct write |
 | `TypedMessage.node(&message)` | the std Node for the list |
 | `TypedMessage.parentFromNode(node)` | `?*Message`: the Message, or null |
 | `TypedMessage.mustParentFromNode(node)` | `*Message`, or a panic |
@@ -301,7 +313,7 @@ The migration is mechanical.
 
 - Find and replace, five times.
 - No design to think about.
-- The compiler finds what you missed.
+- The compiler finds what you missed, except step 3.
 
 ```
 before                       after
@@ -362,7 +374,7 @@ The five steps, for each struct in the list:
 
 | step | find | replace with |
 |---|---|---|
-| 1 | `std.DoublyLinkedList.Node` | `paternitas.DoublyTypedNode` |
+| 1 | `std.DoublyLinkedList.Node` | `paternitas.DoublyTypedNode`. Keep the field name, or rename it |
 | 1 | `std.SinglyLinkedList.Node` | `paternitas.SinglyTypedNode` |
 | 2 | the end of the struct, `};` | `};` and then `const TypedMessage = paternitas.Typed(Message);` |
 | 3 | after `var message: Message = .{ ... };` | add `TypedMessage.setTypeId(&message);` |
@@ -370,8 +382,13 @@ The five steps, for each struct in the list:
 | 5 | `@fieldParentPtr("node", n)` | `TypedMessage.mustParentFromNode(n)` |
 
 - Job: the same five steps, with `TypedJob`.
+- Your code writes the whole struct somewhere, as a reset?
+  - Add `TypedMessage.setTypeId(&message);` right after it, too.
 - The list itself does not change.
 - The compiler stops at each place you missed in steps 4 and 5.
+- Missed step 3? The compiler cannot see it.
+  - `mustParentFromNode` panics: "asked for Message, found <no type>".
+  - Add `setTypeId` right after that struct is created.
 - `mustParentFromNode` still returns `*Message`.
   - A wrong type panics, in every build mode.
 - Several types in one list? Use `parentFromNode` instead.

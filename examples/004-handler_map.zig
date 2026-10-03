@@ -46,10 +46,10 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     try handlers.put(TypedJob.typeId(), onJob);
 
     var message: Message = .{ .text = "hello" };
-    var job: Job = .{ .id = 42 };
-    var ping: Ping = .{};
     TypedMessage.setTypeId(&message);
+    var job: Job = .{ .id = 42 };
     TypedJob.setTypeId(&job);
+    var ping: Ping = .{};
     TypedPing.setTypeId(&ping);
 
     const received: [3]paternitas.AnyParent = .{
