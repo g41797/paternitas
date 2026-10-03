@@ -1,8 +1,17 @@
-# paternitas — Rules (010)
+# paternitas — Rules (012)
 
 All coding, doc, and process rules for paternitas.
 
-Change from 009: the owner added a MUST rule to Part 5, "Three kinds of
+Change from 011: the owner widened a rule. Each Parent's `Typed` const
+goes on the line right after its struct, everywhere: source, tests,
+examples, the README, comments. It is in Part 2, "Parent and `Typed`".
+2026-10-03.
+
+Change from 010, kept: the owner added two rules to Part 5, "Three kinds of
+documentation". The project name is Paternitas. The README is written
+for a plain user, in staccato. 2026-10-03.
+
+Change from 009, kept: the owner added a MUST rule to Part 5, "Three kinds of
 documentation": explain a term before you use it. 2026-10-03.
 
 Change from 008, kept: the owner added a MUST rule to Part 5, "Three kinds of
@@ -279,6 +288,28 @@ Examples.
   - It is not a failure. The gate logs carry it on every run.
   - Pass or fail comes from the exit code.
 
+Parent and `Typed`, everywhere.
+
+- Each Parent's `Typed` const goes on the line right after its struct.
+  - This applies everywhere: `src/`, tests, examples, the README, `//!`
+    and `///` snippets, the design.
+  - Not after all the structs. Not after a blank line.
+- Example:
+
+  ```zig
+  const Message = struct {
+      text: []const u8,
+      tnode: paternitas.DoublyTypedNode = .{},
+  };
+  const TypedMessage = paternitas.Typed(Message);
+
+  const Job = struct {
+      id: u32,
+      tnode: paternitas.DoublyTypedNode = .{},
+  };
+  const TypedJob = paternitas.Typed(Job);
+  ```
+
 Layout of an example file, top to bottom.
 
 - The `//!` header.
@@ -484,6 +515,8 @@ Each kind has its own reader. Write for that reader only.
   - The README MUST be user-first. It starts from what the user does and
     gets, never from how paternitas works. A mechanism appears only when
     the user must act on it, and then in the user's words.
+  - The README is for a plain user, not for an expert. Staccato applies
+    in full: short sentences, one fact each, bullets.
   - A term or construct MUST be explained before the text uses it. Do not
     describe a situation the reader cannot picture yet. The opening uses
     only words a Zig programmer already knows. "Intrusive", "type-erased",
@@ -493,6 +526,9 @@ Each kind has its own reader. Write for that reader only.
   - Show the code without paternitas, and where it breaks.
   - Show the same code with paternitas.
   - Internals do not appear.
+- The project is Paternitas, with a capital P, in all prose.
+  - `paternitas`, in lower case, is the repo, the module and the import.
+  - It appears only in code, paths and URLs.
 - Never copy text from the design into a comment or the README. Write it
   again for that reader.
 

@@ -79,7 +79,7 @@ What it costs:
 
 Paternitas keeps the erasure, and adds a check.
 
-- It writes the type next to the Node, when the struct goes in.
+- It writes the type into your struct, when the struct goes in.
 - It checks the type, when the Node comes out.
 
 ---
@@ -148,11 +148,12 @@ const Message = struct {
     text: []const u8,
     tnode: paternitas.DoublyTypedNode = .{},
 };
+const TypedMessage = paternitas.Typed(Message);
+
 const Job = struct {
     id: u32,
     tnode: paternitas.DoublyTypedNode = .{},
 };
-const TypedMessage = paternitas.Typed(Message);
 const TypedJob = paternitas.Typed(Job);
 
 pub fn main() void {
@@ -188,37 +189,40 @@ pub fn main() void {
 
 P is the Parent: your struct.
 
-`Typed(P)` is a helper.
-
-- You declare it once, next to your struct.
-- It does the housekeeping, so you do not.
-  - It finds the TypedNode field in P, by its type.
-  - It does the `@fieldParentPtr` arithmetic.
-  - It writes P's type next to the Node.
-  - It checks the type when the Node comes back.
-
 Two things go in your code:
 
 - A TypedNode, in the struct, where the std Node was.
-- The helper, next to the struct.
+- `Typed(P)`, declared once, right after the struct.
 
 ```zig
-const Message: type = struct {
+const Message = struct {
     text: []const u8,
     tnode: paternitas.DoublyTypedNode = .{},
 };
-const TypedMessage: type = paternitas.Typed(Message);
+const TypedMessage = paternitas.Typed(Message);
 ```
+
+---
+
 
 - `DoublyTypedNode` is for `std.DoublyLinkedList`.
 - `SinglyTypedNode` is for `std.SinglyLinkedList`.
 - `DTNode` and `STNode` are the short names.
-- A TypedNode is the std Node, with the type kept next to it.
 - The field can have any name.
 - The field can be anywhere in the struct.
 - A struct has one TypedNode.
 
-The helper gives you four calls.
+---
+
+
+`Typed(P)` is a helper. It does the housekeeping, so you do not:
+
+- It finds the TypedNode field in P, by its type.
+- It does the `@fieldParentPtr` arithmetic.
+- It writes P's type into the TypedNode.
+- It checks the type when the Node comes back.
+
+It gives you four calls.
 
 `setTypeId(&p)` writes P's type into its TypedNode.
 
@@ -243,11 +247,11 @@ list.append(TypedMessage.node(&message));
 
 ```zig
 if (TypedMessage.parentFromNode(node)) |m| {
-    std.log.info("message: {s}", .{m.*.text});
+    std.log.info("message: {s}", .{m.text});
     return;
 }
 if (TypedJob.parentFromNode(node)) |j| {
-    std.log.info("job: {d}", .{j.*.id});
+    std.log.info("job: {d}", .{j.id});
     return;
 }
 return error.UnknownParent;
@@ -263,11 +267,14 @@ return error.UnknownParent;
 const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 ```
 
-The first three snippets come from examples 001 and 002.
+---
 
 ### All the calls, at a glance
 
-For the taste. The details are in the API docs.
+---
+
+
+For the taste (or smell). The details are in the API docs.
 
 | call | what you get |
 |---|---|
@@ -290,10 +297,11 @@ For the taste. The details are in the API docs.
 ---
 
 
-Put a TypedNode where the Node was.
+The migration is mechanical.
 
-- It is the same std Node.
-- The struct's type is kept next to it.
+- Find and replace, five times.
+- No design to think about.
+- The compiler finds what you missed.
 
 ```
 before                       after
@@ -308,7 +316,13 @@ Message                      Message
                              +---------------------------+
 ```
 
+
+---
+
 Before:
+
+---
+
 
 ```zig
 const Message = struct {
@@ -316,13 +330,19 @@ const Message = struct {
     node: std.DoublyLinkedList.Node = .{},
 };
 
-var message: Message = .{ .text = "hello" };
+var message: Message = .{ .text = "hi" };
 list.append(&message.node);
 
 const m: *Message = @fieldParentPtr("node", list.popFirst().?);
 ```
 
+---
+
+
 After:
+
+---
+
 
 ```zig
 const Message = struct {
@@ -331,37 +351,39 @@ const Message = struct {
 };
 const TypedMessage = paternitas.Typed(Message); // does the @fieldParentPtr work
 
-var message: Message = .{ .text = "hello" };
+var message: Message = .{ .text = "hi" };
 TypedMessage.setTypeId(&message);
 list.append(TypedMessage.node(&message));
 
 const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 ```
 
-Job gets the same change:
+The five steps, for each struct in the list:
 
-- Its `std.DoublyLinkedList.Node` becomes a `paternitas.DoublyTypedNode`.
-- It gets its own `const TypedJob = paternitas.Typed(Job);`.
+| step | find | replace with |
+|---|---|---|
+| 1 | `std.DoublyLinkedList.Node` | `paternitas.DoublyTypedNode` |
+| 1 | `std.SinglyLinkedList.Node` | `paternitas.SinglyTypedNode` |
+| 2 | the end of the struct, `};` | `};` and then `const TypedMessage = paternitas.Typed(Message);` |
+| 3 | after `var message: Message = .{ ... };` | add `TypedMessage.setTypeId(&message);` |
+| 4 | `&message.node` | `TypedMessage.node(&message)` |
+| 5 | `@fieldParentPtr("node", n)` | `TypedMessage.mustParentFromNode(n)` |
 
-Do it this way, for each struct in the list:
-
-1. `std.SinglyLinkedList.Node` becomes `paternitas.SinglyTypedNode`.
-   `std.DoublyLinkedList.Node` becomes `paternitas.DoublyTypedNode`.
-2. Add `const TypedMessage = paternitas.Typed(Message);`, once.
-3. Call `TypedMessage.setTypeId(&message)` once.
-   - After the struct is set up.
-   - Before it goes in a list.
-4. `&message.node` becomes `TypedMessage.node(&message)`.
-5. `@fieldParentPtr("node", n)` becomes `TypedMessage.mustParentFromNode(n)`.
-   - It still returns `*Message`.
-   - A wrong type panics, in every build mode.
-
+- Job: the same five steps, with `TypedJob`.
 - The list itself does not change.
 - The compiler stops at each place you missed in steps 4 and 5.
-- Where a Node of another type can come, use `parentFromNode`.
-  - It returns null for another type.
+- `mustParentFromNode` still returns `*Message`.
+  - A wrong type panics, in every build mode.
+- Several types in one list? Use `parentFromNode` instead.
+  - Ask each type in turn, as in "What is `Typed(P)`?".
+
+
+---
 
 ## Do you need it?
+
+---
+
 
 You do not need Paternitas when:
 
@@ -383,7 +405,13 @@ A type check costs one pointer compare.
 - No type names to compare.
 - No table to register in.
 
+
+---
+
 ## What Paternitas does not do
+
+---
+
 
 - It has no list, queue or pool of its own.
   - You keep using std, or your own.
@@ -396,27 +424,37 @@ A type check costs one pointer compare.
 - A type id is valid only inside one running program.
   - A shared library gets its own id for the same type.
 
+
+---
+
 ## Advanced topics
+
+---
+
 
 You do not need these to migrate a std list.
 
-- Each one is in the [API docs](https://g41797.github.io/paternitas/apidocs/).
-- Each one has an [example](https://g41797.github.io/paternitas/examples/001-set_type_id_and_recover/).
-
-Topics:
-
 - `AnyParent`: pass a struct through a queue, a map or a union field.
-  - It is the struct's address and its type.
-  - Get the struct back with `fromAny`.
-  - Examples 003 and 005.
+  - Examples [003](https://g41797.github.io/paternitas/examples/003-timeout_list/)
+    and [005](https://g41797.github.io/paternitas/examples/005-large_struct_in_union/).
 - A handler per type.
-  - `typeId()` is the map key.
-  - An `AnyParent` calls the handler.
-  - Example 004.
+  - Example [004](https://g41797.github.io/paternitas/examples/004-handler_map/).
 - `Anchor` and `paternitas.container`: for your own container.
-  - Example 006.
+  - Example [006](https://g41797.github.io/paternitas/examples/006-anchor_chain/).
+
+All of them are explained in the comments, and in the
+[API docs](https://g41797.github.io/paternitas/apidocs/).
+
+
+Have fun.
+
+---
+
 
 ## Why Paternitas
+
+---
+
 
 Paternitas is about finding the Parent of an unknown Node.
 
@@ -442,11 +480,48 @@ Paternitas does both.
 
 The name is a small joke. The idea is literal.
 
+---
+
+
 > The Node may be unknown.
-> Paternitas establishes its parentage.
+> _Paternitas_ establishes its parentage.
+
+---
+
 
 **Note.** Both Latin terms were _invented_ while this README was written.
 
 - We believe they are real Latin.
 - We did not check them in a law book.
 - A joke is a joke.
+
+
+---
+
+## Install
+
+---
+
+
+Fetch the package. It writes the dependency into your `build.zig.zon`.
+
+```sh
+zig fetch --save git+https://github.com/g41797/paternitas
+```
+
+Add the module to your `build.zig`, after your `exe`:
+
+```zig
+const paternitas = b.dependency("paternitas", .{ .target = target, .optimize = optimize });
+exe.root_module.addImport("paternitas", paternitas.module("paternitas"));
+```
+
+Import it in your code:
+
+```zig
+const paternitas = @import("paternitas");
+```
+
+- Zig 0.16.0.
+- Only `std`.
+- There is no release tag yet. `zig fetch` takes the main branch.

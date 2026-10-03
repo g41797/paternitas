@@ -1,8 +1,8 @@
 //! Tests of the paternitas module.
 
 const Msg: type = struct { text: []const u8, tnode: paternitas.SinglyTypedNode = .{} };
-const Job: type = struct { tnode: paternitas.DoublyTypedNode = .{}, id: u32, extra: u64 = 7 };
 const TypedMsg: type = paternitas.Typed(Msg);
+const Job: type = struct { tnode: paternitas.DoublyTypedNode = .{}, id: u32, extra: u64 = 7 };
 const TypedJob: type = paternitas.Typed(Job);
 
 fn check(ok: bool, msg: []const u8) void {
@@ -98,8 +98,8 @@ test "two types with one name have two TypeIds" {
     std.testing.log_level = .debug;
 
     const A: type = msg_one.Msg;
-    const B: type = msg_two.Msg;
     const TypedA: type = paternitas.Typed(A);
+    const B: type = msg_two.Msg;
     const TypedB: type = paternitas.Typed(B);
 
     // The precondition: the two names are equal.

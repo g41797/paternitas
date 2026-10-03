@@ -4,6 +4,71 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — README after the owner's edit: install, advanced, style
+
+The owner edited the README, asked for advice, and chose items 2, 3, 4
+and 6.
+
+- Install, at the end:
+  - `zig fetch --save git+https://github.com/g41797/paternitas`.
+  - The two `build.zig` lines and the `@import`.
+  - The `build.zig` lines were checked with a local consumer project in
+    `$S/consumer`, through a `.path` dependency. It printed the two Hello
+    lines.
+  - `zig fetch` from GitHub was not run: that is remote.
+  - The text says there is no release tag yet.
+- "Advanced topics":
+  - The duplicate pair of lines is gone.
+  - The names are in code font.
+  - Each topic links to its own example: 003, 005, 004, 006.
+  - The owner's "Have fun." stays.
+- Style: the `Typed(P)` snippets use `const Message = struct` and
+  `m.text`, as the program does.
+- Small fixes:
+  - "taste (or smell)".
+  - Step 3's "find" column is searchable text.
+  - The migration uses "hi", as the rest of the README does.
+
+Not done (owner's choice): a title block at the top, and the `---` layout.
+
+All six gates pass.
+
+## 2026-10-03 — README: `Typed(P)` wording, mechanical migration
+
+At the owner's request:
+
+- "What is `Typed(P)`?":
+  - "Two things go in your code" now comes first.
+  - The helper is named once, as `Typed(P)`.
+  - The line "A TypedNode is the std Node, with the type kept next to it"
+    is gone: it said the same thing again, and it was a private detail.
+  - The type is written "into the TypedNode", not "next to the Node".
+- "Two words first": "It writes the type into your struct". TypedNode is
+  not explained there yet.
+- Migration:
+  - It opens with "The migration is mechanical".
+  - The steps are a find-and-replace table of five steps.
+  - Job gets one line. `parentFromNode` for mixed lists gets one bullet.
+- The `//!` header: "The fix" says the migration is mechanical. The
+  "kept next to it" detail is gone.
+
+All six gates pass.
+
+## 2026-10-03 — `Typed` right after its struct, rules 012
+
+The owner's rule: each Parent's `Typed` const goes on the line right after
+its struct, everywhere. Until now it was only in the example layout.
+
+- Rules 012, Part 2: "Parent and `Typed`, everywhere". Rules 011 is in
+  `backup/`.
+- The README program now runs Message, TypedMessage, Job, TypedJob. It ran
+  again from `$S/docex` and printed the same two lines.
+- Example 001: the blank line between `Message` and `TypedMessage` is gone.
+- `tests/paternitas_tests.zig`: two places reordered, at the top and in
+  "two types with one name".
+
+All six gates pass.
+
 ## 2026-10-03 — README, "Why Paternitas"
 
 The owner's text goes at the very end, in staccato. It covers *affirmatio*

@@ -19,8 +19,8 @@
 //!   it is a Message, and you read a Message as a Job. It compiles, it runs,
 //!   and nothing warns you.
 //!
-//! The fix: put a TypedNode where the Node was. It is the same std Node,
-//! with the struct's type kept next to it.
+//! The fix: put a TypedNode where the Node was. The migration is
+//! mechanical: find and replace, five times.
 //!
 //! ```
 //! before                       after

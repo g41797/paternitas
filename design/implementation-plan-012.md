@@ -4,7 +4,7 @@ Forward-looking work, plus one line per completed stage.
 
 - Current state: [STATUS.md](STATUS.md).
 - The narrative: [STATUS-LOG.md](STATUS-LOG.md).
-- Rules: [rules-011.md](rules-011.md).
+- Rules: [rules-012.md](rules-012.md).
 - Design: [paternitas-design-011.md](paternitas-design-011.md).
 - The audit and the owner's rulings:
   [audit-01-report-003.md](audit-01-report-003.md).

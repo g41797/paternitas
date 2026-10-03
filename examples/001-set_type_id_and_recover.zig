@@ -16,7 +16,6 @@ pub fn set_type_id_and_recover(allocator: std.mem.Allocator, io: std.Io) !void {
         text: []const u8,
         tnode: paternitas.DoublyTypedNode = .{},
     };
-
     const TypedMessage: type = paternitas.Typed(Message);
 
     var message: Message = .{ .text = "hello" };
