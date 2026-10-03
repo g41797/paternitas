@@ -39,7 +39,7 @@ nav:
       - examples/002-mixed_list.md
       - examples/003-timeout_list.md
       - examples/004-handler_map.md
-      - examples/005-anchor_in_union.md
+      - examples/005-large_struct_in_union.md
       - examples/006-anchor_chain.md
 
 hooks:

@@ -5,7 +5,7 @@ This file records what came back, what the scan found, and the owner's rulings
 of 2026-10-02. It is the state for the stages after ADPT 01.
 
 - Rules: [rules-008.md](rules-008.md).
-- Plan: [implementation-plan-011.md](implementation-plan-011.md).
+- Plan: [implementation-plan-012.md](implementation-plan-012.md).
 
 ---
 

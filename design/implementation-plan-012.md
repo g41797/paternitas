@@ -1,15 +1,17 @@
-# paternitas — Implementation plan (011)
+# paternitas — Implementation plan (012)
 
 Forward-looking work, plus one line per completed stage.
 
 - Current state: [STATUS.md](STATUS.md).
 - The narrative: [STATUS-LOG.md](STATUS-LOG.md).
 - Rules: [rules-008.md](rules-008.md).
-- Design: [paternitas-design-010.md](paternitas-design-010.md).
+- Design: [paternitas-design-011.md](paternitas-design-011.md).
 - The audit and the owner's rulings:
   [audit-01-report-003.md](audit-01-report-003.md).
 - The outside work: [paternitas-intake-001.md](paternitas-intake-001.md).
-- Change from 010: EXPL 01 is closed. Its account is in
+- Change from 011: EXPL 02 is closed. Its account is in
+  [STATUS-LOG.md](STATUS-LOG.md).
+- Change from 010, kept: EXPL 01 is closed. Its account is in
   [STATUS-LOG.md](STATUS-LOG.md).
 - Change from 009, kept: NAME 01 is closed.
 - Change from 008, kept: PTRN 02 is closed.
@@ -40,11 +42,14 @@ Forward-looking work, plus one line per completed stage.
   `//!`, six examples, the README. 22 tests in all four modes. Six gates
   green. `mkdocs build --strict` passes.
 - NAME 01 (2026-10-03, Opus 5.5) — names that say what each thing is: `Link`
-  is now `TypedNode`, and `stamp` is now `setTypeId`. Design 010, rules 007.
+  is now `TypedNode`, and `stamp` is now `setTypeId`. Design 011, rules 007.
   The ztk copy follows. 22 tests in all four modes. Six gates green.
 - EXPL 01 (2026-10-03, Opus 5.5) — the README and the module header say
   what "intrusive" and "type-erased" mean, and the README says when you
   need paternitas. Four examples get one line each. Six gates green.
+- EXPL 02 (2026-10-03, Opus 5.5) — the README names the two uses. The
+  second one passes an `AnyParent`. `*Anchor` goes to container authors.
+  003, 004 and 005 carry `AnyParent`. Design 011. Six gates green.
 
 ---
 
@@ -54,7 +59,7 @@ paternitas first, until it is done. Then ztk, built on it. The ztk stage may
 need paternitas fixes; the work then goes in rounds. Intake, D1.
 
 ```text
-PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  LOOK 01  ->  ZTK ...  <->  PTRN fixes
+PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  ZTK ...  <->  PTRN fixes
 ```
 
 ---
@@ -69,7 +74,7 @@ Model: to be named by the owner. AUDT 01, T7. The stage name is a proposal.
 - The Anchor idea, from the owner at the end of NAME 01: Archimedes, "Give
   me a place to stand, and I will move the Earth". The Anchor is the one
   fixed point in your struct, and everything is reached from it. Images: a
-  lever on a fixed point, or an anchor. The README already quotes it.
+  lever on a fixed point, or an anchor. The `Anchor` `///` quotes it.
 - The README, the site, the favicon.
 
 ## ZTK — later

@@ -54,8 +54,8 @@ test "05 - anchor in union" {
     var threaded: std.Io.Threaded = .init(std.testing.allocator, .{});
     defer threaded.deinit();
 
-    examples.anchor_in_union.anchor_in_union(std.testing.allocator, threaded.io()) catch |err| {
-        std.log.err("anchor_in_union failed: {s}", .{@errorName(err)});
+    examples.large_struct_in_union.large_struct_in_union(std.testing.allocator, threaded.io()) catch |err| {
+        std.log.err("large_struct_in_union failed: {s}", .{@errorName(err)});
         return err;
     };
 }

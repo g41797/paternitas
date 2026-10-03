@@ -1,12 +1,11 @@
 //! Pick a handler by type, with a map from type id to handler.
 //!
-//! An event loop gets items of many types as `*Anchor`s.
+//! An event loop gets items of many types as `AnyParent`s: an address and a type id each.
 //! It keeps one handler per type in a map, keyed by `TypeId`.
 //! Picking the handler needs only the type id, not the type itself.
 //!
 //! - Register one handler per type, under its `TypeId`.
-//! - Receive a `Message`, a `Job` and a `Ping` as `*Anchor`s.
-//! - Turn each `*Anchor` into an `AnyParent` with `toAny`.
+//! - Receive a `Message`, a `Job` and a `Ping` as `AnyParent`s.
 //! - Find the handler by `type_id`, and call it with `ptr`.
 //! - Count the `Ping` as unhandled. No handler is registered for it.
 //! - Get a `Message` back from an `AnyParent` with `fromAny`, which checks the type.
@@ -53,14 +52,14 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     TypedJob.setTypeId(&job);
     TypedPing.setTypeId(&ping);
 
-    const received: [3]*paternitas.Anchor = .{
-        TypedMessage.anchor(&message),
-        TypedJob.anchor(&job),
-        TypedPing.anchor(&ping),
+    const received: [3]paternitas.AnyParent = .{
+        TypedMessage.toAny(&message),
+        TypedJob.toAny(&job),
+        TypedPing.toAny(&ping),
     };
 
     var counts: Counts = .{};
-    for (received) |a| try dispatch(&handlers, a, &counts);
+    for (received) |any| dispatch(&handlers, any, &counts);
 
     if (counts.messages != 1 or counts.jobs != 1 or counts.unhandled != 1) return error.WrongCount;
 
@@ -68,10 +67,9 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
 }
 
 /// Picks the handler by type id. No struct type appears here.
-fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *paternitas.Anchor, counts: *Counts) !void {
-    const any: paternitas.AnyParent = a.toAny() orelse return error.NoTypeId;
+fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), any: paternitas.AnyParent, counts: *Counts) void {
     const h: Handler = handlers.get(any.type_id) orelse {
-        std.log.info("no handler for {s}", .{a.typeName()});
+        std.log.info("no handler for this type", .{});
         counts.*.unhandled += 1;
         return;
     };

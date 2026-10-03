@@ -7,6 +7,14 @@ Zig 0.16.0. It needs only `std`, and it allocates nothing.
 
 *Paternitas* is Latin for "fatherhood".
 
+## Two uses
+
+1. **One list, many types.** Several struct types share one std list. Each
+   one comes back as itself, or you get null.
+2. **Pass it on, handle by type.** A struct leaves its list for a queue, a
+   map or a union field, as an `AnyParent`. The other side gets it back, or
+   picks a handler by its type. Nothing is copied.
+
 ## Two words first
 
 Zig's std lists are intrusive and type-erased. Here is what the two words
@@ -53,7 +61,7 @@ you know which struct it is in.
 paternitas keeps the erasure. It writes the type next to the Node when the
 struct goes in, and checks it when the Node comes out.
 
-## The problem
+## One list, many types: the problem
 
 Zig's std lists are intrusive. You put a `Node` inside your struct, and the
 list links the Nodes. To get your struct back, you call `@fieldParentPtr`.
@@ -196,73 +204,64 @@ missed in steps 4 and 5.
 Then, where a Node of another type is expected, use `parentFromNode`.
 It returns null for another type.
 
-## Beyond the std list
+## Pass it on, handle by type
 
-Intrusive std lists do not copy your struct. The Node lives inside your
-struct, and the list links the struct where it is.
+Most other containers are non-intrusive: `std.Io.Queue`, `std.ArrayList`,
+a hash map, a union field. They store a copy of each item you put in. A
+large struct, or one that must not be copied, does not fit. A
+`*Connection` fits, but it carries only a `Connection`.
 
-Most other containers are non-intrusive. They know nothing of your struct,
-and they store a copy of each item you put in: `std.Io.Queue`,
-`std.ArrayList`, a hash map. A union field stores a copy too.
-
-Put in a pointer instead, and only the pointer is copied. Your struct
-stays where it is. But a `*Connection` carries only a `Connection`.
-
-So put in a pointer into the struct. You have two to choose from:
-
-- `*Node`. It works when every struct in the container has the same Node
-  kind: all `SinglyTypedNode`, or all `DoublyTypedNode`. The receiver gets
-  the struct back with `parentFromNode`.
-- `*Anchor`. It works for every struct, singly or doubly. The receiver gets
-  the struct back with `parentFromAnchor`.
-
-When in doubt, use `*Anchor`. A struct can change its Node kind later, and
-the container does not have to change with it.
-
-> *Da ubi consistam, et terram movebo.*
->
-> Give me a place to stand, and I will move the Earth. — Archimedes
-
-The Anchor is that place in your struct. Any code can keep a pointer to
-it, whatever the struct's type or Node kind. paternitas reaches everything
-else from it.
+Put in an `AnyParent`. It is the struct's address and its type id, two
+words. The container copies the two words, never your struct.
 
 ```
-Message                  Connection
-+----------------+       +----------------+
-| tnode          |       | tnode          |
-|   node         |       |   node         |
-|   anchor <--+  |       |   anchor <--+  |
-+-------------|--+       +-------------|--+
-              |                        |
-       *Anchor|                 *Anchor|
-     +--------+------------------------+--------+
-     |  a non-intrusive container of *Anchor    |
-     |  std.Io.Queue, std.ArrayList, a map      |
-     |  any struct type, any Node kind          |
-     +--------------------+---------------------+
-                          |
-                          v
-       TypedConnection.parentFromAnchor(a)
-          -> *Connection, or null for another type
+Message                 Connection
+   | toAny                  | toAny
+   v                        v
++------------------------------------------+
+|  a non-intrusive container of AnyParent  |
+|  std.Io.Queue, std.ArrayList, a map      |
++---------------------+--------------------+
+                      |
+         +------------+-------------+
+         v                          v
+TypedConnection.fromAny(any)   handlers.get(any.type_id)
+ -> *Connection, or null        -> the handler for its type
 ```
+
+Get the struct back:
 
 ```zig
-var buffer: [8]*paternitas.Anchor = undefined;
-var queue: std.Io.Queue(*paternitas.Anchor) = .init(&buffer);
+var buffer: [4]paternitas.AnyParent = undefined;
+var queue: std.Io.Queue(paternitas.AnyParent) = .init(&buffer);
 
 TypedConnection.setTypeId(&connection);
-try queue.putOne(io, TypedConnection.anchor(&connection));
+try queue.putOne(io, TypedConnection.toAny(&connection));
 
 // on the other side
-const a = try queue.getOne(io);
-if (TypedConnection.parentFromAnchor(a)) |c| {
-    // c is the same connection, not a copy
-}
+const any: paternitas.AnyParent = try queue.getOne(io);
+const c: *Connection = TypedConnection.fromAny(any) orelse return error.WrongParent;
+// c is the same connection, not a copy
 ```
 
-The same `*Anchor` fits in a hash map, a union field, or a C callback's
-context.
+Or pick a handler by type. The code that picks it never names a type:
+
+```zig
+var handlers: std.AutoHashMap(paternitas.TypeId, Handler) = .init(allocator);
+try handlers.put(TypedMessage.typeId(), onMessage);
+try handlers.put(TypedJob.typeId(), onJob);
+
+// the event loop
+if (handlers.get(any.type_id)) |h| h(any.ptr, counts);
+```
+
+The handler casts `ptr` to its own type. The map matched the type id, so
+the type is right.
+
+A union field works the same way: `parent: paternitas.AnyParent`.
+
+Nothing is copied, so the struct MUST stay alive while its `AnyParent` is in
+use.
 
 ## Do you need it?
 
@@ -271,9 +270,9 @@ know which one. Plain `@fieldParentPtr` is fine there.
 
 You need it when:
 
-- one list, queue or map carries several struct types, or
-- the code in between does not know the type: a mailbox, a dispatcher, an
-  event loop.
+- one std list carries several struct types, or
+- a queue, a map or a union field carries them, and the code in between
+  does not know the type: a mailbox, a dispatcher, an event loop.
 
 A type check costs one pointer compare. There are no type names to compare
 and no table to register in.
@@ -292,6 +291,8 @@ and no table to register in.
   one pattern each: mixed lists, a timeout list, dispatch by type, a union
   field, a chain of your own.
 - The [API docs](https://g41797.github.io/paternitas/apidocs/).
+- Writing your own container? `*Anchor` and `paternitas.container` are in
+  the API docs.
 
 ## License
 

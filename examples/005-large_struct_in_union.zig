@@ -1,17 +1,17 @@
-//! Send a large struct through a union of events, by pointer, without copying it.
+//! Send a large struct through a union of events, without copying it.
 //!
 //! Small events travel by value in a tagged union.
 //! A union field is non-intrusive: it stores a copy of what you put in.
-//! A large struct, or one that must not be copied, travels as its `*Anchor`.
+//! A large struct, or one that must not be copied, travels as its `AnyParent`: its address and its type id.
 //! The handler gets the struct back with a type check.
 //!
 //! - Call `setTypeId` on a `Download`. It has a 4 KB buffer, too large to copy.
-//! - Build three `Event`s: a tick, a resize, and the `Download`'s `*Anchor`.
+//! - Build three `Event`s: a tick, a resize, and the `Download`'s `AnyParent`.
 //! - Copy the events into a second array, as a queue would.
-//! - Handle each event, and get the `Download` back with `parentFromAnchor`.
+//! - Handle each event, and get the `Download` back with `fromAny`.
 //! - Check that it is the same `Download`, not a copy.
 
-/// It is too large to copy. Events carry a pointer to it.
+/// It is too large to copy. Events carry its address and type id.
 const Download: type = struct {
     tnode: paternitas.SinglyTypedNode = .{},
     buffer: [4096]u8 = undefined,
@@ -22,7 +22,7 @@ const TypedDownload: type = paternitas.Typed(Download);
 const Event: type = union(enum) {
     tick: u64,
     resize: Size,
-    parent: *paternitas.Anchor,
+    parent: paternitas.AnyParent,
 };
 
 const Size: type = struct {
@@ -30,7 +30,7 @@ const Size: type = struct {
     height: u16,
 };
 
-pub fn anchor_in_union(allocator: std.mem.Allocator, io: std.Io) !void {
+pub fn large_struct_in_union(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
     _ = io;
 
@@ -40,7 +40,7 @@ pub fn anchor_in_union(allocator: std.mem.Allocator, io: std.Io) !void {
     const sent: [3]Event = .{
         .{ .tick = 1 },
         .{ .resize = .{ .width = 80, .height = 24 } },
-        .{ .parent = TypedDownload.anchor(&download) },
+        .{ .parent = TypedDownload.toAny(&download) },
     };
 
     // Copy the events, as a queue would. Each Event is small, and the
@@ -59,8 +59,8 @@ fn handle(e: Event) !void {
     switch (e) {
         .tick => |t| std.log.info("tick {d}", .{t}),
         .resize => |s| std.log.info("resize {d}x{d}", .{ s.width, s.height }),
-        .parent => |a| {
-            const d: *Download = TypedDownload.parentFromAnchor(a) orelse return error.UnknownParent;
+        .parent => |any| {
+            const d: *Download = TypedDownload.fromAny(any) orelse return error.UnknownParent;
             d.*.received += 1;
             std.log.info("download, {d} bytes of buffer", .{d.*.buffer.len});
         },

@@ -81,15 +81,14 @@
 //! Then, where a Node of another type is expected, use `parentFromNode`.
 //! It returns null for another type.
 //!
-//! When the type is not known yet, as in a queue that carries several
-//! struct types, pass a pointer into the struct:
+//! Outside a std list, pass an `AnyParent`: the struct's address and its
+//! type id. A queue, a map or a union field copies the two words, never
+//! your struct.
 //!
-//! - `*Node`, when every struct in the queue has the same Node kind. Get the
-//!   struct back with `parentFromNode`.
-//! - `*Anchor`, for any struct. Get it with `anchor`, and the struct back
-//!   with `parentFromAnchor`.
+//! - Get it with `toAny`, and the struct back with `fromAny`.
+//! - Or look up a handler by its `type_id`, and give it `ptr`.
 //!
-//! `AnyParent` is for picking a handler by type id.
+//! Writing your own container? See `Anchor` and `container`.
 //!
 //! paternitas has no list or queue of its own, and it allocates nothing.
 
@@ -294,8 +293,12 @@ pub fn Typed(comptime P: type) type {
 /// The one fixed point in your struct. Everything else is reached from it:
 /// the struct's type, the struct itself, its Node.
 ///
-/// Pass `*Anchor` where the code in between does not know your struct's
-/// type: a queue, a map, a union field, a C callback's context.
+/// *Da ubi consistam, et terram movebo.* Give me a place to stand, and I
+/// will move the Earth. (Archimedes)
+///
+/// For container authors. Application code passes an `AnyParent`, two words.
+/// `*Anchor` is one word: use it in your own container, or as a C callback's
+/// `void*` context.
 ///
 /// - Every struct with a TypedNode has one Anchor, inside the TypedNode.
 ///   `setTypeId` writes the struct's type into it.
@@ -338,16 +341,12 @@ pub const Anchor = struct {
     }
 };
 
-/// A Parent's address and its type id, together. Use it to pick a handler by
-/// type.
+/// A Parent's address and its type id, together. Pass it where the code in
+/// between does not know your struct's type: a queue, a map, a union field.
+/// They copy the two words, never your struct.
 ///
-/// - `*Anchor` carries the struct. Use it to pass a Parent through a queue
-///   or a map.
-/// - `AnyParent` is for picking a handler by type id. It keeps the address
-///   and the type id side by side, so the handler is chosen without reading
-///   the struct.
-///
-/// - Look up the handler by `type_id`, and give it `ptr`.
+/// - Look up a handler by `type_id`, and give it `ptr`. The handler is
+///   chosen without reading the struct.
 /// - Or get the typed pointer back with `Typed(P).fromAny`. You get null for
 ///   another type.
 /// - It does not copy the Parent. The Parent MUST stay alive while you use

@@ -49,7 +49,7 @@ Source: a trimmed copy of the Matryoshka rules,
   implementation invariants, its patterns and its provenance.
 - What was added: the git rules, and the stage sequence in Part 1.
 
-Companion: [paternitas-design-010.md](paternitas-design-010.md) — the design
+Companion: [paternitas-design-011.md](paternitas-design-011.md) — the design
 decisions and what paternitas keeps from ztk.
 
 ---
