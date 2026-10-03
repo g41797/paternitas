@@ -150,6 +150,32 @@ The checks after the gates also pass.
     English, and says the Anchor is that place in your struct.
   - Plan 010 keeps the image for LOOK 01: a lever on a fixed point, or an
     anchor.
+- The owner asked why a queue cannot carry `*Node`. It can, when every
+  struct in it has the same Node kind. A scratch test sent two struct types
+  through one `std.Io.Queue` of `*Node` and got each back with
+  `parentFromNode`.
+  - The README section "When you must not copy" now gives both choices:
+    `*Node` for one Node kind, `*Anchor` for any. When in doubt, `*Anchor`,
+    because a struct can change its Node kind later. The quote comes after.
+  - The module header gives the same choice. The `Anchor` doc's last line
+    now reads: `*Node` carries any struct with the same Node kind, `*Anchor`
+    carries any struct.
+  - The ztk copy, run again after these edits: 198 of 199 tests and the
+    negatives pass in all four modes.
+- The owner noted that a std list does not copy either, so "When you must
+  not copy" put the Anchor's reason in the wrong place. The README section
+  is now "Beyond the std list": a std list links the struct where it is,
+  other code stores values, so you give it a pointer into the struct. The
+  mutex, file handle and buffer list is gone.
+  - Then the owner asked for the copy to be said plainly. The opening now
+    reads: most other containers store a copy of each item you put in. Put
+    in a pointer, and only the pointer is copied.
+  - The first line now says "Intrusive std lists", at the owner's word.
+  - The owner asked for "non-intrusive containers", explained in the text.
+    Intrusive: the Node lives inside your struct. Non-intrusive: the
+    container knows nothing of your struct and stores a copy. The diagram's
+    box is now "a non-intrusive container of *Anchor", and the choices say
+    "container", not "queue".
 
 | step | result |
 |---|---|

@@ -76,11 +76,14 @@
 //! It returns null for another type.
 //!
 //! When the type is not known yet, as in a queue that carries several
-//! struct types, pass the `*Anchor` that `anchor` gives you. Get the struct
-//! back with `parentFromAnchor`.
+//! struct types, pass a pointer into the struct:
 //!
-//! - `*Anchor` carries the struct.
-//! - `AnyParent` is for picking a handler by type id.
+//! - `*Node`, when every struct in the queue has the same Node kind. Get the
+//!   struct back with `parentFromNode`.
+//! - `*Anchor`, for any struct. Get it with `anchor`, and the struct back
+//!   with `parentFromAnchor`.
+//!
+//! `AnyParent` is for picking a handler by type id.
 //!
 //! paternitas has no list or queue of its own, and it allocates nothing.
 
@@ -289,9 +292,8 @@ pub fn Typed(comptime P: type) type {
 ///   null for another type.
 /// - You never make an Anchor. You only pass `*Anchor`.
 ///
-/// `*Anchor` works for any struct type the way `*Node` works for one list.
-/// Both point into your struct, and both turn back into your struct with a
-/// type check.
+/// `*Node` carries any struct with the same Node kind. `*Anchor` carries
+/// any struct. Both turn back into your struct with a type check.
 pub const Anchor = struct {
     /// Do not write this field. `Typed(P).setTypeId` writes it. A value you
     /// write yourself passes every type check.

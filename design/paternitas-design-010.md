@@ -1312,6 +1312,10 @@ After the close, the owner ruled on the Anchor, 2026-10-03.
     doc states the idea plainly.
 - `*Anchor` carries the struct. `AnyParent` is for picking a handler by type
   id. The module header and the `AnyParent` doc say so.
+- A queue can also carry `*Node`, when every struct in it has the same Node
+  kind, and the receiver uses `parentFromNode`. `*Anchor` works for any
+  struct. The README and the module header give both, and say: when in
+  doubt, `*Anchor`.
 - The README shows a queue of `*Anchor` from two struct types, in ASCII.
 - ztk's own `ParentHelper.fromAnchor` keeps its name. Only its call into
   paternitas changed.

@@ -149,22 +149,35 @@ missed in steps 4 and 5.
 Then, where a Node of another type is expected, use `parentFromNode`.
 It returns null for another type.
 
-## When you must not copy
+## Beyond the std list
+
+Intrusive std lists do not copy your struct. The Node lives inside your
+struct, and the list links the struct where it is.
+
+Most other containers are non-intrusive. They know nothing of your struct,
+and they store a copy of each item you put in: `std.Io.Queue`,
+`std.ArrayList`, a hash map. A union field holds a copy too.
+
+Put in a pointer instead, and only the pointer is copied. Your struct
+stays where it is. But a `*Connection` carries only a `Connection`.
+
+So put in a pointer into the struct. You have two to choose from:
+
+- `*Node`. It works when every struct in the container has the same Node
+  kind: all `SinglyTypedNode`, or all `DoublyTypedNode`. The receiver gets
+  the struct back with `parentFromNode`.
+- `*Anchor`. It works for every struct, singly or doubly. The receiver gets
+  the struct back with `parentFromAnchor`.
+
+When in doubt, use `*Anchor`. A struct can change its Node kind later, and
+the container does not have to change with it.
 
 > *Da ubi consistam, et terram movebo.*
 >
 > Give me a place to stand, and I will move the Earth. — Archimedes
 
 The Anchor is that place in your struct. Any code can hold it, whatever
-the struct's type. paternitas reaches everything else from it.
-
-Some items must not be copied: a mutex, a file handle, a large buffer. A
-queue that stores by value copies them. A queue of `*Connection` takes only
-one type.
-
-Send a `*paternitas.Anchor` instead. Every struct with a `SinglyTypedNode`
-or `DoublyTypedNode` has one, so one queue carries them all. The receiver
-gets the typed pointer back, with a type check.
+the struct's type or Node kind. paternitas reaches everything else from it.
 
 ```
 Message                  Connection
@@ -176,7 +189,9 @@ Message                  Connection
               |                        |
        *Anchor|                 *Anchor|
      +--------+------------------------+--------+
-     |  one queue of *Anchor, any struct type   |
+     |  a non-intrusive container of *Anchor    |
+     |  std.Io.Queue, std.ArrayList, a map      |
+     |  any struct type, any Node kind          |
      +--------------------+---------------------+
                           |
                           v
