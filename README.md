@@ -152,7 +152,7 @@ Message                      Message
 | node  <-- the list |       | tnode: DoublyTypedNode    |
 +--------------------+       | +-----------------------+ |
                              | | node   <-- the list   | |
-                             | | anchor  type: Message | |
+                             | | internal info...      | |
                              | +-----------------------+ |
                              +---------------------------+
 ```
