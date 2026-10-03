@@ -4,6 +4,73 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — EXPL 01, "intrusive" and "type-erased" explained
+
+Opus 5.5. No behaviour changed.
+
+The README and the module header opened with "Zig's std lists are
+intrusive", and never said what that means. "Type-erased" was not said at
+all. The owner asked for both, taken as ideas from the two analysis
+reports, not as text.
+
+At the start the owner answered five questions.
+
+- EXPL 01 is a stage of its own.
+- "Two words first" goes before "The problem".
+- Design 010 takes no note.
+- No links go in. The de-genericify PR is not named.
+- "Do you need it?" goes in as proposed.
+
+What changed:
+
+- The README has a new section, "Two words first", before "The problem".
+  - "Intrusive" has a diagram, three things you get and two costs. C
+    readers get one line: Linux's `list_head` with `container_of`.
+  - "Type-erased" says the list sees a `Node`, never your struct, and that
+    the type is gone when the Node comes out.
+  - It ends with what paternitas does: it writes the type next to the Node,
+    and checks it when the Node comes out.
+- The README has a second new section, "Do you need it?", before "What
+  paternitas does not do". One struct type per list does not need it.
+  Several types, or code that does not know the type, does. A check costs
+  one pointer compare.
+- The module header says "intrusive and type-erased" in two bullets, before
+  "The problem". The old first bullet of "The problem" is gone, so the word
+  is not said twice.
+- Examples 002, 003, 005 and 006 get one line each in their intro: 002 is
+  type-erased, the queue in 003 and the union in 005 are non-intrusive, and
+  the stack in 006 is intrusive.
+- The plan's line "erase the type here, recognize it later" did not go in.
+  Rules 008, Human voice, has no slogans. The README says it as a plain
+  fact.
+- The claim "one struct can be in several lists" was checked.
+  `findTypedNode` refuses only a second TypedNode. Plain std Nodes beside
+  it are fine.
+- Plan 011 replaces 010. Design 010 had its plan link repointed, and no
+  other change.
+
+All six gates pass.
+
+- Tests: 22 pass in all four modes. Negatives: 9, in all four modes.
+- `build_site.sh` and `mkdocs build --strict` pass.
+- Headless Chrome loaded `apidocs/` and examples 002, 003, 005 and 006. The
+  new lines show, with no `RangeError` or `Uncaught`.
+- The README has 223 counted lines.
+- The banned-word gate passes. The hand scan found no hit in the new text.
+  Four older lines used "holds" or "hold": README lines 206 and 226, and
+  `src/paternitas.zig` lines 18 and 346. The owner said to fix them.
+  - README: "A union field stores a copy too." "Any code can keep a
+    pointer to it".
+  - Module header: "When one list has two struct types".
+  - The `Anchor` doc: "`AnyParent` ... keeps the address and the type id".
+- The owner accepted the repointed plan link in design 010.
+
+| step | result |
+|---|---|
+| Post-stage cleanup | no edits: the stage added text only |
+
+---
+
 ## 2026-10-03 — NAME 01, names that say what each thing is
 
 Opus 5.5. The owner gave the names before the stage, in
@@ -176,6 +243,20 @@ The checks after the gates also pass.
     container knows nothing of your struct and stores a copy. The diagram's
     box is now "a non-intrusive container of *Anchor", and the choices say
     "container", not "queue".
+- The owner asked what `Typed(P)` is to the user. Not a mixin, and not
+  just "a helper type": it takes the `@fieldParentPtr` work off the user.
+  - The `Typed` doc now opens: "Does the `@fieldParentPtr` work for `P`,
+    and checks the type." You never write `@fieldParentPtr` or the field's
+    name. You get the struct back only when the type matches.
+  - The README list says the same. The `Typed` line in the "After" code, in
+    the module header and in the README, has the comment "does the
+    @fieldParentPtr work".
+  - The name stays `Typed`, for the ztk reason in design 010.
+- The owner added two analysis reports, `intrusive-type-erased-best-C.md`
+  and `zelda-and-paternitas.md`, in commit `936c951`. One had a banned word.
+  At the owner's word, `check_docs.sh` now skips both, as it skips
+  `paternitas-001.md`. Rules 008, Part 4, "Scan scope", says so. Rules 008
+  was edited in place: it is this stage's version.
 
 | step | result |
 |---|---|

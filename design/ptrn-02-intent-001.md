@@ -1,7 +1,7 @@
 # PTRN 02 — intent and the owner's answers (001)
 
 The stage: docs and examples. Opus 5.5. Charter:
-[implementation-plan-010.md](implementation-plan-010.md).
+[implementation-plan-011.md](implementation-plan-011.md).
 
 ---
 

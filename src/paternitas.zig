@@ -3,13 +3,19 @@
 
 //! Get your struct back from a std list Node, with a type check.
 //!
+//! Zig's std lists are intrusive and type-erased.
+//!
+//! - Intrusive: the Node lives in your struct. The list copies nothing and
+//!   allocates nothing.
+//! - Type-erased: the list sees only Nodes, never your struct's type.
+//!
+//! paternitas keeps both, and lets you check the type again.
+//!
 //! The problem:
 //!
-//! - Zig's std lists are intrusive. Your struct holds a Node, and the list
-//!   links the Nodes.
 //! - To get your struct back, you call `@fieldParentPtr`. It returns
 //!   whatever type you ask for.
-//! - When one list holds two struct types, you can get the wrong one. It
+//! - When one list has two struct types, you can get the wrong one. It
 //!   compiles, it runs, and nothing warns you.
 //!
 //! The fix: put a TypedNode where the Node was. It is the same std Node,
@@ -49,7 +55,7 @@
 //!     text: []const u8,
 //!     tnode: paternitas.DoublyTypedNode = .{},
 //! };
-//! const TypedMessage = paternitas.Typed(Message);
+//! const TypedMessage = paternitas.Typed(Message); // does the @fieldParentPtr work
 //!
 //! var message: Message = .{ .text = "hello" };
 //! TypedMessage.setTypeId(&message);
@@ -129,8 +135,14 @@ pub fn TypedNode(comptime N: type) type {
     };
 }
 
-/// The calls for one Parent type `P`. Declare it once per type:
-/// `const TypedMessage = paternitas.Typed(Message);`
+/// Does the `@fieldParentPtr` work for `P`, and checks the type.
+///
+/// - You never write `@fieldParentPtr` or the field's name. It finds the
+///   TypedNode by its type.
+/// - You get your struct back only when the type matches. Otherwise you get
+///   null, or a panic from the `must` calls.
+///
+/// Declare it once per type: `const TypedMessage = paternitas.Typed(Message);`
 ///
 /// - `P` MUST be a struct with exactly one `SinglyTypedNode` or
 ///   `DoublyTypedNode` field, under any name.
@@ -331,7 +343,7 @@ pub const Anchor = struct {
 ///
 /// - `*Anchor` carries the struct. Use it to pass a Parent through a queue
 ///   or a map.
-/// - `AnyParent` is for picking a handler by type id. It holds the address
+/// - `AnyParent` is for picking a handler by type id. It keeps the address
 ///   and the type id side by side, so the handler is chosen without reading
 ///   the struct.
 ///

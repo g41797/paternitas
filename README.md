@@ -7,6 +7,52 @@ Zig 0.16.0. It needs only `std`, and it allocates nothing.
 
 *Paternitas* is Latin for "fatherhood".
 
+## Two words first
+
+Zig's std lists are intrusive and type-erased. Here is what the two words
+mean, and what each one costs you.
+
+### Intrusive
+
+An intrusive list keeps its link inside your struct. A non-intrusive
+container wraps your item in a node of its own, and stores a copy.
+
+```
+non-intrusive                  intrusive
+the container's node           your struct
++-------------------+          +--------------------+
+| next              |          | data               |
+| a copy of         |          | node  <-- the list |
+|   your data       |          +--------------------+
++-------------------+
+```
+
+What you get:
+
+- The list allocates nothing for each item.
+- Nothing is copied. Your struct stays at its address.
+- One struct can be in several lists at once, with one Node for each.
+
+What it costs:
+
+- The list does not know your struct. You get it back with
+  `@fieldParentPtr`, and `@fieldParentPtr` trusts you.
+- The struct's memory is yours. The list does not free it, and it does not
+  know when the struct is gone.
+
+If you come from C, this is Linux's `list_head` with `container_of`.
+
+### Type-erased
+
+The list sees a `Node`, never your `Message`. That is why one
+`std.DoublyLinkedList` serves every struct type, with one copy of its code.
+
+The cost is that the type is gone. When a Node comes out of the list, only
+you know which struct it is in.
+
+paternitas keeps the erasure. It writes the type next to the Node when the
+struct goes in, and checks it when the Node comes out.
+
 ## The problem
 
 Zig's std lists are intrusive. You put a `Node` inside your struct, and the
@@ -76,7 +122,8 @@ What changed:
   check added.
 - `DoublyTypedNode` is the one for `std.DoublyLinkedList`. `STNode` and
   `DTNode` are short for the two.
-- `Typed(L)` gives you the calls for `L`. Declare it once per struct.
+- `Typed(L)` does the `@fieldParentPtr` work for `L`, and checks the type.
+  You never write the field's name. Declare it once per struct.
 - `setTypeId` writes the struct's type into its TypedNode. Call it once,
   before the struct goes in a list. Without it, `parentFromNode` returns
   null.
@@ -123,7 +170,7 @@ const Message = struct {
     text: []const u8,
     tnode: paternitas.DoublyTypedNode = .{},
 };
-const TypedMessage = paternitas.Typed(Message);
+const TypedMessage = paternitas.Typed(Message); // does the @fieldParentPtr work
 
 var message: Message = .{ .text = "hello" };
 TypedMessage.setTypeId(&message);
@@ -156,7 +203,7 @@ struct, and the list links the struct where it is.
 
 Most other containers are non-intrusive. They know nothing of your struct,
 and they store a copy of each item you put in: `std.Io.Queue`,
-`std.ArrayList`, a hash map. A union field holds a copy too.
+`std.ArrayList`, a hash map. A union field stores a copy too.
 
 Put in a pointer instead, and only the pointer is copied. Your struct
 stays where it is. But a `*Connection` carries only a `Connection`.
@@ -176,8 +223,9 @@ the container does not have to change with it.
 >
 > Give me a place to stand, and I will move the Earth. — Archimedes
 
-The Anchor is that place in your struct. Any code can hold it, whatever
-the struct's type or Node kind. paternitas reaches everything else from it.
+The Anchor is that place in your struct. Any code can keep a pointer to
+it, whatever the struct's type or Node kind. paternitas reaches everything
+else from it.
 
 ```
 Message                  Connection
@@ -215,6 +263,20 @@ if (TypedConnection.parentFromAnchor(a)) |c| {
 
 The same `*Anchor` fits in a hash map, a union field, or a C callback's
 context.
+
+## Do you need it?
+
+You do not need paternitas when each list keeps one struct type, and you
+know which one. Plain `@fieldParentPtr` is fine there.
+
+You need it when:
+
+- one list, queue or map carries several struct types, or
+- the code in between does not know the type: a mailbox, a dispatcher, an
+  event loop.
+
+A type check costs one pointer compare. There are no type names to compare
+and no table to register in.
 
 ## What paternitas does not do
 

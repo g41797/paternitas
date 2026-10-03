@@ -4,7 +4,8 @@ All coding, doc, and process rules for paternitas.
 
 Change from 007: the owner added a rule to Part 3, "What a comment says".
 A comment answers "What do I need to know to use this?", not "How did the
-paternitas implementation achieve this?". 2026-10-03.
+paternitas implementation achieve this?". 2026-10-03. Later the same day,
+Part 4's scan scope skips the owner's two analysis reports.
 
 Change from 006, kept: NAME 01. `Link` is now `TypedNode`, and `stamp` is now
 `setTypeId`. The examples in Part 3 and Part 5 use the new names. No rule
@@ -377,6 +378,9 @@ Scan scope.
 
 - Skip `design/STATUS-LOG.md` and `design/backup/`. Both record what is gone.
 - Skip `design/paternitas-001.md`. It is kept untouched.
+- Skip `design/intrusive-type-erased-best-C.md` and
+  `design/zelda-and-paternitas.md`. They are the owner's analysis reports,
+  kept as is.
 - Skip `design/source/`. It is a copy of the owner's outside work, kept as is.
 - The gate skips this rules file, because it has to name every word. Scan it
   by hand, and read each hit: a hit outside the lists below is a real one.

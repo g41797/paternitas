@@ -3,6 +3,7 @@
 //! You write a container that keeps items of several types.
 //! Each item has a std Node, and its `next` field is free while the item is in no std list.
 //! `TypeInfo.nextField` gives you that field for any type, so your stack chains through it.
+//! That makes it an intrusive stack: the link lives in the item, as in a std list.
 //!
 //! - Write a `Stack` that keeps `*Anchor`s, chained through each item's `next` field.
 //! - Push a `Message` with a `SinglyTypedNode` and a `Job` with a `DoublyTypedNode`. Two Node types share one chain.

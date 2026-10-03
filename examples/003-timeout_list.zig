@@ -2,6 +2,7 @@
 //!
 //! A server keeps its open connections in a timeout list, a plain `std.DoublyLinkedList`.
 //! Sometimes a connection goes to another thread for a while, through a queue.
+//! A `std.Io.Queue` is non-intrusive: it stores a copy of what you put in.
 //! A connection must not be copied, so the queue carries its `*Anchor`, a pointer.
 //! The other side gets the `Connection` back with a type check.
 //!

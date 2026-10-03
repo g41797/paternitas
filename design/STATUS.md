@@ -7,7 +7,7 @@ Current state only. Updated in place. The narrative is in
 
 1. Read this file in full.
 2. Read Part 0 of [rules-008.md](rules-008.md).
-3. Read the plan, [implementation-plan-010.md](implementation-plan-010.md), for
+3. Read the plan, [implementation-plan-011.md](implementation-plan-011.md), for
    the stage the owner names. Not before they name it.
 4. Read the design, [paternitas-design-010.md](paternitas-design-010.md), for
    a stage that writes code or docs.
@@ -24,7 +24,7 @@ Current state only. Updated in place. The narrative is in
 |---|---|
 | rules | [rules-008.md](rules-008.md) |
 | design decisions, and what paternitas keeps from ztk | [paternitas-design-010.md](paternitas-design-010.md) |
-| the plan | [implementation-plan-010.md](implementation-plan-010.md) |
+| the plan | [implementation-plan-011.md](implementation-plan-011.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
@@ -35,6 +35,8 @@ Current state only. Updated in place. The narrative is in
 
 ## Current state
 
+- EXPL 01 is done, 2026-10-03. The README and the module header say what
+  "intrusive" and "type-erased" mean, and when you need paternitas.
 - NAME 01 is done, 2026-10-03.
 - The code: `src/paternitas.zig`, `src/container.zig`. Design 010.
 - The names say what each thing is.
@@ -61,7 +63,7 @@ Current state only. Updated in place. The narrative is in
 ## Next
 
 **LOOK 01 — the picture and the logo.** The charter is in
-[implementation-plan-010.md](implementation-plan-010.md). The owner names the
+[implementation-plan-011.md](implementation-plan-011.md). The owner names the
 model. Claude's proposal: Opus 5.5, since it writes the README and site text
 around the picture.
 

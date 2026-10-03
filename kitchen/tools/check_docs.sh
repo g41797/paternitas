@@ -13,6 +13,9 @@
 # Exempt from both checks:
 #   - design/STATUS-LOG.md and design/backup/ — they record what is gone.
 #   - design/paternitas-001.md — kept untouched, by the owner's ruling.
+#   - design/intrusive-type-erased-best-C.md and
+#     design/zelda-and-paternitas.md — the owner's analysis reports, kept as
+#     is.
 #   - design/source/ — a copy of the owner's outside work, kept as is.
 # Exempt from check 2 only:
 #   - design/rules-NNN.md — it has to name every banned word. Scan it by hand.
@@ -38,7 +41,9 @@ report() {
 docs() {
     {
         find "$repo_root/design" -maxdepth 1 -name '*.md' \
-            -not -name 'STATUS-LOG.md' -not -name 'paternitas-001.md'
+            -not -name 'STATUS-LOG.md' -not -name 'paternitas-001.md' \
+            -not -name 'intrusive-type-erased-best-C.md' \
+            -not -name 'zelda-and-paternitas.md'
         find "$repo_root" -maxdepth 1 -name '*.md'
         find "$repo_root/kitchen/docs" -maxdepth 1 -name '*.md' 2>/dev/null
     } | sort
@@ -144,6 +149,7 @@ for w in "${banned[@]}" "${banned_forms[@]}" "${banned_phrases[@]}"; do
         report "BANNED     $w  $line"
     done < <(grep -rniw --include='*.md' --include='*.zig' \
         --exclude='STATUS-LOG.md' --exclude='paternitas-001.md' \
+        --exclude='intrusive-type-erased-best-C.md' --exclude='zelda-and-paternitas.md' \
         --exclude='rules-[0-9][0-9][0-9].md' \
         --exclude-dir=backup --exclude-dir=source --exclude-dir=.zig-cache --exclude-dir=zig-out \
         --exclude-dir=.git --exclude-dir=.idea --exclude-dir=apidocs \

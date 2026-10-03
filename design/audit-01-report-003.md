@@ -10,7 +10,7 @@ Change from 001, kept: the owner's rulings, 2026-10-02, in "The rulings"
 below. A1 and A11 have a second probe and Claude's advice.
 
 - Rules: [rules-008.md](rules-008.md).
-- Plan: [implementation-plan-010.md](implementation-plan-010.md).
+- Plan: [implementation-plan-011.md](implementation-plan-011.md).
 - Intake: [paternitas-intake-001.md](paternitas-intake-001.md).
 - The outside design: `design/source/paternitas-design.md`.
 - The outside code: `design/source/paternitas-and-ztk/paternitas/`.

@@ -1,6 +1,7 @@
 //! Send a large struct through a union of events, by pointer, without copying it.
 //!
 //! Small events travel by value in a tagged union.
+//! A union field is non-intrusive: it stores a copy of what you put in.
 //! A large struct, or one that must not be copied, travels as its `*Anchor`.
 //! The handler gets the struct back with a type check.
 //!

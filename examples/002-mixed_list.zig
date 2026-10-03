@@ -1,6 +1,7 @@
 //! One std list, two struct types, and each one comes back as itself.
 //!
 //! A mailbox list often carries more than one kind of item.
+//! The list is type-erased: it sees only Nodes, never a `Message` or a `Job`.
 //! With a plain std Node, `@fieldParentPtr` returns whatever type you ask for, right or wrong.
 //! Here each type asks `parentFromNode`, and the wrong type gets null.
 //!
