@@ -39,7 +39,7 @@ address and its id. A view, not an owner.
 
 The order the README follows, from 3tk's "How to start".
 
-1. One thread, one struct. An `SLink` in your struct, a helper, a `Queue`.
+1. One thread, one struct. A `SinglyTypedNode` in your struct, a helper, a `Queue`.
 2. Add a thread. Send parents over `Io.Queue(*Anchor)`.
 3. Add a pool, when repeated allocation becomes a problem.
 4. Replace the channel with a mailbox, when the channel stops being enough.
@@ -54,16 +54,16 @@ If the channel already does what you need, keep it.
 
 ## Built on Paternitas
 
-A parent is the struct that embeds the Link, as in `@fieldParentPtr`.
-The Matryoshka model calls it the outer doll: parent, then Link, then
+A parent is the struct that embeds the TypedNode, as in `@fieldParentPtr`.
+The Matryoshka model calls it the outer doll: parent, then TypedNode, then
 Anchor.
 
 An item is a parent while it is in a mailbox, a queue or a pool. In code,
 what a container holds is an `*Anchor`.
 
-The Link, the Anchor and the type description come from Paternitas
+The TypedNode, the Anchor and the type description come from Paternitas
 (`../paternitas`). Matryoshka adds the policy: the chain convention, the
 Slot, the mailbox and the pool.
 
-A parent embeds `SLink` or `DLink`. A DLink parent can also live in the
+A parent embeds `SinglyTypedNode` or `DoublyTypedNode`. A DoublyTypedNode parent can also live in the
 application's own `std.DoublyLinkedList` — one place at a time.

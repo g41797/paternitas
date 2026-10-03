@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! 307 — a parent with two Link fields does not compile.
+//! 307 — a parent with two TypedNode fields does not compile.
 
 const TwoInners = struct {
-    first: m.inner.SLink = .{},
-    second: m.inner.SLink = .{},
+    first: m.inner.SinglyTypedNode = .{},
+    second: m.inner.SinglyTypedNode = .{},
 };
 
 comptime {

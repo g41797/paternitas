@@ -6,13 +6,13 @@
 //!
 //! Three layers, each optional above the first:
 //!
-//! - the core — a parent, its Link, the id, the helper, the queue
+//! - the core — a parent, its TypedNode, the id, the helper, the queue
 //! - the mailbox — items move from one context to another
 //! - the pool — items are kept and handed out again
 //!
 //! Five namespaces, one per file, each with a page of its own:
 //!
-//! - `inner` — the Link, the Anchor, the Slot, the id, what a parent is
+//! - `inner` — the TypedNode, the Anchor, the Slot, the id, what a parent is
 //! - `queue` — a first in, first out chain of parents
 //! - `helper` — one helper per parent type, and the borders out of the toolkit
 //! - `mbox` — a queue between contexts

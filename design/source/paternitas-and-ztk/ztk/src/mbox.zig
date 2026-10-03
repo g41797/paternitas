@@ -412,7 +412,7 @@ pub const Mbox = struct {
     /// keeps, and that queue belongs to the caller — so doing it here would
     /// drop them.
     ///
-    /// The mailbox's own Link is not consulted. A mailbox that is still
+    /// The mailbox's own TypedNode is not consulted. A mailbox that is still
     /// on a chain is a caller who freed something another container holds,
     /// and the chain is the place that notices.
     pub fn destroy(self: *Mbox) void {
@@ -461,7 +461,7 @@ pub const Mbox = struct {
         defer self._active -= 1;
 
         if (lane == .ordinary and limit > 0) {
-            if (self._regular.countOfId(anchor.type_id, limit) >= limit) return error.Limit;
+            if (self._regular.countOfId(anchor.typeId(), limit) >= limit) return error.Limit;
         }
 
         switch (lane) {
@@ -511,7 +511,7 @@ pub const Mbox = struct {
         _ = io;
     }
 
-    _link: inner.SLink,
+    _tnode: inner.SinglyTypedNode,
 
     _mu: Io.Mutex,
     _cv: Io.Condition,
@@ -545,7 +545,7 @@ pub fn new(alloc: std.mem.Allocator, io: Io, slot: *Slot) !void {
     errdefer alloc.destroy(mbx);
 
     mbx.* = .{
-        ._link = .{},
+        ._tnode = .{},
         ._mu = .init,
         ._cv = .init,
         ._io = io,
@@ -558,7 +558,7 @@ pub fn new(alloc: std.mem.Allocator, io: Io, slot: *Slot) !void {
         ._wake_epoch = 0,
     };
 
-    helper.stamp(mbx);
+    helper.setTypeId(mbx);
 
     slot.* = Mbox.toAnchor(mbx);
 }

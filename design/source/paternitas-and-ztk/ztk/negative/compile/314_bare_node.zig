@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! 314 — a bare std Node is not a Link. A parent with one and no Link does
+//! 314 — a bare std Node is not a TypedNode. A parent with one and no TypedNode does
 //! not compile.
 
 const BareNode = struct {

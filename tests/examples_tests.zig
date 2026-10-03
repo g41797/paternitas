@@ -1,13 +1,13 @@
 //! Test wrappers. Each one runs an example and checks it returned.
 
-test "01 - stamp and recover" {
+test "01 - set type id and recover" {
     std.testing.log_level = .debug;
 
     var threaded: std.Io.Threaded = .init(std.testing.allocator, .{});
     defer threaded.deinit();
 
-    examples.stamp_and_recover.stamp_and_recover(std.testing.allocator, threaded.io()) catch |err| {
-        std.log.err("stamp_and_recover failed: {s}", .{@errorName(err)});
+    examples.set_type_id_and_recover.set_type_id_and_recover(std.testing.allocator, threaded.io()) catch |err| {
+        std.log.err("set_type_id_and_recover failed: {s}", .{@errorName(err)});
         return err;
     };
 }

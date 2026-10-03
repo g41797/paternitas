@@ -4,8 +4,8 @@
 //! Define a parent type.
 //!
 //! - Message struct embeds an Anchor field. Its name is free.
-//! - ParentHelper(Message) gives the id, stamp, and toAnchor.
-//! - stamp sets the id on a stack value, no heap.
+//! - ParentHelper(Message) gives the id, setTypeId, and toAnchor.
+//! - setTypeId sets the id on a stack value, no heap.
 //! - isIt checks the id.
 //! - toAnchor reaches the embedded Anchor — the way in.
 //! - The inner carries the id and starts unlinked, ready to be placed.
@@ -17,7 +17,7 @@
 //! ```
 //!  stack: var msg: Message
 //!       │
-//!  MessageHelper.stamp ──► msg.hdr.anchor.type_id set (no alloc)
+//!  MessageHelper.setTypeId ──► msg.hdr.anchor._type_id set (no alloc)
 //!       │
 //!  MessageHelper.toAnchor ──► *Anchor (the way in)
 //!       │
@@ -31,25 +31,25 @@ pub fn define_a_parent_type(allocator: std.mem.Allocator, io: std.Io) !void {
 
     // A Message on the stack. No allocator involved.
     var msg: Message = .{ .text = "hello", .priority = 1 };
-    MessageHelper.stamp(&msg);
+    MessageHelper.setTypeId(&msg);
 
     // The id identifies the type at runtime.
-    try helpers.expect(error.DefineTypeFailed, MessageHelper.isIt(msg.hdr.anchor.type_id), "expected Message id");
-    try helpers.expect(error.DefineTypeFailed, !parents.Event.EventHelper.isIt(msg.hdr.anchor.type_id), "unexpected Event id");
+    try helpers.expect(error.DefineTypeFailed, MessageHelper.isIt(msg.hdr.anchor.typeId()), "expected Message id");
+    try helpers.expect(error.DefineTypeFailed, !parents.Event.EventHelper.isIt(msg.hdr.anchor.typeId()), "unexpected Event id");
 
     // toAnchor reaches the embedded Anchor. Nothing else needs to know
     // the field is called hdr.
     const inner: *Anchor = MessageHelper.toAnchor(&msg);
 
     // The inner travels with its id, so a holder can identify it later.
-    try helpers.expect(error.DefineTypeFailed, MessageHelper.isIt(inner.type_id), "inner must carry the Message id");
+    try helpers.expect(error.DefineTypeFailed, MessageHelper.isIt(inner.typeId()), "inner must carry the Message id");
 
     // A fresh parent sits on no chain yet.
     try helpers.expect(error.DefineTypeFailed, !matryoshka.inner.isLinked(inner), "new parent must be unlinked");
 }
 
 pub const Message = struct {
-    hdr: SLink = .{},
+    hdr: SinglyTypedNode = .{},
     text: []const u8 = "",
     priority: u8 = 0,
 };
@@ -60,5 +60,5 @@ const parents = @import("../parents/parents.zig");
 const helpers = @import("../helpers/helpers.zig");
 const matryoshka = @import("matryoshka");
 const Anchor = matryoshka.inner.Anchor;
-const SLink = matryoshka.inner.SLink;
+const SinglyTypedNode = matryoshka.inner.SinglyTypedNode;
 const std = @import("std");

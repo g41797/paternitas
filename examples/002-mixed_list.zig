@@ -4,7 +4,7 @@
 //! With a plain std Node, `@fieldParentPtr` returns whatever type you ask for, right or wrong.
 //! Here each type asks `parentFromNode`, and the wrong type gets null.
 //!
-//! - Stamp a `Message` and a `Job`.
+//! - Call `setTypeId` on a `Message` and a `Job`.
 //! - Append both Nodes to one `std.DoublyLinkedList`.
 //! - Pop each Node.
 //! - Ask `Message` first, then `Job`.
@@ -12,12 +12,12 @@
 
 const Message: type = struct {
     text: []const u8,
-    link: paternitas.DLink = .{},
+    tnode: paternitas.DoublyTypedNode = .{},
 };
 const TypedMessage: type = paternitas.Typed(Message);
 
 const Job: type = struct {
-    link: paternitas.DLink = .{},
+    tnode: paternitas.DoublyTypedNode = .{},
     id: u32,
     attempts: u32 = 0,
 };
@@ -33,10 +33,10 @@ pub fn mixed_list(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = io;
 
     var message: Message = .{ .text = "hello" };
-    TypedMessage.stamp(&message);
+    TypedMessage.setTypeId(&message);
 
     var job: Job = .{ .id = 42 };
-    TypedJob.stamp(&job);
+    TypedJob.setTypeId(&job);
 
     var list: std.DoublyLinkedList = .{};
     list.append(TypedMessage.node(&message));

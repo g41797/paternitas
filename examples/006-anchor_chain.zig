@@ -5,7 +5,7 @@
 //! `TypeInfo.nextField` gives you that field for any type, so your stack chains through it.
 //!
 //! - Write a `Stack` that keeps `*Anchor`s, chained through each item's `next` field.
-//! - Push a `Message` with an `SLink` and a `Job` with a `DLink`. Two Node types share one chain.
+//! - Push a `Message` with a `SinglyTypedNode` and a `Job` with a `DoublyTypedNode`. Two Node types share one chain.
 //! - Pop each, and get it back with `fromAnchor`.
 //! - Check the order, and that each `next` field is null again.
 //!
@@ -17,12 +17,12 @@
 
 const Message: type = struct {
     text: []const u8,
-    link: paternitas.SLink = .{},
+    tnode: paternitas.SinglyTypedNode = .{},
 };
 const TypedMessage: type = paternitas.Typed(Message);
 
 const Job: type = struct {
-    link: paternitas.DLink = .{},
+    tnode: paternitas.DoublyTypedNode = .{},
     id: u32,
 };
 const TypedJob: type = paternitas.Typed(Job);
@@ -52,8 +52,8 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
 
     var message: Message = .{ .text = "hello" };
     var job: Job = .{ .id = 42 };
-    TypedMessage.stamp(&message);
-    TypedJob.stamp(&job);
+    TypedMessage.setTypeId(&message);
+    TypedJob.setTypeId(&job);
 
     var stack: Stack = .{};
     try stack.push(TypedMessage.anchor(&message));
@@ -74,9 +74,9 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
 /// Returns the item's `next` field, typed as this stack uses it: a pointer
 /// to the next `*Anchor`.
 ///
-/// Fails when `stamp` was never called on the item.
+/// Fails when `setTypeId` was never called on the item.
 fn chainWord(a: *paternitas.Anchor) !*?*paternitas.Anchor {
-    const ti: *const paternitas.container.TypeInfo = a.info() orelse return error.Unstamped;
+    const ti: *const paternitas.container.TypeInfo = a.info() orelse return error.NoTypeId;
     return @ptrCast(ti.nextField(a));
 }
 

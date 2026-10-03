@@ -115,9 +115,9 @@ pub fn build(b: *std.Build) void {
 
     // Each of these must fail to compile, with that message.
     const refused_at_compile_time = [_]struct { file: []const u8, says: []const u8 }{
-        .{ .file = "negative/compile/306_no_inner.zig", .says = "no Link, so it cannot be a Paternitas Parent" },
-        .{ .file = "negative/compile/307_two_inners.zig", .says = "more than one Link, and exactly one is allowed" },
-        .{ .file = "negative/compile/314_bare_node.zig", .says = "no Link, so it cannot be a Paternitas Parent" },
+        .{ .file = "negative/compile/306_no_inner.zig", .says = "no TypedNode, so it cannot be a Paternitas Parent" },
+        .{ .file = "negative/compile/307_two_inners.zig", .says = "more than one TypedNode, and exactly one is allowed" },
+        .{ .file = "negative/compile/314_bare_node.zig", .says = "no TypedNode, so it cannot be a Paternitas Parent" },
         .{ .file = "negative/compile/308_no_init.zig", .says = "a parent the helper creates declares `pub fn init(self: *308_no_init.NoInit, alloc: std.mem.Allocator, io: std.Io) !void` — an empty body is fine" },
         .{ .file = "negative/compile/309_no_finish.zig", .says = "a parent the helper releases declares `pub fn finish(self: *309_no_finish.NoFinish, alloc: std.mem.Allocator, io: std.Io) void` — an empty body is fine" },
     };
@@ -144,7 +144,7 @@ pub fn build(b: *std.Build) void {
     // rests on `check`, which is compiled out where runtime safety is off —
     // there the program is correct to survive, so it is not built at all.
     const refused_at_run_time = [_]struct { file: []const u8, safe_only: bool = true }{
-        .{ .file = "negative/panic/300_unstamped_append.zig" },
+        .{ .file = "negative/panic/300_no_type_append.zig" },
         .{ .file = "negative/panic/301_wrong_type_must.zig", .safe_only = false },
         .{ .file = "negative/panic/302_create_into_full_slot.zig" },
         .{ .file = "negative/panic/303_overwrite_slot.zig" },
@@ -156,7 +156,7 @@ pub fn build(b: *std.Build) void {
         .{ .file = "negative/panic/286_empty_identities.zig" },
         .{ .file = "negative/panic/311_destroy_open_pool.zig", .safe_only = false },
         .{ .file = "negative/panic/313_destroy_during_hook.zig", .safe_only = false },
-        .{ .file = "negative/panic/321_take_unstamped.zig" },
+        .{ .file = "negative/panic/321_take_no_type.zig" },
         .{ .file = "negative/panic/322_take_linked.zig" },
     };
 

@@ -1,6 +1,7 @@
-//! mustParentFromNode on an unstamped Parent panics in every build mode.
+//! mustParentFromNode panics in every build mode when setTypeId was never
+//! called on the Parent.
 
-const Msg = struct { link: p.SLink = .{} };
+const Msg = struct { tnode: p.SinglyTypedNode = .{} };
 
 pub fn main() void {
     var m: Msg = .{};

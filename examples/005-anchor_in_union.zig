@@ -4,7 +4,7 @@
 //! A large struct, or one that must not be copied, travels as its `*Anchor`.
 //! The handler gets the struct back with a type check.
 //!
-//! - Stamp a `Download`. It has a 4 KB buffer, too large to copy.
+//! - Call `setTypeId` on a `Download`. It has a 4 KB buffer, too large to copy.
 //! - Build three `Event`s: a tick, a resize, and the `Download`'s `*Anchor`.
 //! - Copy the events into a second array, as a queue would.
 //! - Handle each event, and get the `Download` back with `fromAnchor`.
@@ -12,7 +12,7 @@
 
 /// It is too large to copy. Events carry a pointer to it.
 const Download: type = struct {
-    link: paternitas.SLink = .{},
+    tnode: paternitas.SinglyTypedNode = .{},
     buffer: [4096]u8 = undefined,
     received: usize = 0,
 };
@@ -34,7 +34,7 @@ pub fn anchor_in_union(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = io;
 
     var download: Download = .{};
-    TypedDownload.stamp(&download);
+    TypedDownload.setTypeId(&download);
 
     const sent: [3]Event = .{
         .{ .tick = 1 },

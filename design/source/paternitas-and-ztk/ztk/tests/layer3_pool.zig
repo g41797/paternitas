@@ -53,7 +53,7 @@ test "63 — a pool is made, detached, closed and destroyed" {
 
     // The identities are their own argument now, not a field of the hooks.
     // And a pool is a parent like any other: it has an id and it crosses.
-    try expect(m.Pool.isIt(m.Pool.toAnchor(f.pool).type_id));
+    try expect(m.Pool.isIt(m.Pool.toAnchor(f.pool).typeId()));
     try expect(m.Pool.fromAnchor(m.Pool.toAnchor(f.pool)).? == f.pool);
 
     try expect(!f.pool.isClosed());

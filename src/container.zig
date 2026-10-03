@@ -31,7 +31,7 @@ pub const TypeInfo = struct {
     /// The distance from the Anchor to the Node's `next` field. It can be
     /// negative. `nextField` uses it.
     node_next_offset: isize,
-    /// `.single` for `SLink`, `.double` for `DLink`.
+    /// `.single` for `SinglyTypedNode`, `.double` for `DoublyTypedNode`.
     node_kind: NodeKind,
 
     /// Returns a pointer to the Node's `next` field. Chain your items
@@ -52,11 +52,11 @@ pub const TypeInfo = struct {
     /// Panics in every build mode when `N` is the wrong Node type for this
     /// Parent.
     pub inline fn node(ti: *const TypeInfo, a: *Anchor, comptime N: type) *N {
-        const L: type = Link(N);
-        if (ti.*.node_kind != L.kind)
+        const TN: type = TypedNode(N);
+        if (ti.*.node_kind != TN.kind)
             std.debug.panic("TypeInfo.node: {s} has another Node kind", .{ti.*.name});
-        const l: *L = @fieldParentPtr("anchor", a);
-        return &l.*.node;
+        const tn: *TN = @fieldParentPtr("anchor", a);
+        return &tn.*.node;
     }
 
     /// Returns the Parent's address, with no type. For code that knows
@@ -77,10 +77,10 @@ pub const TypeInfo = struct {
 /// You do not need it to use `nextField`. It is here for tests and for the
 /// curious.
 pub const uniform_next_offset: ?isize =
-    if (SLink.node_next_offset == DLink.node_next_offset) SLink.node_next_offset else null;
+    if (SinglyTypedNode.node_next_offset == DoublyTypedNode.node_next_offset) SinglyTypedNode.node_next_offset else null;
 
-/// Which std Node a Parent has: `.single` for `SLink`, `.double` for
-/// `DLink`.
+/// Which std Node a Parent has: `.single` for `SinglyTypedNode`, `.double`
+/// for `DoublyTypedNode`.
 pub const NodeKind = enum { single, double };
 
 /// Do not use. It is `pub` only for a test. Call `nextField` instead.
@@ -95,7 +95,7 @@ inline fn addOffset(a: *Anchor, off: isize) *anyopaque {
 const root = @import("paternitas.zig");
 const Anchor = root.Anchor;
 const AnyParent = root.AnyParent;
-const Link = root.Link;
-const SLink = root.SLink;
-const DLink = root.DLink;
+const TypedNode = root.TypedNode;
+const SinglyTypedNode = root.SinglyTypedNode;
+const DoublyTypedNode = root.DoublyTypedNode;
 const std = @import("std");

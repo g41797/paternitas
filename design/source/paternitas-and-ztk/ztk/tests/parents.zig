@@ -12,7 +12,7 @@
 pub const Msg = struct {
     seq: u32 = 0,
     payload: u64 = 0,
-    hdr: SLink = .{},
+    hdr: SinglyTypedNode = .{},
 
     pub fn init(self: *Msg, alloc: std.mem.Allocator, io: Io) !void {
         _ = io;
@@ -30,7 +30,7 @@ pub const Msg = struct {
 
 /// The inner first, so its offset is zero.
 pub const Chunk = struct {
-    mtk: SLink = .{},
+    mtk: SinglyTypedNode = .{},
     size: usize = 0,
 
     pub fn init(self: *Chunk, alloc: std.mem.Allocator, io: Io) !void {
@@ -48,7 +48,7 @@ pub const Chunk = struct {
 
 /// A third type, so a wrong-type test has two ways to be wrong.
 pub const Note = struct {
-    chain: SLink = .{},
+    chain: SinglyTypedNode = .{},
     text: [8]u8 = @splat(0),
 
     pub fn init(self: *Note, alloc: std.mem.Allocator, io: Io) !void {
@@ -66,7 +66,7 @@ pub const Note = struct {
 
 /// Allocates in `init` and releases in `finish`.
 pub const Buf = struct {
-    hdr: SLink = .{},
+    hdr: SinglyTypedNode = .{},
     bytes: []u8 = &.{},
 
     pub const size = 32;
@@ -85,7 +85,7 @@ pub const Buf = struct {
 
 /// Its `init` always fails. The parent must be freed again.
 pub const BadInit = struct {
-    hdr: SLink = .{},
+    hdr: SinglyTypedNode = .{},
 
     pub const Failed = error{InitRefused};
 
@@ -109,7 +109,7 @@ pub const BadInit = struct {
 /// and the crossings; only create and destroy are out of reach, and asking
 /// for them does not compile.
 pub const FakeMbox = struct {
-    hdr: SLink = .{},
+    hdr: SinglyTypedNode = .{},
     closed: bool = false,
 };
 
@@ -144,10 +144,10 @@ pub fn release(anchor: *Anchor, alloc: std.mem.Allocator, io: Io) void {
     var slot: m.inner.Slot = null;
     m.inner.fillSlot(&slot, anchor);
 
-    if (MSG.isIt(anchor.type_id)) return MSG.destroy(alloc, io, &slot);
-    if (CHUNK.isIt(anchor.type_id)) return CHUNK.destroy(alloc, io, &slot);
-    if (NOTE.isIt(anchor.type_id)) return NOTE.destroy(alloc, io, &slot);
-    if (BUF.isIt(anchor.type_id)) return BUF.destroy(alloc, io, &slot);
+    if (MSG.isIt(anchor.typeId())) return MSG.destroy(alloc, io, &slot);
+    if (CHUNK.isIt(anchor.typeId())) return CHUNK.destroy(alloc, io, &slot);
+    if (NOTE.isIt(anchor.typeId())) return NOTE.destroy(alloc, io, &slot);
+    if (BUF.isIt(anchor.typeId())) return BUF.destroy(alloc, io, &slot);
 
     @panic("release: a parent of a type these tests do not know");
 }
@@ -166,6 +166,6 @@ pub fn releaseSlot(slot: *m.inner.Slot, alloc: std.mem.Allocator, io: Io) void {
 
 const m = @import("matryoshka");
 const Anchor = m.inner.Anchor;
-const SLink = m.inner.SLink;
+const SinglyTypedNode = m.inner.SinglyTypedNode;
 const Io = std.Io;
 const std = @import("std");

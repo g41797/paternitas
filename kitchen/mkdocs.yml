@@ -35,7 +35,7 @@ theme:
 nav:
   - Home: index.md
   - Examples:
-      - examples/001-stamp_and_recover.md
+      - examples/001-set_type_id_and_recover.md
       - examples/002-mixed_list.md
       - examples/003-timeout_list.md
       - examples/004-handler_map.md

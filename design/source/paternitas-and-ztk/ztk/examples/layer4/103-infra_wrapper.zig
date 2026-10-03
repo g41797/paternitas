@@ -51,7 +51,7 @@ pub fn infra_wrapper(allocator: std.mem.Allocator, io: std.Io) !void {
 
 /// A parent that owns a mailbox.
 const Channel = struct {
-    inner: SLink = .{},
+    inner: SinglyTypedNode = .{},
     inbox: *Mbox = undefined,
     alloc: std.mem.Allocator = undefined,
     io: std.Io = undefined,
@@ -84,7 +84,7 @@ const helpers = @import("../helpers/helpers.zig");
 const matryoshka = @import("matryoshka");
 const std = @import("std");
 const Anchor = matryoshka.inner.Anchor;
-const SLink = matryoshka.inner.SLink;
+const SinglyTypedNode = matryoshka.inner.SinglyTypedNode;
 const Mbox = matryoshka.Mbox;
 const Queue = matryoshka.queue.Queue;
 const Slot = matryoshka.inner.Slot;

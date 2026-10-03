@@ -5,7 +5,7 @@
 
 const Msg = struct {
     seq: u32 = 0,
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 
     pub fn init(self: *Msg, alloc: std.mem.Allocator, io: std.Io) !void {
         _ = io;
@@ -25,8 +25,8 @@ const MSG = m.helper.ParentHelper(Msg);
 pub fn main() void {
     var first: Msg = .{ .seq = 1 };
     var second: Msg = .{ .seq = 2 };
-    MSG.stamp(&first);
-    MSG.stamp(&second);
+    MSG.setTypeId(&first);
+    MSG.setTypeId(&second);
 
     var slot: m.inner.Slot = MSG.toAnchor(&first);
     m.inner.fillSlot(&slot, MSG.toAnchor(&second));

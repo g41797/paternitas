@@ -133,7 +133,7 @@ fn receiveAndVerify(master_inbox: *Mbox, worker_mbx: *Mbox, alloc: std.mem.Alloc
         slot = null;
     };
     try master_inbox.receive(&slot, null);
-    try helpers.expect(error.WorkerFinishFailed, Mbox.isIt(slot.?.type_id), "expected an Mbox");
+    try helpers.expect(error.WorkerFinishFailed, Mbox.isIt(slot.?.typeId()), "expected an Mbox");
     try helpers.expect(error.WorkerFinishFailed, Mbox.mustFromSlot(&slot) == worker_mbx, "wrong mailbox returned");
     cleanupReturnedMailbox(&slot, alloc, io);
 }

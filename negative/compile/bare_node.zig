@@ -1,4 +1,5 @@
-//! A bare std Node is not a Link. A Parent without a Link does not compile.
+//! A bare std Node is not a TypedNode. A Parent without a TypedNode does not
+//! compile.
 
 const BareNode = struct {
     node: std.DoublyLinkedList.Node = .{},

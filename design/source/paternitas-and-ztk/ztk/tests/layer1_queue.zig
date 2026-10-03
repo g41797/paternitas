@@ -9,22 +9,22 @@ const MSG = m.helper.ParentHelper(o.Msg);
 const CHUNK = m.helper.ParentHelper(o.Chunk);
 const NOTE = m.helper.ParentHelper(o.Note);
 
-/// Three stamped parents on the test's own stack.
+/// Three parents with their type ids set, on the test's own stack.
 const Three = struct {
     a: o.Msg = .{ .seq = 1 },
     b: o.Msg = .{ .seq = 2 },
     c: o.Msg = .{ .seq = 3 },
 
-    fn stamped(self: *Three) void {
-        MSG.stamp(&self.a);
-        MSG.stamp(&self.b);
-        MSG.stamp(&self.c);
+    fn setTypeIds(self: *Three) void {
+        MSG.setTypeId(&self.a);
+        MSG.setTypeId(&self.b);
+        MSG.setTypeId(&self.c);
     }
 };
 
 test "240 — the chain is first in, first out" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&t.a));
@@ -47,7 +47,7 @@ test "241 — an empty chain answers" {
 
 test "242 — the last item points at itself" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&t.a));
@@ -62,7 +62,7 @@ test "242 — the last item points at itself" {
 
 test "243 — the link test is exact, including a chain of one" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     try expect(!MSG.isLinked(&t.a));
 
@@ -78,7 +78,7 @@ test "243 — the link test is exact, including a chain of one" {
 
 test "244 — the link test sees another container" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var first: m.queue.Queue = .{};
     first.append(MSG.toAnchor(&t.a));
@@ -95,7 +95,7 @@ test "244 — the link test sees another container" {
 
 test "245 — every removal repairs the chain" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&t.a));
@@ -110,7 +110,7 @@ test "245 — every removal repairs the chain" {
 
 test "246 — length is a stored count" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var q: m.queue.Queue = .{};
     try expect(q.len() == 0);
@@ -134,7 +134,7 @@ test "246 — length is a stored count" {
 
 test "247 — pop feeds append-from-Slot directly" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var source: m.queue.Queue = .{};
     source.append(MSG.toAnchor(&t.a));
@@ -150,7 +150,7 @@ test "247 — pop feeds append-from-Slot directly" {
 
 test "248 — append-from-Slot takes the parent" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var slot: m.inner.Slot = MSG.toAnchor(&t.a);
 
@@ -163,7 +163,7 @@ test "248 — append-from-Slot takes the parent" {
 
 test "249 — concat moves every item and empties the source" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var left: m.queue.Queue = .{};
     var right: m.queue.Queue = .{};
@@ -192,7 +192,7 @@ test "249 — concat moves every item and empties the source" {
 
 test "250 — concat keeps the chain walkable" {
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var left: m.queue.Queue = .{};
     var right: m.queue.Queue = .{};
@@ -216,7 +216,7 @@ test "251 — a chain onto itself does not destroy it" {
     if (std.debug.runtime_safety) return error.SkipZigTest;
 
     var t: Three = .{};
-    t.stamped();
+    t.setTypeIds();
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&t.a));
@@ -235,9 +235,9 @@ test "252 — one chain, three types" {
     var chunk: o.Chunk = .{ .size = 16 };
     var note: o.Note = .{};
 
-    MSG.stamp(&msg);
-    CHUNK.stamp(&chunk);
-    NOTE.stamp(&note);
+    MSG.setTypeId(&msg);
+    CHUNK.setTypeId(&chunk);
+    NOTE.setTypeId(&note);
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&msg));

@@ -11,7 +11,7 @@
 //! because a program can only die once.
 
 const Item = struct {
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 };
 
 const ITEM = m.helper.ParentHelper(Item);

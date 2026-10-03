@@ -12,7 +12,7 @@ pub const Timer = @import("Timer.zig");
 /// is none of them means the caller passed something else.
 pub fn destroySlot(slot: *Slot, alloc: std.mem.Allocator, io: std.Io) void {
     const anchor = slot.* orelse return;
-    destroyById(anchor.type_id, alloc, io, slot);
+    destroyById(anchor.typeId(), alloc, io, slot);
 }
 
 /// Releases the parent in `slot`, given its id.

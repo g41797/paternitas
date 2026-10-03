@@ -7,9 +7,9 @@
 //!
 //! There is nothing to instantiate and nothing to keep.
 //!
-//! The helper wraps `paternitas.Info(Parent)`. It finds the one `SLink` or
-//! `DLink` field by type, so its name is yours to choose. Zero such fields,
-//! or two, is a compile error naming the type.
+//! The helper wraps `paternitas.Typed(Parent)`. It finds the one
+//! `SinglyTypedNode` or `DoublyTypedNode` field by type, so its name is yours
+//! to choose. Zero such fields, or two, is a compile error naming the type.
 //!
 //! Two methods your parent declares, where the helper creates or releases it:
 //!
@@ -34,7 +34,7 @@ const _doc_stub = void;
 /// - the dispatch view, both ways
 /// - create and destroy, which run your own `init` and `finish`
 pub fn ParentHelper(comptime Parent: type) type {
-    const P = paternitas.Info(Parent);
+    const P = paternitas.Typed(Parent);
 
     return struct {
         /// This type's id.
@@ -52,9 +52,9 @@ pub fn ParentHelper(comptime Parent: type) type {
         ///
         /// Runs once per parent, before it is used anywhere. `create` does it
         /// for you. Never on a parent that is on a chain or a std list.
-        pub inline fn stamp(self: *Parent) void {
+        pub inline fn setTypeId(self: *Parent) void {
             P.node(self).* = .{};
-            P.stamp(self);
+            P.setTypeId(self);
         }
 
         /// The Anchor embedded in your parent.
@@ -144,7 +144,7 @@ pub fn ParentHelper(comptime Parent: type) type {
             return P.fromAny(any);
         }
 
-        /// The std Node type of this parent's Link.
+        /// The std Node type of this parent's TypedNode.
         pub const Node = P.Node;
 
         /// The std Node embedded in your parent, for a std list of your own.
@@ -156,9 +156,9 @@ pub fn ParentHelper(comptime Parent: type) type {
         }
 
         /// Your pointer, from a std Node. Null when the Node belongs to
-        /// another type or is unstamped.
+        /// another type, or when setTypeId was never called.
         ///
-        /// MUST: the Node lives in a Link. A std list handed back by a
+        /// MUST: the Node lives in a TypedNode. A std list handed back by a
         /// caller holds only Nodes of parents.
         pub inline fn fromNode(n: *Node) ?*Parent {
             return P.parentFromNode(n);
@@ -169,7 +169,7 @@ pub fn ParentHelper(comptime Parent: type) type {
             return inner.isLinked(toAnchor(self));
         }
 
-        /// Allocates your parent, runs its `init`, stamps it, and fills the
+        /// Allocates your parent, runs its `init`, calls setTypeId, and fills the
         /// Slot.
         ///
         /// Frees the parent again when `init` fails, and passes the failure
@@ -191,7 +191,7 @@ pub fn ParentHelper(comptime Parent: type) type {
             errdefer allocator.destroy(parent);
 
             try parent.init(allocator, io);
-            stamp(parent);
+            setTypeId(parent);
 
             slot.* = toAnchor(parent);
         }
@@ -218,7 +218,7 @@ pub fn ParentHelper(comptime Parent: type) type {
         fn wrongType(comptime call: []const u8, found: *const Anchor) noreturn {
             std.debug.panic(
                 call ++ ": asked for {s}, found {s}",
-                .{ @typeName(Parent), paternitas.nameOf(found) },
+                .{ @typeName(Parent), found.typeName() },
             );
         }
 

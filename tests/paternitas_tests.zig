@@ -1,7 +1,7 @@
 //! Tests of the paternitas module.
 
-const Msg: type = struct { text: []const u8, link: paternitas.SLink = .{} };
-const Job: type = struct { link: paternitas.DLink = .{}, id: u32, extra: u64 = 7 };
+const Msg: type = struct { text: []const u8, tnode: paternitas.SinglyTypedNode = .{} };
+const Job: type = struct { tnode: paternitas.DoublyTypedNode = .{}, id: u32, extra: u64 = 7 };
 const TypedMsg: type = paternitas.Typed(Msg);
 const TypedJob: type = paternitas.Typed(Job);
 
@@ -11,7 +11,7 @@ fn check(ok: bool, msg: []const u8) void {
 
 // The chain word of an Anchor, typed as this chain keeps it.
 fn next(a: *Anchor) *?*Anchor {
-    const ti: *const TypeInfo = a.info() orelse @panic("chain: unstamped");
+    const ti: *const TypeInfo = a.info() orelse @panic("chain: no type");
     return @ptrCast(ti.nextField(a));
 }
 
@@ -45,8 +45,8 @@ test "the Chain helper keeps order and clears the chain word" {
 
     var m1: Msg = .{ .text = "1" };
     var m2: Msg = .{ .text = "2" };
-    TypedMsg.stamp(&m1);
-    TypedMsg.stamp(&m2);
+    TypedMsg.setTypeId(&m1);
+    TypedMsg.setTypeId(&m2);
 
     var q: Chain = .{};
     q.append(TypedMsg.anchor(&m1));
@@ -74,7 +74,7 @@ test "ids are distinct; TypeInfo fields and calls" {
     try testing.expect(TypedMsg.typeId() != TypedJob.typeId());
 
     var m: Msg = .{ .text = "x" };
-    TypedMsg.stamp(&m);
+    TypedMsg.setTypeId(&m);
     const a: *Anchor = TypedMsg.anchor(&m);
     try testing.expect(a.typeId() == TypedMsg.typeId());
 
@@ -85,12 +85,12 @@ test "ids are distinct; TypeInfo fields and calls" {
     try testing.expect(i.node(a, std.SinglyLinkedList.Node) == TypedMsg.node(&m));
 }
 
-test "Anchor.typeId is null when unstamped, the type's id when stamped" {
+test "Anchor.typeId is null before setTypeId, the type's id after" {
     std.testing.log_level = .debug;
 
     var j: Job = .{ .id = 1 };
     try testing.expect(TypedJob.anchor(&j).typeId() == null);
-    TypedJob.stamp(&j);
+    TypedJob.setTypeId(&j);
     try testing.expect(TypedJob.anchor(&j).typeId() == TypedJob.typeId());
 }
 
@@ -112,20 +112,20 @@ test "two types with one name have two TypeIds" {
     try testing.expect(ids[0] != ids[1]);
 
     var b: B = .{};
-    TypedB.stamp(&b);
+    TypedB.setTypeId(&b);
     var a: *Anchor = TypedB.anchor(&b);
     std.mem.doNotOptimizeAway(&a);
     try testing.expect(TypedA.fromAnchor(a) == null);
     try testing.expect(TypedB.fromAnchor(a).? == &b);
 }
 
-test "SLink and DLink Parents in one Anchor chain, then a std list" {
+test "SinglyTypedNode and DoublyTypedNode Parents in one Anchor chain, then a std list" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "hi" };
     var j: Job = .{ .id = 42 };
-    TypedMsg.stamp(&m);
-    TypedJob.stamp(&j);
+    TypedMsg.setTypeId(&m);
+    TypedJob.setTypeId(&j);
 
     var q: Chain = .{};
     q.append(TypedMsg.anchor(&m));
@@ -142,7 +142,7 @@ test "SLink and DLink Parents in one Anchor chain, then a std list" {
     try testing.expect(TypedJob.parentFromNode(n).? == &j);
 }
 
-test "unstamped" {
+test "without setTypeId, every check returns null or false" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "x" };
@@ -150,10 +150,10 @@ test "unstamped" {
     try testing.expect(TypedMsg.parentFromNode(TypedMsg.node(&m)) == null);
     try testing.expect(TypedMsg.fromAnchor(TypedMsg.anchor(&m)) == null);
     try testing.expect(TypedMsg.anchor(&m).info() == null);
-    try testing.expectEqualStrings("<unstamped>", TypedMsg.anchor(&m).typeName());
+    try testing.expectEqualStrings("<no type>", TypedMsg.anchor(&m).typeName());
 }
 
-test "stamp leaves a linked Node intact" {
+test "setTypeId leaves a linked Node intact" {
     std.testing.log_level = .debug;
 
     var j1: Job = .{ .id = 1 };
@@ -161,19 +161,19 @@ test "stamp leaves a linked Node intact" {
     var list: std.DoublyLinkedList = .{};
     list.append(TypedJob.node(&j1));
     list.append(TypedJob.node(&j2));
-    TypedJob.stamp(&j1);
-    TypedJob.stamp(&j2);
+    TypedJob.setTypeId(&j1);
+    TypedJob.setTypeId(&j2);
     try testing.expect(TypedJob.parentFromNode(list.popFirst().?).?.*.id == 1);
     try testing.expect(TypedJob.parentFromNode(list.popFirst().?).?.*.id == 2);
 }
 
-test "is, isId and parentFromNodeUnchecked on a stamped Parent" {
+test "is, isId and parentFromNodeUnchecked after setTypeId" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "x" };
     var j: Job = .{ .id = 3 };
-    TypedMsg.stamp(&m);
-    TypedJob.stamp(&j);
+    TypedMsg.setTypeId(&m);
+    TypedJob.setTypeId(&j);
 
     const m_node: *const std.SinglyLinkedList.Node = TypedMsg.node(&m);
     try testing.expect(TypedMsg.is(m_node));
@@ -192,8 +192,8 @@ test "mustFromAnchor and mustParentFromNode return the Parent on a match" {
 
     var m: Msg = .{ .text = "x" };
     var j: Job = .{ .id = 4 };
-    TypedMsg.stamp(&m);
-    TypedJob.stamp(&j);
+    TypedMsg.setTypeId(&m);
+    TypedJob.setTypeId(&j);
 
     try testing.expect(TypedMsg.mustFromAnchor(TypedMsg.anchor(&m)) == &m);
     try testing.expect(TypedJob.mustFromAnchor(TypedJob.anchor(&j)) == &j);
@@ -201,19 +201,19 @@ test "mustFromAnchor and mustParentFromNode return the Parent on a match" {
     try testing.expect(TypedJob.mustParentFromNode(TypedJob.node(&j)) == &j);
 }
 
-test "typeName of a stamped Anchor" {
+test "typeName after setTypeId" {
     std.testing.log_level = .debug;
 
     var j: Job = .{ .id = 5 };
-    TypedJob.stamp(&j);
+    TypedJob.setTypeId(&j);
     try testing.expectEqualStrings(@typeName(Job), TypedJob.anchor(&j).typeName());
 }
 
-test "TypeInfo.node for a DLink Parent" {
+test "TypeInfo.node for a DoublyTypedNode Parent" {
     std.testing.log_level = .debug;
 
     var j: Job = .{ .id = 6 };
-    TypedJob.stamp(&j);
+    TypedJob.setTypeId(&j);
     const a: *Anchor = TypedJob.anchor(&j);
     const i: *const TypeInfo = a.info().?;
     try testing.expect(i.*.node_kind == .double);
@@ -225,8 +225,8 @@ test "AnyParent dispatch through a map, no Typed call at dispatch" {
 
     var m: Msg = .{ .text = "hi" };
     var j: Job = .{ .id = 42 };
-    TypedMsg.stamp(&m);
-    TypedJob.stamp(&j);
+    TypedMsg.setTypeId(&m);
+    TypedJob.setTypeId(&j);
 
     const Handlers: type = struct {
         var seen_msg: ?*Msg = null;
@@ -264,7 +264,7 @@ test "toAny and fromAny" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "x" };
-    TypedMsg.stamp(&m);
+    TypedMsg.setTypeId(&m);
     const any: AnyParent = TypedMsg.toAny(&m);
     try testing.expect(TypedMsg.fromAny(any).? == &m);
     try testing.expect(TypedJob.fromAny(any) == null);
@@ -272,8 +272,8 @@ test "toAny and fromAny" {
     const from_anchor: AnyParent = TypedMsg.anchor(&m).toAny().?;
     try testing.expect(from_anchor.ptr == any.ptr and from_anchor.type_id == any.type_id);
 
-    var unstamped: Msg = .{ .text = "y" };
-    try testing.expect(TypedMsg.anchor(&unstamped).toAny() == null);
+    var no_type: Msg = .{ .text = "y" };
+    try testing.expect(TypedMsg.anchor(&no_type).toAny() == null);
 }
 
 test "*Anchor and AnyParent in a tagged union" {
@@ -282,7 +282,7 @@ test "*Anchor and AnyParent in a tagged union" {
     const Event: type = union(enum) { tick: u64, anchor: *Anchor, view: AnyParent };
 
     var m: Msg = .{ .text = "x" };
-    TypedMsg.stamp(&m);
+    TypedMsg.setTypeId(&m);
     const events: [3]Event = .{ .{ .tick = 1 }, .{ .anchor = TypedMsg.anchor(&m) }, .{ .view = TypedMsg.toAny(&m) } };
 
     var hits: u32 = 0;
@@ -299,8 +299,8 @@ test "the stored offset finds next for both kinds, and so does nextField" {
 
     var m: Msg = .{ .text = "x" };
     var j: Job = .{ .id = 1 };
-    TypedMsg.stamp(&m);
-    TypedJob.stamp(&j);
+    TypedMsg.setTypeId(&m);
+    TypedJob.setTypeId(&j);
 
     const m_anchor: *Anchor = TypedMsg.anchor(&m);
     const j_anchor: *Anchor = TypedJob.anchor(&j);

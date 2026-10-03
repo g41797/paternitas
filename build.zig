@@ -122,10 +122,10 @@ fn addNegative(
     // Each of these must fail to compile, with that message.
     const refused_at_compile_time = [_]struct { file: []const u8, says: []const u8 }{
         .{ .file = "negative/compile/not_struct.zig", .says = "not a struct, so it cannot be a Paternitas Parent" },
-        .{ .file = "negative/compile/bare_node.zig", .says = "no Link, so it cannot be a Paternitas Parent" },
-        .{ .file = "negative/compile/two_links.zig", .says = "more than one Link, and exactly one is allowed" },
+        .{ .file = "negative/compile/bare_node.zig", .says = "no TypedNode, so it cannot be a Paternitas Parent" },
+        .{ .file = "negative/compile/two_typed_nodes.zig", .says = "more than one TypedNode, and exactly one is allowed" },
         .{ .file = "negative/compile/wrong_node.zig", .says = "found '*DoublyLinkedList.Node'" },
-        .{ .file = "negative/compile/link_other_node.zig", .says = "Link(link_other_node.OtherNode): not a std Node, so it cannot be a Paternitas Link" },
+        .{ .file = "negative/compile/typed_node_other_node.zig", .says = "TypedNode(typed_node_other_node.OtherNode): not a std Node, so it cannot be a Paternitas TypedNode" },
     };
 
     for (refused_at_compile_time) |case| {
@@ -153,9 +153,9 @@ fn addNegative(
     // on, and exits 0 elsewhere.
     const refused_at_run_time = [_]struct { file: []const u8, says: []const u8, every_mode: bool = true }{
         .{ .file = "negative/panic/must_from_anchor.zig", .says = "mustFromAnchor: asked for must_from_anchor.Msg, found must_from_anchor.Job" },
-        .{ .file = "negative/panic/must_parent_from_node.zig", .says = "mustParentFromNode: asked for must_parent_from_node.Msg, found <unstamped>" },
+        .{ .file = "negative/panic/must_parent_from_node.zig", .says = "mustParentFromNode: asked for must_parent_from_node.Msg, found <no type>" },
         .{ .file = "negative/panic/wrong_node_kind.zig", .says = "TypeInfo.node: wrong_node_kind.Msg has another Node kind" },
-        .{ .file = "negative/panic/from_any_unstamped.zig", .says = "fromAny: the Parent was never stamped", .every_mode = false },
+        .{ .file = "negative/panic/from_any_no_type.zig", .says = "fromAny: setTypeId was never called on the Parent", .every_mode = false },
     };
 
     const safety_is_on: bool = optimize == .Debug or optimize == .ReleaseSafe;

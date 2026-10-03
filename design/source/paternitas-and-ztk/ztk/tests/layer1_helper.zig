@@ -100,7 +100,7 @@ test "216 — a created parent is an ordinary parent" {
     const msg = MSG.fromSlot(&slot).?;
 
     // Nothing marks it as having been made by the helper.
-    try expect(msg.hdr.anchor.type_id == MSG.ID);
+    try expect(msg.hdr.anchor.typeId() == MSG.ID);
 
     MSG.destroy(alloc, std.testing.io, &slot);
 }
@@ -122,7 +122,7 @@ test "217 — the panicking take answers on a match" {
 
 test "218 — the border pair, out and back" {
     var msg: o.Msg = .{ .seq = 8 };
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
 
@@ -141,8 +141,8 @@ test "218 — the border pair, out and back" {
 test "219 — the border pair round trip through a std list" {
     var a: o.Msg = .{ .seq = 1 };
     var b: o.Msg = .{ .seq = 2 };
-    MSG.stamp(&a);
-    MSG.stamp(&b);
+    MSG.setTypeId(&a);
+    MSG.setTypeId(&b);
 
     var slot: m.inner.Slot = MSG.toAnchor(&a);
     var list: std.SinglyLinkedList = .{};
@@ -178,7 +178,7 @@ test "253 — a container declares no create and no destroy" {
     // the crossings work. Asking for create or destroy does not compile, and
     // that is scenarios 308 and 309.
     var fake: o.FakeMbox = .{};
-    MBOX.stamp(&fake);
+    MBOX.setTypeId(&fake);
 
     try expect(!@hasDecl(o.FakeMbox, "init"));
     try expect(!@hasDecl(o.FakeMbox, "finish"));

@@ -4,7 +4,7 @@
 //! 308 — a parent with no init does not compile where the helper creates it.
 
 const NoInit = struct {
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 
     pub fn finish(self: *NoInit, alloc: std.mem.Allocator, io: std.Io) void {
         _ = io;

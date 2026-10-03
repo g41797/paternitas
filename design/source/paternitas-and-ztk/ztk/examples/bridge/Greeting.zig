@@ -1,7 +1,7 @@
 //! A greeting: a short text in a fixed buffer. Just a demo parent.
 //!
 //! The buffer is part of the parent, so filling it allocates nothing.
-inner: SLink = .{},
+inner: SinglyTypedNode = .{},
 text: Text = .{},
 
 pub const GreetingHelper = matryoshka.helper.ParentHelper(Self);
@@ -42,7 +42,7 @@ pub fn destroyQueue(queue: *Queue, alloc: std.mem.Allocator, io: std.Io) void {
 
 const Self = @This();
 const Anchor = matryoshka.inner.Anchor;
-const SLink = matryoshka.inner.SLink;
+const SinglyTypedNode = matryoshka.inner.SinglyTypedNode;
 const Queue = matryoshka.queue.Queue;
 const Slot = matryoshka.inner.Slot;
 const matryoshka = @import("matryoshka");

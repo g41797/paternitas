@@ -43,12 +43,12 @@ test "18 — a mailbox is a parent" {
     defer f.finish();
 
     // Its id answers for it, and the crossing back lands on the mailbox.
-    try expect(m.Mbox.isIt(m.Mbox.toAnchor(f.mbx).type_id));
+    try expect(m.Mbox.isIt(m.Mbox.toAnchor(f.mbx).typeId()));
     try expect(m.Mbox.fromAnchor(m.Mbox.toAnchor(f.mbx)).? == f.mbx);
 
     // And a wrong type is refused rather than cast.
     var msg: o.Msg = .{};
-    o.MSG.stamp(&msg);
+    o.MSG.setTypeId(&msg);
     try expect(m.Mbox.fromAnchor(o.MSG.toAnchor(&msg)) == null);
 }
 

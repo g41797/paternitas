@@ -4,8 +4,8 @@ The owner worked several days on another computer, with Claude and ChatGPT.
 This file records what came back, what the scan found, and the owner's rulings
 of 2026-10-02. It is the state for the stages after ADPT 01.
 
-- Rules: [rules-005.md](backup/rules-005.md).
-- Plan: [implementation-plan-009.md](implementation-plan-009.md).
+- Rules: [rules-007.md](rules-007.md).
+- Plan: [implementation-plan-010.md](implementation-plan-010.md).
 
 ---
 

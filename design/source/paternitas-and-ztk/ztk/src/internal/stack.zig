@@ -28,7 +28,7 @@ const _doc_stub = void;
 ///
 /// What it refuses, where runtime safety is on:
 ///
-/// - a parent that was never stamped
+/// - a parent whose setTypeId was never called
 /// - a parent already on a chain, including a chain of one
 pub const AnchorStack = struct {
     /// True when the stack holds no items.
@@ -72,7 +72,7 @@ pub const AnchorStack = struct {
     /// The insert guard, the same one the queue states.
     inline fn _guardInsert(self: *const AnchorStack, anchor: *Anchor) void {
         _ = self;
-        check(anchor.type_id != null, "the parent was never stamped: make it with create, or stamp it once");
+        check(anchor.typeId() != null, "setTypeId was never called on the parent: make it with create, or call setTypeId once");
         check(!inner.isLinked(anchor), "the parent is already on a chain");
     }
 

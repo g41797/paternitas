@@ -6,10 +6,10 @@ Current state only. Updated in place. The narrative is in
 ## Start here — every session
 
 1. Read this file in full.
-2. Read Part 0 of [rules-006.md](rules-006.md).
-3. Read the plan, [implementation-plan-009.md](implementation-plan-009.md), for
+2. Read Part 0 of [rules-007.md](rules-007.md).
+3. Read the plan, [implementation-plan-010.md](implementation-plan-010.md), for
    the stage the owner names. Not before they name it.
-4. Read the design, [paternitas-design-009.md](paternitas-design-009.md), for
+4. Read the design, [paternitas-design-010.md](paternitas-design-010.md), for
    a stage that writes code or docs.
 5. Read [paternitas-intake-001.md](paternitas-intake-001.md) for the ztk
    stage: the outside work and the questions left for it.
@@ -22,26 +22,29 @@ Current state only. Updated in place. The narrative is in
 
 | what | where |
 |---|---|
-| rules | [rules-006.md](rules-006.md) |
-| design decisions, and what paternitas keeps from ztk | [paternitas-design-009.md](paternitas-design-009.md) |
-| the plan | [implementation-plan-009.md](implementation-plan-009.md) |
+| rules | [rules-007.md](rules-007.md) |
+| design decisions, and what paternitas keeps from ztk | [paternitas-design-010.md](paternitas-design-010.md) |
+| the plan | [implementation-plan-010.md](implementation-plan-010.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
+| NAME 01: the new names and what they touch | [name-01-intent-002.md](name-01-intent-002.md) |
 | the narrative | [STATUS-LOG.md](STATUS-LOG.md) |
 | the advice collected by the owner, read in AUDT 01 | `paternitas-001.md` |
 | superseded versions | `design/backup/` |
 
 ## Current state
 
-- PTRN 02 is done, 2026-10-02.
-- The code: `src/paternitas.zig`, `src/container.zig`. Design 009.
+- NAME 01 is done, 2026-10-03.
+- The code: `src/paternitas.zig`, `src/container.zig`. Design 010.
+- The names say what each thing is.
+  - `TypedNode(N)`, with `SinglyTypedNode` and `DoublyTypedNode`, and the
+    short names `STNode` and `DTNode`.
+  - `setTypeId` writes the type. `typeId()` reads it.
+  - The field in the examples is `tnode`.
 - Every `pub` declaration has a `///`. The root `//!` has a usage block.
-- `Info(P)` is now `Typed(P)`. The examples put the types first.
-- The README, the comments and the source order are written for the user.
-  Rules 006, design 009.
 - Six examples in `examples/`, each with a test wrapper and a site page.
-- The README replaces `WIP`.
+- The ztk copy in `design/source/` has the new names in its code and text.
 - Gates: all six pass.
 - Tests: 22 pass, in all four optimization modes. 16 unit, 6 examples.
 - Negatives: 9 programs, 5 compile, 4 run, in all four modes.
@@ -58,6 +61,8 @@ Current state only. Updated in place. The narrative is in
 ## Next
 
 **LOOK 01 — the picture and the logo.** The charter is in
-[implementation-plan-009.md](implementation-plan-009.md). The owner names the
+[implementation-plan-010.md](implementation-plan-010.md). The owner names the
 model. Claude's proposal: Opus 5.5, since it writes the README and site text
-around the picture. It starts when the owner names it.
+around the picture.
+
+It starts when the owner names it.

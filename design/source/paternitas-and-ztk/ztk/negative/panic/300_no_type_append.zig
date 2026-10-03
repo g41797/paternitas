@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! 300 — an unstamped parent is refused at every crossing.
+//! 300 — a parent whose setTypeId was never called is refused at
+//! every crossing.
 //!
 //! The append is one crossing of several. The others are a send and a put,
 //! and they arrive with their own layers.
 
 const Msg = struct {
     seq: u32 = 0,
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 
     pub fn init(self: *Msg, alloc: std.mem.Allocator, io: std.Io) !void {
         _ = io;
@@ -28,7 +29,7 @@ const MSG = m.helper.ParentHelper(Msg);
 pub fn main() void {
     var msg: Msg = .{};
 
-    // No stamp. The helper is the only thing that writes an id.
+    // No setTypeId. The helper is the only thing that writes an id.
     var q: m.queue.Queue = .{};
     q.append(&msg.hdr.anchor);
 }

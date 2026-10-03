@@ -46,7 +46,7 @@ pub fn composite_parts(allocator: std.mem.Allocator, io: std.Io) !void {
 }
 
 const Composite = struct {
-    inner: SLink = .{},
+    inner: SinglyTypedNode = .{},
     a: Slot = null,
     b: Slot = null,
 
@@ -92,7 +92,7 @@ const Parts = struct {
         var rest = remaining;
         while (rest.popFirst()) |anchor| {
             var s: Slot = anchor;
-            if (Composite.Helper.isIt(anchor.type_id)) {
+            if (Composite.Helper.isIt(anchor.typeId())) {
                 Composite.Helper.destroy(self.alloc, self.io, &s);
             } else {
                 parents.destroySlot(&s, self.alloc, self.io);
@@ -106,7 +106,7 @@ const helpers = @import("../helpers/helpers.zig");
 const matryoshka = @import("matryoshka");
 const std = @import("std");
 const Anchor = matryoshka.inner.Anchor;
-const SLink = matryoshka.inner.SLink;
+const SinglyTypedNode = matryoshka.inner.SinglyTypedNode;
 const TypeId = matryoshka.inner.TypeId;
 const Pool = matryoshka.Pool;
 const Queue = matryoshka.queue.Queue;

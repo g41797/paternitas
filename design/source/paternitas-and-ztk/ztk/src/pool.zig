@@ -143,7 +143,7 @@ pub const Pool = struct {
     ///   parents are kept from being lost. So a close hook does not release
     ///   its own state on the first call, and it survives being re-entered.
     /// - Clearing a parent means your own fields. The toolkit keeps the
-    ///   Link.
+    ///   TypedNode.
     pub const Hooks = struct {
         /// Yours, handed back to every call. The pool does not read it.
         ctx: *anyopaque,
@@ -280,7 +280,7 @@ pub const Pool = struct {
 
         const made = slot.* orelse return error.NotCreated;
 
-        check(made.type_id == want, "the get hook filled the Slot with a parent of another identity");
+        check(made.typeId() == want, "the get hook filled the Slot with a parent of another identity");
     }
 
     /// Fetches a stored parent, waiting up to `timeout_ns` for one.
@@ -388,7 +388,7 @@ pub const Pool = struct {
 
         self._active += 1;
 
-        const bucket = self._bucketFor(anchor.type_id) orelse {
+        const bucket = self._bucketFor(anchor.typeId()) orelse {
             self._active -= 1;
             self._mu.unlock(io);
             return error.UnknownIdentity;
@@ -612,7 +612,7 @@ pub const Pool = struct {
     /// the hook's own mistake, so it is a check rather than an error return
     /// — there is no caller left to hand it to.
     fn _takeBack(self: *Pool, anchor: *Anchor) void {
-        const bucket = self._bucketFor(anchor.type_id) orelse {
+        const bucket = self._bucketFor(anchor.typeId()) orelse {
             check(false, "the put hook gave back an identity the pool was not created with");
             return;
         };
@@ -640,7 +640,7 @@ pub const Pool = struct {
         _ = io;
     }
 
-    _link: inner.SLink,
+    _tnode: inner.SinglyTypedNode,
 
     _mu: Io.Mutex,
     _cv: Io.Condition,
@@ -697,7 +697,7 @@ pub fn new(
     for (buckets, ids) |*bucket, id| bucket.* = .{ .id = id };
 
     pool.* = .{
-        ._link = .{},
+        ._tnode = .{},
         ._mu = .init,
         ._cv = .init,
         ._io = io,
@@ -709,7 +709,7 @@ pub fn new(
         ._hooks = hooks,
     };
 
-    helper.stamp(pool);
+    helper.setTypeId(pool);
 
     slot.* = Pool.toAnchor(pool);
 }

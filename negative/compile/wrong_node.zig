@@ -1,7 +1,8 @@
-//! A DNode passed where an SLink Parent expects an SNode does not compile.
+//! The std doubly Node, passed where a SinglyTypedNode Parent expects the std
+//! singly Node, does not compile.
 
 const Msg = struct {
-    link: p.SLink = .{},
+    tnode: p.SinglyTypedNode = .{},
 };
 
 export fn run() bool {

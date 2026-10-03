@@ -56,7 +56,7 @@ pub fn id_first_dispatch_loop(allocator: std.mem.Allocator, io: std.Io) !void {
         defer parents.destroySlot(&slot, allocator, io);
 
         // One read. Every branch below asks about this id.
-        const id: TypeId = anchor.type_id;
+        const id: TypeId = anchor.typeId();
 
         if (parents.Event.EventHelper.isIt(id)) {
             // The id is proven, so this cast cannot fail.

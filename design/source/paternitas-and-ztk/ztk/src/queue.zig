@@ -4,7 +4,7 @@
 //! A first in, first out chain of parents.
 //!
 //! The link is the `next` field of each parent's std Node, so a queue
-//! allocates nothing and locks nothing. SLink and DLink parents mix freely.
+//! allocates nothing and locks nothing. SinglyTypedNode and DoublyTypedNode parents mix freely.
 //!
 //! What a caller does with one — MUST:
 //!
@@ -31,7 +31,7 @@ const _doc_stub = void;
 ///
 /// What it refuses, where runtime safety is on:
 ///
-/// - a parent that was never stamped
+/// - a parent whose setTypeId was never called
 /// - a parent already on a chain, including a chain of one
 /// - an append from an empty Slot
 /// - a concat onto itself
@@ -140,7 +140,7 @@ pub const Queue = struct {
         var at: ?*Anchor = self._head;
 
         while (at) |anchor| {
-            if (anchor.type_id == id) {
+            if (anchor.typeId() == id) {
                 seen += 1;
                 if (stop_at != 0 and seen >= stop_at) return seen;
             }
@@ -158,7 +158,7 @@ pub const Queue = struct {
     /// Both checks read the item and cost one compare each.
     inline fn _guardInsert(self: *const Queue, anchor: *Anchor) void {
         _ = self;
-        check(anchor.type_id != null, "the parent was never stamped: make it with create, or stamp it once");
+        check(anchor.typeId() != null, "setTypeId was never called on the parent: make it with create, or call setTypeId once");
         check(!inner.isLinked(anchor), "the parent is already on a chain");
     }
 

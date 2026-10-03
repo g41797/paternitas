@@ -13,18 +13,18 @@
 
 const Message: type = struct {
     text: []const u8,
-    link: paternitas.SLink = .{},
+    tnode: paternitas.SinglyTypedNode = .{},
 };
 const TypedMessage: type = paternitas.Typed(Message);
 
 const Job: type = struct {
-    link: paternitas.DLink = .{},
+    tnode: paternitas.DoublyTypedNode = .{},
     id: u32,
 };
 const TypedJob: type = paternitas.Typed(Job);
 
 const Ping: type = struct {
-    link: paternitas.SLink = .{},
+    tnode: paternitas.SinglyTypedNode = .{},
 };
 const TypedPing: type = paternitas.Typed(Ping);
 
@@ -49,9 +49,9 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     var message: Message = .{ .text = "hello" };
     var job: Job = .{ .id = 42 };
     var ping: Ping = .{};
-    TypedMessage.stamp(&message);
-    TypedJob.stamp(&job);
-    TypedPing.stamp(&ping);
+    TypedMessage.setTypeId(&message);
+    TypedJob.setTypeId(&job);
+    TypedPing.setTypeId(&ping);
 
     const received: [3]*paternitas.Anchor = .{
         TypedMessage.anchor(&message),
@@ -69,7 +69,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
 
 /// Picks the handler by type id. No struct type appears here.
 fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *paternitas.Anchor, counts: *Counts) !void {
-    const any: paternitas.AnyParent = a.toAny() orelse return error.Unstamped;
+    const any: paternitas.AnyParent = a.toAny() orelse return error.NoTypeId;
     const h: Handler = handlers.get(any.type_id) orelse {
         std.log.info("no handler for {s}", .{a.typeName()});
         counts.*.unhandled += 1;

@@ -1,20 +1,36 @@
-# paternitas — Rules (003)
+# paternitas — Rules (007)
 
 All coding, doc, and process rules for paternitas.
 
-Change from 002: the ADPT 01 audit. Owner's rulings, 2026-09-25.
+Change from 006: NAME 01. `Link` is now `TypedNode`, and `stamp` is now
+`setTypeId`. The examples in Part 3 and Part 5 use the new names. No rule
+changed.
 
-- A cleanup edit that changes no behaviour needs no approval. Part 0, Part 1
-  step 7.
-- The gates run from `kitchen/gates.sh`. Part 0.
-- The model follows what a stage writes. Part 1 step 2.
-- The continue prompt begins with "Read", and its path is absolute. Part 1
-  step 12.
-- Test wrappers keep the `.debug` log level, and the noise is written down.
+Change from 005, kept: a PTRN 02 follow-up. The owner found the text correct but
+not human, and written for the wrong reader. Part 5 gets "Three kinds of
+documentation" and "Human voice". Part 3 says example steps are commands,
+and that a comment stands alone. Part 2 gets "Order in a source file" and the
+layout of an example file.
+
+Change from 004, kept: PTRN 01. Owner's rulings, 2026-10-02.
+
+- Six gates. Gate 6 runs `negative` in all four modes. Part 0.
+- Gate 5 checks `negative/` too. Part 0.
+- SPDX headers: in `src/`, not in `tests/`, `negative/`, `examples/`. Part 2.
+- A leading `_` in `src/` marks a `pub` declaration that is not for use.
   Part 2.
-- The gate enforces the other word forms and the phrases. `holds` and
-  `object` join the hand scan. Part 4.
-- The hard-break fixer skips raw HTML. Part 5.
+
+Change from 003, kept: the ADPT 01 close.
+
+- No remote git and no `gh`. The owner's other repos are read, never run in.
+  Part 0.
+- Every stage saves all it learns in the owner's files, and ends with how to
+  continue and which model. Part 0, Part 1 step 12.
+- `design/source/` is skipped by the banned-word check. Part 4.
+
+Change from 002, kept: cleanup without approval, `kitchen/gates.sh`, the model
+rule, the "Read" prompt, the `.debug` log level, word forms and phrases in the
+gate, the hard-break fixer skips raw HTML.
 
 Source: a trimmed copy of the Matryoshka rules,
 `/home/g41797/dev/root/github.com/g41797/matryoshka-ztk/design/rules-050.md`.
@@ -28,7 +44,7 @@ Source: a trimmed copy of the Matryoshka rules,
   implementation invariants, its patterns and its provenance.
 - What was added: the git rules, and the stage sequence in Part 1.
 
-Companion: [paternitas-design-003.md](paternitas-design-003.md) — the design
+Companion: [paternitas-design-010.md](paternitas-design-010.md) — the design
 decisions and what paternitas keeps from ztk.
 
 ---
@@ -39,8 +55,12 @@ Read this part every session. The rest is reference.
 
 Hard gates.
 
-- No git. The one exception is plain `git status`.
+- No git. The one exception is plain `git status` in this repo.
 - Every other git operation goes through the owner.
+- Nothing remote.
+  - No git command that reaches a remote.
+  - No `gh`: no runs, no PRs, no issues, no API.
+- The owner's other repos on disk may be read. No command runs in them.
 - To move a file, use a plain `mv`. Never `git mv`.
 - No file deletions. Ask the owner.
 - Show intent before code. The owner approves before code is written.
@@ -52,6 +72,11 @@ Hard gates.
 - Ask the owner questions as numbered plain text. No picker tool.
 - State lives in the owner's `.md` files, not in Claude memory. That is what
   survives a clear.
+  - Every stage saves all it learns there: findings, answers, decisions,
+    plans, open questions.
+  - The intent file is written when the owner's answers arrive, not at close.
+  - Every stage ends with how to continue after a clear, and which model to
+    use. Part 1 step 12.
 
 Documents.
 
@@ -78,22 +103,24 @@ Verification.
 
 - Run kitchen scripts, not manual `zig` commands.
 - Run from the repo root.
-- `bash kitchen/gates.sh` runs the five gates.
+- `bash kitchen/gates.sh` runs the six gates.
   - In order. It stops at the first failure.
   - One line per gate on the screen.
   - Each gate's output goes to a fixed log: `zig-out/g1_debug.log` to
-    `zig-out/g5_fmt.log`.
+    `zig-out/g6_negative.log`.
   - Pass or fail comes from the exit code, never from the log text.
-- The five gates, in order:
+- The six gates, in order:
   1. `bash kitchen/build_and_test_debug.sh`
   2. `bash kitchen/build_and_test_all.sh`
   3. `bash kitchen/build_cross_debug.sh`
   4. `bash kitchen/tools/check_docs.sh`
-  5. `zig fmt --check src tests examples build.zig`
+  5. `zig fmt --check src tests examples negative build.zig`
+  6. `bash kitchen/build_negative_all.sh`
+     - `zig build negative` in all four modes, on the host.
 - Build before test. `zig build` must pass before `zig build test`.
 - Full verification = all four modes: Debug, ReleaseSafe, ReleaseFast,
   ReleaseSmall.
-- A stage is complete only when all five gates pass.
+- A stage is complete only when all six gates pass.
 - Redirect output to `zig-out/` log files. Read the log file, not shell stdout.
 - Run a single gate by hand only to look into a failure.
 
@@ -155,11 +182,12 @@ The usual order in which the owner and Claude work together.
 11. Sync `README.md` if the stage changed what it says.
 12. End the message with the continue prompt.
     - Three lines: the STATUS file, the stage, the model. Nothing else.
+    - Every stage ends with it, also a stage that stops halfway.
     - The first line begins with "Read". A bare path names a file. "Read"
       makes it an instruction.
     - The path is absolute, so the prompt works from any directory.
     - Say whether to clear or compact.
-    - It must not repeat the reading list. `STATUS.md` holds that.
+    - It must not repeat the reading list. `STATUS.md` has that.
 
 ---
 
@@ -171,6 +199,8 @@ Import order (LE style).
   after the code.
 - Package and local imports first.
 - `const std = @import("std")` always last.
+  - An alias of `std`, such as `const testing = std.testing;`, goes before
+    it.
 - Do not flag std-last as a violation.
 
 ```zig
@@ -180,8 +210,9 @@ const std = @import("std");
 
 SPDX headers.
 
-- Owner-added. Never remove them during edits.
-- Do not add SPDX headers to new `src/` files. The owner will.
+- Never remove them during edits.
+- Every `src/` file carries one. Owner's ruling, PTRN 01.
+- `tests/`, `negative/` and `examples/` files carry none.
 
 General style.
 
@@ -190,6 +221,9 @@ General style.
 - Check the standard library before adding custom definitions.
 - `errdefer` after every `alloc.create` or resource-acquiring `try`.
 - `defer` for cleanup that must run on all exit paths.
+- A leading `_` in `src/` marks a `pub` declaration that is not for use.
+  - Example: `container._nextFieldAt`, `pub` only for a test.
+  - Not a quoted name. Autodoc cannot resolve its link. See Examples below.
 
 Observable by human.
 
@@ -206,6 +240,19 @@ One quality bar.
 - Tests check correctness. They are internal and not in the generated docs.
 - Examples show one pattern. They are part of the generated docs.
 
+Order in a source file.
+
+- A `src/` file follows the order in which a user meets the API: the README
+  and the examples. Not the order in which it is built.
+- What a user writes first sits first. Details the user meets later, such
+  as type ids and layout facts, sit later.
+- Zig allows use before declaration. A declaration can sit below the code
+  that uses it.
+- Inside a type, its calls follow the same rule.
+- Private helpers come after the public declarations, before the imports.
+- Fields stay first in a struct, in their order. Field order is layout.
+- The imports stay at the bottom.
+
 Examples.
 
 - Entry point: `pub fn <snake_case>(allocator: std.mem.Allocator, io: std.Io) !void`.
@@ -219,6 +266,19 @@ Examples.
     line.
   - It is not a failure. The gate logs carry it on every run.
   - Pass or fail comes from the exit code.
+
+Layout of an example file, top to bottom.
+
+- The `//!` header.
+- The types. Each Parent struct comes with its `Typed` const on the next
+  line. Then the other types the example uses.
+  - You see what exists before the code that uses it.
+- The entry point, `pub fn`.
+- The private fns, in the order the entry point calls them.
+- The imports, at the bottom.
+- One exception: when only the entry point uses a Parent, the Parent and
+  its `Typed` const may sit inside the entry point. Example 001 does this.
+- No double blank lines.
 
 ---
 
@@ -235,6 +295,13 @@ Staccato applies. It is defined once, in Part 5.
 - No references to `.md` files inside `src/*.zig` comments.
   - Readers of source or generated docs see only the `.zig` files.
   - Comments are self-contained. State the fact, do not point at a doc.
+- A comment stands alone. It uses only words the reader already has, and
+  names the reader can see in the code.
+  - A reader lands on any declaration's page straight from a search.
+  - A paternitas term, like Anchor or `setTypeId`, is explained where it
+    is declared and in the root `//!`. Nowhere else does a comment lean on it.
+  - Say what the caller sees: "`setTypeId` was never called on it", not
+    a coined adjective for that state.
 - File-header `//!` standard: model on `std.Io`'s own file header.
   - A header that reads as one run-on paragraph across several `//!` lines is
     a violation, even if each line is short.
@@ -260,11 +327,11 @@ An example's `//!` description is written like its code.
 
 - One-line intent first. This is the coordinator line.
 - Then named steps as bullets, one per bullet, in the order they run.
+- A step is a command: "Pop each Node.", not "You pop each Node."
 - Any ASCII diagram inside a `//!` block sits in a fenced code block.
   - Autodoc renders doc comments as CommonMark, which collapses single line
     breaks.
 - Mixing `//!` and `///` above the same function is a bug.
-- The entry point sits at the top of the file, directly after the `//!` block.
 - Imports stay at the bottom.
 
 ### Doc target size
@@ -303,6 +370,7 @@ Scan scope.
 
 - Skip `design/STATUS-LOG.md` and `design/backup/`. Both record what is gone.
 - Skip `design/paternitas-001.md`. It is kept untouched.
+- Skip `design/source/`. It is a copy of the owner's outside work, kept as is.
 - The gate skips this rules file, because it has to name every word. Scan it
   by hand, and read each hit: a hit outside the lists below is a real one.
 - Stdlib names are not hits.
@@ -379,6 +447,65 @@ Structure.
 
 - Cross-reference instead of duplicating.
 - When extending a document, match the heading levels already in use.
+
+### Three kinds of documentation
+
+Each kind has its own reader. Write for that reader only.
+
+- The design is for whoever builds or changes paternitas.
+  - It has the intent, the reasons and the implementation.
+- Source comments, `///` and `//!`, are for someone who calls the API.
+  - They say what a declaration is for, what it promises, and when it fails
+    or returns null.
+  - They say the least a caller MUST know. Nothing about how it is built.
+  - A limitation is stated as a limitation. The reason for it stays in the
+    design.
+- The README, the site and the examples are for someone deciding whether to
+  use paternitas.
+  - Start from a real problem, in code.
+  - Show the code without paternitas, and where it breaks.
+  - Show the same code with paternitas.
+  - Internals do not appear.
+- Never copy text from the design into a comment or the README. Write it
+  again for that reader.
+
+Before and after, from our own text.
+
+| before | after |
+|---|---|
+| `/// A TypeId is the address of a Parent type's TypeInfo.` | `/// Identifies a Parent type. Equal ids mean the same type.` |
+| README: "An Anchor is one word that `setTypeId` writes." | README: the ziggit footgun in code, then the same code with paternitas. |
+
+### Human voice
+
+Staccato means short sentences. It does not mean fragments. A text can follow
+every rule above and still read as if no person wrote it. This section is
+about that.
+
+- Every sentence has a subject and a verb. "Not taken." is not a sentence.
+  "The owner did not take it." is.
+- No labels in place of sentences. "Reason:", "The principle.", "Checks."
+  each stand for a sentence. Write that sentence.
+  - `MUST` stays, inside a sentence: "The Node MUST live in a TypedNode."
+- Say a thing once. A date or "the owner's ruling" goes at the top of a
+  section, not on every bullet.
+- No slogans. If a line sounds clever and needs a second read, write the
+  plain fact instead.
+- Nest a bullet only when it belongs to the bullet above it. A lone
+  sub-bullet is almost always a sentence that was split for no reason.
+- The README, the examples and the doc comments talk to the reader as "you".
+  - The tone: a seasoned developer talking to a friend in the field, on a
+    hard day. Direct, plain, no lecture, no sales talk.
+- Read it aloud. If it sounds odd said to a colleague, rewrite it.
+- When this section and Staccato seem to disagree, keep the sentence whole.
+
+Before and after, from our own text.
+
+| before | after |
+|---|---|
+| `Helper` was proposed, from a review the owner collected. Not taken. | A review proposed `Helper`. The owner did not take it, because ztk already uses that name. |
+| What exists comes before what happens. | The types come first, so you see them before the code that uses them. |
+| Checks. (then bullets) | All six gates pass. (then the details as bullets) |
 
 ### Markdown hard breaks
 

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Layer 1 — the id, the stamp and the Slot.
+//! Layer 1 — the id, setTypeId and the Slot.
 //!
 //! Scenarios 1 to 5, 9, 200 to 209, 317.
 
@@ -18,31 +18,31 @@ test "1 — an id is per type" {
     try expect(MSG.ID == m.helper.ParentHelper(o.Msg).ID);
 }
 
-test "2 — the stamp writes the id once" {
+test "2 — setTypeId writes the id once" {
     var msg: o.Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
-    try expect(msg.hdr.anchor.type_id == MSG.ID);
-    try expect(MSG.toAnchor(&msg).type_id == MSG.ID);
+    try expect(msg.hdr.anchor.typeId() == MSG.ID);
+    try expect(MSG.toAnchor(&msg).typeId() == MSG.ID);
 }
 
 test "3 — an id answers what, never which" {
     var a: o.Msg = .{};
     var b: o.Msg = .{};
-    MSG.stamp(&a);
-    MSG.stamp(&b);
+    MSG.setTypeId(&a);
+    MSG.setTypeId(&b);
 
     // Two instances of one type share an id.
-    try expect(MSG.toAnchor(&a).type_id == MSG.toAnchor(&b).type_id);
+    try expect(MSG.toAnchor(&a).typeId() == MSG.toAnchor(&b).typeId());
 
     // Which one it is, is a different question, and a different answer.
     try expect(&a != &b);
-    try expect(MSG.isIt(MSG.toAnchor(&a).type_id));
+    try expect(MSG.isIt(MSG.toAnchor(&a).typeId()));
 }
 
 test "4 — the crossing back, with the type known" {
     var msg: o.Msg = .{ .seq = 7, .payload = 99 };
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     const back = MSG.fromAnchor(MSG.toAnchor(&msg)).?;
 
@@ -53,7 +53,7 @@ test "4 — the crossing back, with the type known" {
 
 test "5 — the crossing back is refused on the wrong id" {
     var msg: o.Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     try expect(CHUNK.fromAnchor(MSG.toAnchor(&msg)) == null);
     try expect(NOTE.fromAnchor(MSG.toAnchor(&msg)) == null);
@@ -65,9 +65,9 @@ test "200 — the inner is found by type, not by name" {
     var chunk: o.Chunk = .{};
     var note: o.Note = .{};
 
-    MSG.stamp(&msg);
-    CHUNK.stamp(&chunk);
-    NOTE.stamp(&note);
+    MSG.setTypeId(&msg);
+    CHUNK.setTypeId(&chunk);
+    NOTE.setTypeId(&note);
 
     try expect(MSG.fromAnchor(&msg.hdr.anchor).? == &msg);
     try expect(CHUNK.fromAnchor(&chunk.mtk.anchor).? == &chunk);
@@ -79,25 +79,25 @@ test "201 — the inner may sit anywhere in the parent" {
     // differ. The offset itself is the toolkit's to know; what a caller sees is
     // that the crossing back lands on the parent either way.
     var chunk: o.Chunk = .{};
-    CHUNK.stamp(&chunk);
+    CHUNK.setTypeId(&chunk);
     try expect(CHUNK.fromAnchor(CHUNK.toAnchor(&chunk)).? == &chunk);
 
     var msg: o.Msg = .{ .seq = 3 };
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     try expect(MSG.fromAnchor(MSG.toAnchor(&msg)).?.seq == 3);
 }
 
-test "203 — an unstamped inner reads as unstamped" {
+test "203 — an inner with no type id reads as no type" {
     var msg: o.Msg = .{};
 
-    // Null is the unstamped id, so a declared parent is unstamped with nothing
-    // written into it, and a zeroed one is too.
-    try expect(msg.hdr.anchor.type_id == null);
-    try expect(std.mem.zeroes(o.Msg).hdr.anchor.type_id == null);
+    // Null is the id before setTypeId, so a declared parent has no type with
+    // nothing written into it, and a zeroed one has none either.
+    try expect(msg.hdr.anchor.typeId() == null);
+    try expect(std.mem.zeroes(o.Msg).hdr.anchor.typeId() == null);
 
-    // The typed read is what a caller has: it answers null for an unstamped
-    // inner exactly as it does for another type's.
+    // The typed read is what a caller has: it answers null for an inner with
+    // no type id exactly as it does for another type's.
     try expect(MSG.fromAnchor(&msg.hdr.anchor) == null);
 }
 
@@ -106,9 +106,9 @@ test "205 — a mixed walk claims correctly" {
     var chunk: o.Chunk = .{};
     var note: o.Note = .{};
 
-    MSG.stamp(&msg);
-    CHUNK.stamp(&chunk);
-    NOTE.stamp(&note);
+    MSG.setTypeId(&msg);
+    CHUNK.setTypeId(&chunk);
+    NOTE.setTypeId(&note);
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&msg));
@@ -130,7 +130,7 @@ test "205 — a mixed walk claims correctly" {
 
 test "9 — a Slot holds one parent, or nothing" {
     var msg: o.Msg = .{ .seq = 1 };
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = null;
     try expect(slot == null);
@@ -155,7 +155,7 @@ test "206 — a Slot starts empty" {
 
 test "207 — a transfer clears the Slot" {
     var msg: o.Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
     var q: m.queue.Queue = .{};
@@ -172,7 +172,7 @@ test "207 — a transfer clears the Slot" {
 
 test "208 — a failed move leaves the Slot untouched" {
     var msg: o.Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
 
@@ -183,7 +183,7 @@ test "208 — a failed move leaves the Slot untouched" {
 
 test "209 — a look is not a take" {
     var msg: o.Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
 

@@ -47,19 +47,19 @@ byte is there. Nothing tells you.
 ```zig
 const L = struct {
     data: u32,
-    link: paternitas.SLink = .{},
+    tnode: paternitas.SinglyTypedNode = .{},
 };
 const M = struct {
     data: u8,
-    link: paternitas.SLink = .{},
+    tnode: paternitas.SinglyTypedNode = .{},
 };
 const TypedL = paternitas.Typed(L);
 const TypedM = paternitas.Typed(M);
 
 var l: L = .{ .data = 1234567 };
 var m: M = .{ .data = 255 };
-TypedL.stamp(&l);
-TypedM.stamp(&m);
+TypedL.setTypeId(&l);
+TypedM.setTypeId(&m);
 
 var list: std.SinglyLinkedList = .{};
 list.prepend(TypedM.node(&m)); // vendor B
@@ -72,11 +72,14 @@ const as_l: ?*L = TypedL.parentFromNode(node); // the L, data 1234567
 
 What changed:
 
-- `SLink` replaces the std Node. `DLink` is the one for
-  `std.DoublyLinkedList`.
+- `SinglyTypedNode` replaces the std Node. It is the std Node with a type
+  check added.
+- `DoublyTypedNode` is the one for `std.DoublyLinkedList`. `STNode` and
+  `DTNode` are short for the two.
 - `Typed(L)` gives you the calls for `L`. Declare it once per struct.
-- `stamp` writes the struct's type into its `SLink`. Call it once, before
-  the struct goes in a list. Without it, `parentFromNode` returns null.
+- `setTypeId` writes the struct's type into its TypedNode. Call it once,
+  before the struct goes in a list. Without it, `parentFromNode` returns
+  null.
 - `parentFromNode` checks the type first. The wrong type gets null.
 
 The list is still the plain std list. Its calls do not change.
@@ -87,15 +90,15 @@ Some items must not be copied: a mutex, a file handle, a large buffer. A
 queue that stores by value copies them. A queue of `*Connection` takes only
 one type.
 
-Send a `*paternitas.Anchor` instead. Every struct with an `SLink` or `DLink`
-has one, so one queue carries them all. The receiver gets the typed pointer
-back, with a type check.
+Send a `*paternitas.Anchor` instead. Every struct with a `SinglyTypedNode`
+or `DoublyTypedNode` has one, so one queue carries them all. The receiver
+gets the typed pointer back, with a type check.
 
 ```zig
 var buffer: [8]*paternitas.Anchor = undefined;
 var queue: std.Io.Queue(*paternitas.Anchor) = .init(&buffer);
 
-TypedConnection.stamp(&connection);
+TypedConnection.setTypeId(&connection);
 try queue.putOne(io, TypedConnection.anchor(&connection));
 
 // on the other side
@@ -118,7 +121,7 @@ context.
 
 ## More
 
-- The [examples](https://g41797.github.io/paternitas/examples/001-stamp_and_recover/),
+- The [examples](https://g41797.github.io/paternitas/examples/001-set_type_id_and_recover/),
   one pattern each: mixed lists, a timeout list, dispatch by type, a union
   field, a chain of your own.
 - The [API docs](https://g41797.github.io/paternitas/apidocs/).

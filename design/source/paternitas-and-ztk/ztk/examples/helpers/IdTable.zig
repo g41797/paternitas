@@ -76,7 +76,7 @@ pub fn IdTable(comptime T: type) type {
         /// at the error, to learn where the item went.
         pub fn dispatch(self: Self, receiver: *T, slot: *Slot) anyerror!void {
             const anchor = slot.* orelse return error.EmptySlot;
-            const handler = self.find(anchor.type_id) orelse return error.NoHandler;
+            const handler = self.find(anchor.typeId()) orelse return error.NoHandler;
             return handler(receiver, slot);
         }
     };

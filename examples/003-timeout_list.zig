@@ -5,7 +5,7 @@
 //! A connection must not be copied, so the queue carries its `*Anchor`, a pointer.
 //! The other side gets the `Connection` back with a type check.
 //!
-//! - Stamp three `Connection`s and append them to the timeout list.
+//! - Call `setTypeId` on three `Connection`s and append them to the timeout list.
 //! - Remove the middle one from the list.
 //! - Send its `*Anchor` through a `std.Io.Queue`.
 //! - Receive the `*Anchor`, and get the `Connection` back with `fromAnchor`.
@@ -24,11 +24,11 @@
 //!  timeout list:   c1 <-> c3 <-> c2
 //! ```
 
-/// It has a `DLink`, so the timeout list can remove it from anywhere.
+/// It has a `DoublyTypedNode`, so the timeout list can remove it from anywhere.
 const Connection: type = struct {
     id: u32,
     deadline: u64,
-    link: paternitas.DLink = .{},
+    tnode: paternitas.DoublyTypedNode = .{},
 };
 const TypedConnection: type = paternitas.Typed(Connection);
 
@@ -45,7 +45,7 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
 
     var timeouts: std.DoublyLinkedList = .{};
     for (&connections) |*c| {
-        TypedConnection.stamp(c);
+        TypedConnection.setTypeId(c);
         timeouts.append(TypedConnection.node(c));
     }
 

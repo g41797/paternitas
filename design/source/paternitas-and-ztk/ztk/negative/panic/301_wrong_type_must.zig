@@ -10,7 +10,7 @@
 
 const Msg = struct {
     seq: u32 = 0,
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 
     pub fn init(self: *Msg, alloc: std.mem.Allocator, io: std.Io) !void {
         _ = io;
@@ -28,7 +28,7 @@ const Msg = struct {
 const MSG = m.helper.ParentHelper(Msg);
 
 const Chunk = struct {
-    mtk: m.inner.SLink = .{},
+    mtk: m.inner.SinglyTypedNode = .{},
 
     pub fn init(self: *Chunk, alloc: std.mem.Allocator, io: std.Io) !void {
         _ = io;
@@ -47,7 +47,7 @@ const CHUNK = m.helper.ParentHelper(Chunk);
 
 pub fn main() void {
     var msg: Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
     _ = CHUNK.mustMoveFromSlot(&slot);

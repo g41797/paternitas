@@ -4,6 +4,91 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — NAME 01, names that say what each thing is
+
+Opus 5.5. The owner gave the names before the stage, in
+[name-01-intent-002.md](name-01-intent-002.md). No behaviour changed.
+
+A Link was the std Node with a type check added, and the name did not say
+so. `stamp` needed an explanation in every comment that used it.
+
+| was | now |
+|---|---|
+| `Link(N)` | `TypedNode(N)` |
+| `SLink`, `DLink` | `SinglyTypedNode`, `DoublyTypedNode` |
+| none | the aliases `STNode`, `DTNode` |
+| `findLink`, `linkOf`, `L` | `findTypedNode`, `typedNodeOf`, `TN` |
+| `stamp` | `setTypeId` |
+| the field `link:` | `tnode:` |
+| `<unstamped>` | `<no type>` |
+| `001-stamp_and_recover` | `001-set_type_id_and_recover` |
+
+At the start the owner answered five questions.
+
+- Example 001 is renamed.
+- The private names follow the public ones.
+- In the ztk copy, the code and its text change. Its `design/` and its
+  generated `docs/` and `kitchen/docs/` stay.
+- The two ztk negatives with "unstamped" in the name are renamed.
+- A second grep covers the prose "Link" and the `link:` fields.
+
+What changed:
+
+- `src/`, `tests/`, `examples/`, `negative/`, `build.zig`, the README.
+  - The compile errors and panics use the new words. `build.zig` checks
+    them.
+  - Three negatives are renamed with `mv`: `two_typed_nodes`,
+    `typed_node_other_node`, `from_any_no_type`.
+  - Test names and example steps say `setTypeId`. Two examples return
+    `error.NoTypeId`, not `error.Unstamped`.
+  - The diagrams in 003 and 006 had no old names, so they did not change.
+- The ztk copy: 52 files had old names, not about 40.
+  - `_link` fields are now `_tnode`. `ParentHelper.stamp` is now
+    `setTypeId`.
+  - The ztk word "link", for its own chain link, stays.
+  - `300_no_type_append` and `321_take_no_type` are renamed with `mv`.
+  - The copy called `paternitas.Info`, which PTRN 02 renamed. After the
+    report, the owner asked for `Typed` there too, and for a debug build.
+  - The debug build ran in a scratch copy, with `../paternitas` linked to
+    this repo. No NAME 01 name failed. 108 errors came from `anchor.type_id`
+    (A11) and `paternitas.nameOf` (PTRN 02).
+  - The owner asked for both to be fixed. Reads of `.type_id` are now
+    `.typeId()`, and `nameOf(found)` is now `found.typeName()`.
+  - The debug build then passed: 198 of 199 tests, one skipped by design.
+  - The owner then asked for all four modes and the negatives. Both pass
+    in all four modes: 198 of 199 tests each, and 5 compile and 14 panic
+    programs. The cross build in Debug passes too, for x86_64-macos,
+    aarch64-macos and x86_64-windows.
+- Design 010, with "Decisions of NAME 01". Rules 007. Plan 010. Intent
+  002, with the answers.
+  - Design 009, rules 006, plan 009 and intent 001 are in `design/backup/`.
+- The audit report and the intake now link to plan 010.
+- The owner cleared older versions from `design/backup/` during the stage.
+  Six links to them went dead: design 005 and 007, rules 005, plan 008.
+  The owner ruled to point each at the current version: rules 007, design
+  010, plan 010. They are in the audit report, the intake and the PTRN 01
+  and PTRN 02 intents.
+
+All six gates pass. There are 22 tests in all four modes, and 9 negatives.
+The checks after the gates also pass.
+
+- A copy was made before the edits. With comments stripped and the rename
+  map applied, the only other diffs are the planned ones: the aliases, the
+  message text, `error.NoTypeId` and the test names.
+- The README snippets compile and pass as tests in the scratchpad.
+- The site builds, and `mkdocs build --strict` has no warnings.
+- In headless Chrome the API pages list `SinglyTypedNode` and `setTypeId`.
+  No old name shows, and there are no console errors.
+- The intent's grep finds old names only in kept records, and in the
+  rename tables of design 010, rules 007, the plan and this entry.
+- The banned-word gate is clean. The added ztk lines were scanned by hand.
+
+| step | result |
+|---|---|
+| Post-stage cleanup | no edits: the stage was only renames |
+
+---
+
 ## 2026-10-03 — PTRN 02, the docs for the user
 
 A PTRN 02 follow-up, 2026-10-02 to 2026-10-03. Opus 5.5 wrote the code

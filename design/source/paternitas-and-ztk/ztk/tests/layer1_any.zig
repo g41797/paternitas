@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 //! Layer 1 — parents outside the toolkit: the bare Anchor, the dispatch view,
-//! and the DLink.
+//! and the DoublyTypedNode.
 //!
 //! Scenarios 320 to 329.
 
@@ -11,7 +11,7 @@ const CHUNK = m.helper.ParentHelper(o.Chunk);
 
 test "320 — takeFromSlot and fillSlot carry one parent out and back" {
     var msg: o.Msg = .{ .seq = 7 };
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
     const bare: *m.inner.Anchor = m.inner.takeFromSlot(&slot);
@@ -25,7 +25,7 @@ test "320 — takeFromSlot and fillSlot carry one parent out and back" {
 
 test "321 — anyFromSlot is a view: the parent's address and id, and the Slot stays full" {
     var msg: o.Msg = .{ .seq = 9 };
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
     const any = m.inner.anyFromSlot(&slot).?;
@@ -37,14 +37,14 @@ test "321 — anyFromSlot is a view: the parent's address and id, and the Slot s
 
 test "322 — toAny and fromAny round-trip" {
     var msg: o.Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     try expect(MSG.fromAny(MSG.toAny(&msg)).? == &msg);
 }
 
 test "323 — fromAny answers null for a wrong type; anyFromSlot for an empty Slot" {
     var msg: o.Msg = .{};
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     try expect(CHUNK.fromAny(MSG.toAny(&msg)) == null);
 
@@ -52,9 +52,9 @@ test "323 — fromAny answers null for a wrong type; anyFromSlot for an empty Sl
     try expect(m.inner.anyFromSlot(&empty) == null);
 }
 
-test "324 — a Link at a nonzero and a zero offset both round-trip" {
+test "324 — a TypedNode at a nonzero and a zero offset both round-trip" {
     var chunk: o.Chunk = .{};
-    CHUNK.stamp(&chunk);
+    CHUNK.setTypeId(&chunk);
 
     var slot: m.inner.Slot = CHUNK.toAnchor(&chunk);
     try expect(CHUNK.fromAny(m.inner.anyFromSlot(&slot).?).? == &chunk);
@@ -72,7 +72,7 @@ test "325 — a bare Anchor travels through a std queue" {
     const io = std.testing.io;
 
     var msg: o.Msg = .{ .seq = 42 };
-    MSG.stamp(&msg);
+    MSG.setTypeId(&msg);
 
     var slot: m.inner.Slot = MSG.toAnchor(&msg);
     try q.putOne(io, .{ .parent = m.inner.takeFromSlot(&slot) });
@@ -104,8 +104,8 @@ test "326 — dispatch by id: a handler map, no helper at the call" {
 
     var msg: o.Msg = .{ .seq = 5 };
     var chunk: o.Chunk = .{ .size = 64 };
-    MSG.stamp(&msg);
-    CHUNK.stamp(&chunk);
+    MSG.setTypeId(&msg);
+    CHUNK.setTypeId(&chunk);
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&msg));
@@ -121,19 +121,19 @@ test "326 — dispatch by id: a handler map, no helper at the call" {
     try expect(H.size == 64);
 }
 
-/// A parent with a DLink: it can also live in a `std.DoublyLinkedList`.
+/// A parent with a DoublyTypedNode: it can also live in a `std.DoublyLinkedList`.
 const Timed = struct {
     deadline: u64 = 0,
-    link: m.inner.DLink = .{},
+    tnode: m.inner.DoublyTypedNode = .{},
 };
 
 const TIMED = m.helper.ParentHelper(Timed);
 
-test "327 — a DLink parent shares a queue with SLink parents, then goes onto a std list" {
+test "327 — a DoublyTypedNode parent shares a queue with SinglyTypedNode parents, then goes onto a std list" {
     var msg: o.Msg = .{ .seq = 1 };
     var timed: Timed = .{ .deadline = 99 };
-    MSG.stamp(&msg);
-    TIMED.stamp(&timed);
+    MSG.setTypeId(&msg);
+    TIMED.setTypeId(&timed);
 
     var q: m.queue.Queue = .{};
     q.append(MSG.toAnchor(&msg));
@@ -156,18 +156,18 @@ test "327 — a DLink parent shares a queue with SLink parents, then goes onto a
     try expect(q.len() == 1);
 }
 
-test "328 — a DLink parent goes from a std list to a queue and back to the std list" {
+test "328 — a DoublyTypedNode parent goes from a std list to a queue and back to the std list" {
     var a: Timed = .{ .deadline = 1 };
     var b: Timed = .{ .deadline = 2 };
-    TIMED.stamp(&a);
-    TIMED.stamp(&b);
+    TIMED.setTypeId(&a);
+    TIMED.setTypeId(&b);
 
     var timeouts: std.DoublyLinkedList = .{};
     timeouts.append(TIMED.node(&a));
     timeouts.append(TIMED.node(&b));
 
     // Out of the application's list. O(1) removal from the middle is what
-    // the DLink is for.
+    // the DoublyTypedNode is for.
     timeouts.remove(TIMED.node(&b));
     TIMED.node(&b).* = .{};
 
@@ -189,8 +189,8 @@ test "328 — a DLink parent goes from a std list to a queue and back to the std
 test "329 — on a chain, the Node's next word holds an Anchor" {
     var msg: o.Msg = .{};
     var timed: Timed = .{};
-    MSG.stamp(&msg);
-    TIMED.stamp(&timed);
+    MSG.setTypeId(&msg);
+    TIMED.setTypeId(&timed);
 
     const ma = MSG.toAnchor(&msg);
     const ta = TIMED.toAnchor(&timed);

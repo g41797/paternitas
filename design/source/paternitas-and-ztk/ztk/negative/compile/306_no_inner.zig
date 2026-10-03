@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! 306 — a parent with no SLink or DLink field does not compile.
+//! 306 — a parent with no SinglyTypedNode or DoublyTypedNode field does not compile.
 
 const NoInner = struct {
     seq: u32 = 0,

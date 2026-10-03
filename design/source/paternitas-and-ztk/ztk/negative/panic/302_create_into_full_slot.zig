@@ -5,7 +5,7 @@
 
 const Msg = struct {
     seq: u32 = 0,
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 
     pub fn init(self: *Msg, alloc: std.mem.Allocator, io: std.Io) !void {
         _ = io;

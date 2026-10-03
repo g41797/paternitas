@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! 321 — taking an unstamped parent out of a Slot is refused.
+//! 321 — taking a parent whose setTypeId was never called out of a
+//! Slot is refused.
 
 const Msg = struct {
     seq: u32 = 0,
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 };
 
 pub fn main() void {

@@ -1,9 +1,10 @@
-//! fromAny of a hand-built AnyParent whose Parent was never stamped.
+//! fromAny of a hand-built AnyParent, when setTypeId was never called on the
+//! Parent.
 //!
 //! - Debug, ReleaseSafe: aborts, and says why.
 //! - ReleaseFast, ReleaseSmall: the contract check compiles to nothing. Exits 0.
 
-const Msg = struct { link: p.SLink = .{} };
+const Msg = struct { tnode: p.SinglyTypedNode = .{} };
 
 pub fn main() void {
     var m: Msg = .{};

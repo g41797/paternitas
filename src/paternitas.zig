@@ -10,12 +10,12 @@
 //! ```zig
 //! const Message = struct {
 //!     text: []const u8,
-//!     link: paternitas.DLink = .{}, // where the std Node was
+//!     tnode: paternitas.DoublyTypedNode = .{}, // where the std Node was
 //! };
 //! const TypedMessage = paternitas.Typed(Message);
 //!
 //! var message: Message = .{ .text = "hello" };
-//! TypedMessage.stamp(&message);
+//! TypedMessage.setTypeId(&message);
 //! list.append(TypedMessage.node(&message));
 //!
 //! // null when the Node is in a struct of another type
@@ -24,11 +24,11 @@
 //!
 //! How to use it:
 //!
-//! - Put an `SLink` or a `DLink` in your struct, where the std Node was.
-//!   paternitas calls that struct the Parent.
+//! - Put a `SinglyTypedNode` or a `DoublyTypedNode` in your struct, where
+//!   the std Node was. paternitas calls that struct the Parent.
 //! - Declare `Typed` once per struct type.
-//! - Call `stamp` once on each struct, before it goes in a list. It writes
-//!   the struct's type into its Link.
+//! - Call `setTypeId` once on each struct, before it goes in a list. It
+//!   writes the struct's type into its TypedNode.
 //! - Give `node` to the std list.
 //! - Get the struct back with `parentFromNode`. You get null when the Node
 //!   is in a struct of another type.
@@ -43,29 +43,35 @@
 
 const _doc_stub = void;
 
-/// The Link for a `std.SinglyLinkedList`.
-pub const SLink = Link(std.SinglyLinkedList.Node);
-/// The Link for a `std.DoublyLinkedList`.
-pub const DLink = Link(std.DoublyLinkedList.Node);
+/// The TypedNode for a `std.SinglyLinkedList`.
+pub const SinglyTypedNode = TypedNode(std.SinglyLinkedList.Node);
+/// Short for `SinglyTypedNode`.
+pub const STNode = SinglyTypedNode;
+/// The TypedNode for a `std.DoublyLinkedList`.
+pub const DoublyTypedNode = TypedNode(std.DoublyLinkedList.Node);
+/// Short for `DoublyTypedNode`.
+pub const DTNode = DoublyTypedNode;
 
-/// The field you put in your struct, where the std Node was. Use `SLink` or
-/// `DLink`.
+/// The std Node with a type check added. It is the field you put in your
+/// struct, where the std Node was. Use `SinglyTypedNode` or
+/// `DoublyTypedNode`.
 ///
 /// - A Parent has exactly one.
-/// - It contains the std Node, and the place where `stamp` writes the type.
+/// - It contains the std Node, and the place where `setTypeId` writes the
+///   type.
 /// - Any `N` other than the two std Node types is a compile error.
-pub fn Link(comptime N: type) type {
+pub fn TypedNode(comptime N: type) type {
     const node_kind: NodeKind = comptime kindOf(N);
 
     return struct {
         /// The std Node that the list links.
         node: N = .{},
-        /// Where `stamp` writes the type.
+        /// Where `setTypeId` writes the type.
         anchor: Anchor = .{},
 
         /// The std Node type.
         pub const Node: type = N;
-        /// `.single` for `SLink`, `.double` for `DLink`.
+        /// `.single` for `SinglyTypedNode`, `.double` for `DoublyTypedNode`.
         pub const kind: NodeKind = node_kind;
         /// For container authors: where the Node's `next` field is, counted
         /// from the Anchor.
@@ -78,23 +84,23 @@ pub fn Link(comptime N: type) type {
 /// The calls for one Parent type `P`. Declare it once per type:
 /// `const TypedMessage = paternitas.Typed(Message);`
 ///
-/// - `P` MUST be a struct with exactly one `SLink` or `DLink` field, under
-///   any name.
+/// - `P` MUST be a struct with exactly one `SinglyTypedNode` or
+///   `DoublyTypedNode` field, under any name.
 /// - Anything else is a compile error that names the type.
 pub fn Typed(comptime P: type) type {
-    const field: []const u8 = comptime findLink(P);
-    const L: type = @FieldType(P, field);
+    const field: []const u8 = comptime findTypedNode(P);
+    const TN: type = @FieldType(P, field);
 
     return struct {
-        /// Writes the type of `p` into its Link. Call it once, before `p`
-        /// goes in a list or a queue.
+        /// Writes the type of `p` into its TypedNode. Call it once, before
+        /// `p` goes in a list or a queue.
         ///
         /// - Without it, `parentFromNode`, `fromAnchor` and `fromAny` return
         ///   null for `p`.
         /// - Set up `p` first. `allocator.create` gives you undefined memory.
         /// - It changes nothing else in `p`. A Parent already in a list stays
         ///   there.
-        pub inline fn stamp(p: *P) void {
+        pub inline fn setTypeId(p: *P) void {
             @field(p.*, field).anchor._type_id = typeId();
         }
 
@@ -104,9 +110,9 @@ pub fn Typed(comptime P: type) type {
         }
 
         /// Returns the `P` that contains the Node. Returns null when it is
-        /// another type, or when `stamp` was never called.
+        /// another type, or when `setTypeId` was never called.
         ///
-        /// The Node MUST be inside an `SLink` or `DLink`.
+        /// The Node MUST be inside a `SinglyTypedNode` or `DoublyTypedNode`.
         pub inline fn parentFromNode(n: *Node) ?*P {
             if (!is(n)) return null;
             return parentFromNodeUnchecked(n);
@@ -115,24 +121,24 @@ pub fn Typed(comptime P: type) type {
         /// Like `parentFromNode`, but panics instead of returning null. It
         /// panics in every build mode.
         ///
-        /// The Node MUST be inside an `SLink` or `DLink`.
+        /// The Node MUST be inside a `SinglyTypedNode` or `DoublyTypedNode`.
         pub inline fn mustParentFromNode(n: *Node) *P {
-            return parentFromNode(n) orelse wrongType("mustParentFromNode", &linkOf(n).*.anchor);
+            return parentFromNode(n) orelse wrongType("mustParentFromNode", &typedNodeOf(n).*.anchor);
         }
 
         /// Returns the `P` that contains the Node, with no type check.
         ///
         /// The Node MUST be inside a `P`. Anything else gives you garbage.
         pub inline fn parentFromNodeUnchecked(n: *Node) *P {
-            return @fieldParentPtr(field, linkOf(n));
+            return @fieldParentPtr(field, typedNodeOf(n));
         }
 
         /// Returns true when the Node is inside a `P`.
         ///
-        /// The Node MUST be inside an `SLink` or `DLink`.
+        /// The Node MUST be inside a `SinglyTypedNode` or `DoublyTypedNode`.
         pub inline fn is(n: *const Node) bool {
-            const l: *const L = @fieldParentPtr("node", n);
-            return isId(l.*.anchor.typeId());
+            const tn: *const TN = @fieldParentPtr("node", n);
+            return isId(tn.*.anchor.typeId());
         }
 
         /// Returns the `*Anchor` of `p`. Pass it where the type is not known
@@ -142,11 +148,11 @@ pub fn Typed(comptime P: type) type {
         }
 
         /// Returns the `P` behind the `*Anchor`. Returns null when it is
-        /// another type, or when `stamp` was never called.
+        /// another type, or when `setTypeId` was never called.
         pub inline fn fromAnchor(a: *Anchor) ?*P {
             if (!isId(a.typeId())) return null;
-            const l: *L = @fieldParentPtr("anchor", a);
-            return @fieldParentPtr(field, l);
+            const tn: *TN = @fieldParentPtr("anchor", a);
+            return @fieldParentPtr(field, tn);
         }
 
         /// Like `fromAnchor`, but panics instead of returning null. It panics
@@ -164,7 +170,7 @@ pub fn Typed(comptime P: type) type {
         pub inline fn fromAny(any: AnyParent) ?*P {
             if (!isId(any.type_id)) return null;
             const p: *P = @ptrCast(@alignCast(any.ptr));
-            check(isId(anchor(p).typeId()), "fromAny: the Parent was never stamped");
+            check(isId(anchor(p).typeId()), "fromAny: setTypeId was never called on the Parent");
             return p;
         }
 
@@ -179,7 +185,7 @@ pub fn Typed(comptime P: type) type {
         }
 
         /// The std Node type of `P`.
-        pub const Node: type = L.Node;
+        pub const Node: type = TN.Node;
 
         // Nothing reads or writes this. Its address keeps `desc` unique.
         // A `const` tag would merge with the tag of every other `Typed`.
@@ -188,12 +194,12 @@ pub fn Typed(comptime P: type) type {
         const desc: TypeInfo = .{
             ._tag = &tag,
             .name = @typeName(P),
-            .anchor_offset = @offsetOf(P, field) + @offsetOf(L, "anchor"),
-            .node_next_offset = L.node_next_offset,
-            .node_kind = L.kind,
+            .anchor_offset = @offsetOf(P, field) + @offsetOf(TN, "anchor"),
+            .node_next_offset = TN.node_next_offset,
+            .node_kind = TN.kind,
         };
 
-        inline fn linkOf(n: *Node) *L {
+        inline fn typedNodeOf(n: *Node) *TN {
             return @fieldParentPtr("node", n);
         }
 
@@ -205,39 +211,39 @@ pub fn Typed(comptime P: type) type {
 
 /// A pointer to a Parent whose type is checked when you get it back.
 ///
-/// Every Parent has one, inside its `SLink` or `DLink`. Get it with
-/// `Typed(P).anchor(&p)`.
+/// Every Parent has one, inside its `SinglyTypedNode` or
+/// `DoublyTypedNode`. Get it with `Typed(P).anchor(&p)`.
 ///
 /// - Pass `*Anchor` through a queue, a map or a union field that carries
 ///   several struct types.
 /// - Get the Parent back with `Typed(P).fromAnchor`. You get null for
 ///   another type.
 pub const Anchor = struct {
-    /// Do not write this field. `Typed(P).stamp` writes it. A value you write
-    /// yourself passes every type check.
+    /// Do not write this field. `Typed(P).setTypeId` writes it. A value you
+    /// write yourself passes every type check.
     _type_id: TypeId = null,
 
-    /// Returns the Parent's type name, or `<unstamped>` when `stamp` was
+    /// Returns the Parent's type name, or `<no type>` when `setTypeId` was
     /// never called on it. For logs and panic messages.
     pub fn typeName(a: *const Anchor) []const u8 {
-        return if (a.info()) |i| i.*.name else "<unstamped>";
+        return if (a.info()) |i| i.*.name else "<no type>";
     }
 
     /// Returns the Parent's address and type id, to pick a handler by type.
-    /// Returns null when `stamp` was never called on the Parent.
+    /// Returns null when `setTypeId` was never called on the Parent.
     pub inline fn toAny(a: *Anchor) ?AnyParent {
         const ti: *const TypeInfo = a.info() orelse return null;
         return ti.toAny(a);
     }
 
-    /// Returns the Parent's type id, or null when `stamp` was never called
+    /// Returns the Parent's type id, or null when `setTypeId` was never called
     /// on it.
     pub inline fn typeId(a: *const Anchor) TypeId {
         return a.*._type_id;
     }
 
     /// For container authors. Returns the type's layout facts, or null when
-    /// `stamp` was never called on the Parent.
+    /// `setTypeId` was never called on the Parent.
     pub inline fn info(a: *const Anchor) ?*const TypeInfo {
         const id: *const anyopaque = a.typeId() orelse return null;
         return @ptrCast(@alignCast(id));
@@ -264,7 +270,7 @@ pub const AnyParent = struct {
 /// An id for a struct type. Each Parent type gets its own.
 ///
 /// - Use it as a map key, to find the handler for a type.
-/// - Null means no type: `stamp` was never called on that struct.
+/// - Null means no type: `setTypeId` was never called on that struct.
 /// - It is valid only while the program runs. Do not save it or send it.
 /// - A shared library gets a different id for the same type.
 pub const TypeId = ?*const anyopaque;
@@ -276,24 +282,24 @@ pub const container = @import("container.zig");
 fn kindOf(comptime N: type) NodeKind {
     if (N == std.SinglyLinkedList.Node) return .single;
     if (N == std.DoublyLinkedList.Node) return .double;
-    @compileError("Link(" ++ @typeName(N) ++ "): not a std Node, so it cannot be a Paternitas Link");
+    @compileError("TypedNode(" ++ @typeName(N) ++ "): not a std Node, so it cannot be a Paternitas TypedNode");
 }
 
-fn findLink(comptime P: type) []const u8 {
+fn findTypedNode(comptime P: type) []const u8 {
     comptime {
         const ti: std.builtin.Type = @typeInfo(P);
         if (ti != .@"struct")
             @compileError(@typeName(P) ++ ": not a struct, so it cannot be a Paternitas Parent");
         var found: ?[]const u8 = null;
         for (ti.@"struct".fields) |f| {
-            if (f.type == SLink or f.type == DLink) {
+            if (f.type == SinglyTypedNode or f.type == DoublyTypedNode) {
                 if (found != null)
-                    @compileError(@typeName(P) ++ ": more than one Link, and exactly one is allowed");
+                    @compileError(@typeName(P) ++ ": more than one TypedNode, and exactly one is allowed");
                 found = f.name;
             }
         }
         return found orelse
-            @compileError(@typeName(P) ++ ": no Link, so it cannot be a Paternitas Parent");
+            @compileError(@typeName(P) ++ ": no TypedNode, so it cannot be a Paternitas Parent");
     }
 }
 

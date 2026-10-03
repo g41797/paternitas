@@ -4,7 +4,7 @@
 //! 309 — a parent with no finish does not compile where the helper releases it.
 
 const NoFinish = struct {
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 
     pub fn init(self: *NoFinish, alloc: std.mem.Allocator, io: std.Io) !void {
         _ = io;

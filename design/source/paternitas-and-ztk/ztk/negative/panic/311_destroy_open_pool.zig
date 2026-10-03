@@ -12,7 +12,7 @@
 //! because a program can only die once.
 
 const Item = struct {
-    hdr: m.inner.SLink = .{},
+    hdr: m.inner.SinglyTypedNode = .{},
 
     pub fn init(self: *Item, alloc: std.mem.Allocator, io: std.Io) !void {
         _ = self;
