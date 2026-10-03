@@ -1,12 +1,12 @@
-//! Stamp a Parent, pass its Node through a std list, and recover the Parent.
+//! The smallest use: one struct, one std list, and the struct back with a type check.
 //!
-//! The smallest use of paternitas. One Parent type, one std list.
+//! The struct has a `DLink` where it would have a std Node.
 //!
-//! - stamp a `Message`
-//! - append its Node to a `std.DoublyLinkedList`
-//! - pop the Node
-//! - recover the `Message` from the Node, checked
-//! - log its text
+//! - Stamp a `Message`, so it carries its type.
+//! - Append its Node to a `std.DoublyLinkedList`.
+//! - Pop the Node.
+//! - Get the `Message` back with `parentFromNode`. A Node of another type would give null.
+//! - Log its text.
 
 pub fn stamp_and_recover(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;

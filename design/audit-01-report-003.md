@@ -9,7 +9,7 @@ is open.
 Change from 001, kept: the owner's rulings, 2026-10-02, in "The rulings"
 below. A1 and A11 have a second probe and Claude's advice.
 
-- Rules: [rules-005.md](rules-005.md).
+- Rules: [rules-005.md](backup/rules-005.md).
 - Plan: [implementation-plan-009.md](implementation-plan-009.md).
 - Intake: [paternitas-intake-001.md](paternitas-intake-001.md).
 - The outside design: `design/source/paternitas-design.md`.

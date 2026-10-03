@@ -1,15 +1,15 @@
-//! A stack chained through `TypeInfo.nextField`, for container authors.
+//! Build your own stack of mixed struct types, with no extra memory per item.
 //!
-//! The chain word is the Node's `next`.
-//! paternitas says where it is. The container decides what goes in it.
+//! You write a container that keeps items of several types.
+//! Each item has a std Node, and its `next` field is free while the item is in no std list.
+//! `TypeInfo.nextField` gives you that field for any type, so your stack chains through it.
 //!
-//! - a `Stack` keeps `*Anchor`s, chained through each Anchor's `next` word
-//! - push an `SLink` Parent and a `DLink` Parent: one chain, two Node kinds
-//! - pop each, and recover it with `fromAnchor`
-//! - check the order, and that each chain word is null again
+//! - Write a `Stack` that keeps `*Anchor`s, chained through each item's `next` field.
+//! - Push a `Message` with an `SLink` and a `Job` with a `DLink`. Two Node types share one chain.
+//! - Pop each, and get it back with `fromAnchor`.
+//! - Check the order, and that each `next` field is null again.
 //!
-//! The `next` word is shared with the std lists.
-//! A Parent on this stack is in no std list.
+//! A std list uses the same `next` field. An item on this stack MUST NOT be in a std list.
 //!
 //! ```
 //!  top --> job.anchor --next--> message.anchor --next--> null
@@ -27,7 +27,7 @@ const Job: type = struct {
 };
 const TypedJob: type = paternitas.Typed(Job);
 
-/// A last-in, first-out stack of Anchors. It allocates nothing.
+/// A last-in, first-out stack of `*Anchor`s. It allocates nothing.
 const Stack: type = struct {
     top: ?*paternitas.Anchor = null,
 
@@ -71,9 +71,10 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
     std.log.info("popped job {d}, then message {s}", .{ j.*.id, m.*.text });
 }
 
-/// The chain word of `a`, typed as this stack keeps it: the next Anchor.
+/// Returns the item's `next` field, typed as this stack uses it: a pointer
+/// to the next `*Anchor`.
 ///
-/// An unstamped Anchor has no `TypeInfo`, so no chain word.
+/// Fails when `stamp` was never called on the item.
 fn chainWord(a: *paternitas.Anchor) !*?*paternitas.Anchor {
     const ti: *const paternitas.container.TypeInfo = a.info() orelse return error.Unstamped;
     return @ptrCast(ti.nextField(a));

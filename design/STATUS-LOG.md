@@ -4,6 +4,44 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — PTRN 02, the docs for the user
+
+A PTRN 02 follow-up, 2026-10-02 to 2026-10-03. Opus 5.5 wrote the code
+comments and the README. Fable did the voice pass on the design. No
+behaviour changed.
+
+The owner found the text correct but not human. Then the owner found a
+deeper fault. The README and the comments copied the design. They described
+the internals instead of how a user solves the problem.
+
+What changed:
+
+- rules-006 replaces 005. It adds "Three kinds of documentation" and "Human
+  voice" to Part 5. Part 3 now says a comment stands alone and example steps
+  are commands. Part 2 adds the order of a source file and the layout of an
+  example file. The line that put the entry point first is gone.
+- The README starts from the ziggit footgun, in code. Then it shows the same
+  code with paternitas, and a queue of `*Anchor`. The snippets compile and
+  run as tests in the scratchpad.
+- Every comment in `src/` is rewritten for the caller. No comment leans on
+  "stamped" or "Anchor" without explaining it.
+- `src/paternitas.zig` and `src/container.zig` follow the user's path. Only
+  the order changed: the sorted lines of each file are the same as before.
+- Each example opens with the situation it solves. The steps are commands.
+- Design 009 is the voice pass, plus the rulings of this round. 008 is in
+  `design/backup/`.
+- The first Fable pilot rewrote only the voice. The brief told it to keep
+  the facts, so it kept the wrong ones. The second pilot came from Claude.
+
+Autodoc groups declarations by kind and sorts a type's calls by name. The
+source order helps the reader of the source, not the API page.
+
+All six gates pass. The site builds, and `mkdocs build --strict` is clean.
+The pages load in headless Chrome with no console errors. The banned-word
+scan is clean.
+
+---
+
 ## 2026-10-02 — PTRN 02, Info becomes Typed
 
 A PTRN 02 follow-up. The owner did not like `MessageInfo`, and brought a

@@ -1,72 +1,56 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! For container authors.
+//! For you if you write your own container: a queue, a stack, a pool.
 //!
-//! - The type description behind a `TypeId`.
-//! - Where an Anchor's Node `next` word is.
-//! - Where its Parent starts.
-//! - Which Node kind it carries.
+//! Your container keeps `*Anchor`s of many Parent types. This part tells you,
+//! for any of them, without knowing the type:
 //!
-//! Application code does not need this namespace. It uses `Typed(P)`, the
-//! Link types, `*Anchor`, `AnyParent` and `Anchor.toAny()`.
+//! - where a pointer-sized word sits that you can chain through, so the
+//!   container needs no extra memory per item
+//! - the std Node, typed
+//! - the Parent's address
 //!
-//! Reach it through `Anchor.info()`.
+//! Start from `anchor.info()`. It gives you the `TypeInfo` of that Parent.
+//!
+//! Application code does not need this part. `Typed(P)` covers it.
 
 const _doc_stub = void;
 
-/// Which std Node a Link carries.
-pub const NodeKind = enum { single, double };
-
-/// One Parent type's description. One `const` per type, built by `Typed`.
+/// What paternitas knows about one Parent type. Get it with `anchor.info()`.
 ///
-/// Its address is the `TypeId`.
+/// There is one per Parent type, and it lives as long as the program.
 pub const TypeInfo = struct {
-    /// Not for use. Its address makes this descriptor unique.
-    ///
-    /// The compiler merges constants with equal contents, and `@typeName` is
-    /// not unique across modules.
+    /// Do not use.
     _tag: *const u8,
-    /// `@typeName(Parent)`, for panic and log text.
+    /// The Parent's type name. For logs and panic messages.
     name: []const u8,
-    /// From the Parent start to its Anchor.
+    /// The distance from the start of the Parent to its Anchor. `parent`
+    /// uses it.
     anchor_offset: usize,
-    /// From the Anchor to the Node's `next` field. Signed: the Node may sit
-    /// before the Anchor.
+    /// The distance from the Anchor to the Node's `next` field. It can be
+    /// negative. `nextField` uses it.
     node_next_offset: isize,
-    /// `.single` or `.double`.
+    /// `.single` for `SLink`, `.double` for `DLink`.
     node_kind: NodeKind,
 
-    /// Address of the Node's `next` field, for either Node kind.
+    /// Returns a pointer to the Node's `next` field. Chain your items
+    /// through it.
     ///
-    /// Location only. paternitas never reads or writes this word. What goes
-    /// in it is the container's choice.
-    ///
-    /// MUST: the word is shared. A std list writes it while the Parent is in
-    /// that list. A container that chains through it does not use the Parent
-    /// while it is in a std list, and the other way round.
+    /// - It works for both Node kinds.
+    /// - paternitas never reads or writes this word. What you put in it is
+    ///   up to your container.
+    /// - A std list uses the same word. A Parent MUST NOT be in your
+    ///   container and in a std list at the same time.
     pub inline fn nextField(ti: *const TypeInfo, a: *Anchor) *?*anyopaque {
         const off: isize = if (uniform_next_offset) |u| u else ti.*.node_next_offset;
         return _nextFieldAt(a, off);
     }
 
-    /// The Parent address, erased.
+    /// Returns the std Node of the Parent, as type `N`.
     ///
-    /// For code that knows nothing of paternitas, such as a C callback's
-    /// `void*`.
-    pub inline fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque {
-        return addOffset(a, -@as(isize, @intCast(ti.*.anchor_offset)));
-    }
-
-    /// The dispatch view of the Parent behind this Anchor.
-    pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) AnyParent {
-        return .{ .ptr = ti.parent(a), .type_id = a.typeId() };
-    }
-
-    /// The Node, typed.
-    ///
-    /// Panics in every build mode when `N` is not this type's Node kind. A
-    /// wrong kind would read memory as the wrong Node type.
+    /// Panics in every build mode when `N` is the wrong Node type for this
+    /// Parent.
     pub inline fn node(ti: *const TypeInfo, a: *Anchor, comptime N: type) *N {
         const L: type = Link(N);
         if (ti.*.node_kind != L.kind)
@@ -74,24 +58,32 @@ pub const TypeInfo = struct {
         const l: *L = @fieldParentPtr("anchor", a);
         return &l.*.node;
     }
+
+    /// Returns the Parent's address, with no type. For code that knows
+    /// nothing of paternitas, such as a C callback's `void*`.
+    pub inline fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque {
+        return addOffset(a, -@as(isize, @intCast(ti.*.anchor_offset)));
+    }
+
+    /// Returns the Parent's address and type id, to pick a handler by type.
+    pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) AnyParent {
+        return .{ .ptr = ti.parent(a), .type_id = a.typeId() };
+    }
 };
 
-/// The Node's `next` is at the same distance from the Anchor in both Links.
+/// Not null when the `next` field sits at the same distance from the Anchor
+/// in every Parent. Then `nextField` costs one addition.
 ///
-/// - `next` is the last word of both std Nodes, and the Anchor follows the
-///   Node.
-/// - When the compiler keeps that order, `nextField` adds a constant and
-///   loads nothing.
-/// - When it does not, this is null and `nextField` reads `node_next_offset`.
-///   Still correct, one load slower.
+/// You do not need it to use `nextField`. It is here for tests and for the
+/// curious.
 pub const uniform_next_offset: ?isize =
     if (SLink.node_next_offset == DLink.node_next_offset) SLink.node_next_offset else null;
 
-/// Not for use: the leading `_` says so. The address step of `nextField`,
-/// with the offset given.
-///
-/// `pub` only so a test can run it with `node_next_offset`: on every tested
-/// target `nextField` uses `uniform_next_offset`.
+/// Which std Node a Parent has: `.single` for `SLink`, `.double` for
+/// `DLink`.
+pub const NodeKind = enum { single, double };
+
+/// Do not use. It is `pub` only for a test. Call `nextField` instead.
 pub inline fn _nextFieldAt(a: *Anchor, off: isize) *?*anyopaque {
     return @ptrCast(@alignCast(addOffset(a, off)));
 }

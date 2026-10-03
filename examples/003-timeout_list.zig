@@ -1,29 +1,30 @@
-//! A `DLink` Parent in the application's timeout list, sent away and back.
+//! A connection leaves the timeout list, goes through a queue, and comes back.
 //!
-//! The timeout list is a plain `std.DoublyLinkedList`.
-//! It removes any Node in O(1).
-//! The queue carries `*Anchor`, a pointer. The Parent never moves.
+//! A server keeps its open connections in a timeout list, a plain `std.DoublyLinkedList`.
+//! Sometimes a connection goes to another thread for a while, through a queue.
+//! A connection must not be copied, so the queue carries its `*Anchor`, a pointer.
+//! The other side gets the `Connection` back with a type check.
 //!
-//! - stamp three `Connection`s and append them to the timeout list
-//! - remove the middle one from the list
-//! - send its `*Anchor` through a `std.Io.Queue`
-//! - receive the `*Anchor`, and recover the `Connection` with `fromAnchor`
-//! - give it a new deadline, and append it to the list again
-//! - check the order of the list
+//! - Stamp three `Connection`s and append them to the timeout list.
+//! - Remove the middle one from the list.
+//! - Send its `*Anchor` through a `std.Io.Queue`.
+//! - Receive the `*Anchor`, and get the `Connection` back with `fromAnchor`.
+//! - Give it a new deadline, and append it to the list again.
+//! - Check the order of the list.
 //!
 //! ```
 //!  timeout list:   c1 <-> c2 <-> c3
 //!                          |
-//!                          |  remove, Typed.anchor
+//!                          |  remove, anchor()
 //!                          v
 //!  queue:              [*Anchor]
 //!                          |
-//!                          |  getOne, Typed.fromAnchor
+//!                          |  getOne, fromAnchor()
 //!                          v
 //!  timeout list:   c1 <-> c3 <-> c2
 //! ```
 
-/// A `DLink`, so the timeout list can remove it from anywhere.
+/// It has a `DLink`, so the timeout list can remove it from anywhere.
 const Connection: type = struct {
     id: u32,
     deadline: u64,
@@ -56,13 +57,15 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
     try checkOrder(&timeouts, &.{ 1, 3, 2 });
 }
 
-/// Out of the list, into the queue. Only the pointer travels.
+/// Takes the connection out of the list, and sends its pointer through the
+/// queue.
 fn removeAndSend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: *Connection) !void {
     timeouts.remove(TypedConnection.node(c));
     try queue.putOne(io, TypedConnection.anchor(c));
 }
 
-/// Out of the queue, back into the list, with a new deadline.
+/// Gets a pointer from the queue, and puts the connection back in the list
+/// with a new deadline.
 fn receiveAndAppend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) !void {
     const a: *paternitas.Anchor = try queue.getOne(io);
     const c: *Connection = TypedConnection.fromAnchor(a) orelse return error.WrongParent;

@@ -1,15 +1,15 @@
-//! Dispatch through a `TypeId -> handler` map, with no `Typed` call at dispatch.
+//! Pick a handler by type, with a map from type id to handler.
 //!
-//! The consumer keeps a map.
-//! Each handler knows its own Parent type.
-//! Picking a handler needs no paternitas call.
+//! An event loop gets items of many types as `*Anchor`s.
+//! It keeps one handler per type in a map, keyed by `TypeId`.
+//! Picking the handler needs only the type id, not the type itself.
 //!
-//! - register one handler per Parent type, under its `TypeId`
-//! - receive a `Message`, a `Job` and a `Ping` as `*Anchor`s
-//! - turn each `*Anchor` into an `AnyParent` with `toAny`
-//! - find the handler by `type_id`, and call it with `ptr`
-//! - count the `Ping`: no handler is registered for it
-//! - check one view with `fromAny`, the checked form
+//! - Register one handler per type, under its `TypeId`.
+//! - Receive a `Message`, a `Job` and a `Ping` as `*Anchor`s.
+//! - Turn each `*Anchor` into an `AnyParent` with `toAny`.
+//! - Find the handler by `type_id`, and call it with `ptr`.
+//! - Count the `Ping` as unhandled. No handler is registered for it.
+//! - Get a `Message` back from an `AnyParent` with `fromAny`, which checks the type.
 
 const Message: type = struct {
     text: []const u8,
@@ -42,7 +42,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     var handlers: std.AutoHashMap(paternitas.TypeId, Handler) = .init(allocator);
     defer handlers.deinit();
 
-    // Registration: the only `Typed` calls.
+    // Register the handlers. The dispatch below never names a type.
     try handlers.put(TypedMessage.typeId(), onMessage);
     try handlers.put(TypedJob.typeId(), onJob);
 
@@ -67,7 +67,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     try checkFromAny(&message);
 }
 
-/// The dispatch step. No Parent type appears here.
+/// Picks the handler by type id. No struct type appears here.
 fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *paternitas.Anchor, counts: *Counts) !void {
     const any: paternitas.AnyParent = a.toAny() orelse return error.Unstamped;
     const h: Handler = handlers.get(any.type_id) orelse {
@@ -78,15 +78,15 @@ fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), a: *pa
     h(any.ptr, counts);
 }
 
-/// `fromAny` compares the id first. A view of another type gives null.
+/// `fromAny` checks the type id first. Asking for another type gives null.
 fn checkFromAny(message: *Message) !void {
     const any: paternitas.AnyParent = TypedMessage.toAny(message);
     if (TypedMessage.fromAny(any) != message) return error.WrongParent;
     if (TypedJob.fromAny(any) != null) return error.WrongParent;
 }
 
-// The cast is unchecked. The map matched the id, so it is correct by
-// registration.
+// The cast has no check. The map matched the type id, so the type is
+// right.
 fn onMessage(parent: *anyopaque, counts: *Counts) void {
     const m: *Message = @ptrCast(@alignCast(parent));
     std.log.info("message: {s}", .{m.*.text});

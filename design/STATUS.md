@@ -6,10 +6,10 @@ Current state only. Updated in place. The narrative is in
 ## Start here — every session
 
 1. Read this file in full.
-2. Read Part 0 of [rules-005.md](rules-005.md).
+2. Read Part 0 of [rules-006.md](rules-006.md).
 3. Read the plan, [implementation-plan-009.md](implementation-plan-009.md), for
    the stage the owner names. Not before they name it.
-4. Read the design, [paternitas-design-008.md](paternitas-design-008.md), for
+4. Read the design, [paternitas-design-009.md](paternitas-design-009.md), for
    a stage that writes code or docs.
 5. Read [paternitas-intake-001.md](paternitas-intake-001.md) for the ztk
    stage: the outside work and the questions left for it.
@@ -22,8 +22,8 @@ Current state only. Updated in place. The narrative is in
 
 | what | where |
 |---|---|
-| rules | [rules-005.md](rules-005.md) |
-| design decisions, and what paternitas keeps from ztk | [paternitas-design-008.md](paternitas-design-008.md) |
+| rules | [rules-006.md](rules-006.md) |
+| design decisions, and what paternitas keeps from ztk | [paternitas-design-009.md](paternitas-design-009.md) |
 | the plan | [implementation-plan-009.md](implementation-plan-009.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
@@ -35,9 +35,11 @@ Current state only. Updated in place. The narrative is in
 ## Current state
 
 - PTRN 02 is done, 2026-10-02.
-- The code: `src/paternitas.zig`, `src/container.zig`. Design 008.
+- The code: `src/paternitas.zig`, `src/container.zig`. Design 009.
 - Every `pub` declaration has a `///`. The root `//!` has a usage block.
 - `Info(P)` is now `Typed(P)`. The examples put the types first.
+- The README, the comments and the source order are written for the user.
+  Rules 006, design 009.
 - Six examples in `examples/`, each with a test wrapper and a site page.
 - The README replaces `WIP`.
 - Gates: all six pass.

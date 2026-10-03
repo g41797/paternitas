@@ -1,14 +1,14 @@
-//! Two Parent types in one std list, each recovered with a check.
+//! One std list, two struct types, and each one comes back as itself.
 //!
-//! The list sees only Nodes.
-//! `@fieldParentPtr` trusts any Node it is given.
-//! `parentFromNode` reads the Anchor next to the Node first.
+//! A mailbox list often carries more than one kind of item.
+//! With a plain std Node, `@fieldParentPtr` returns whatever type you ask for, right or wrong.
+//! Here each type asks `parentFromNode`, and the wrong type gets null.
 //!
-//! - stamp a `Message` and a `Job`
-//! - append both Nodes to one `std.DoublyLinkedList`
-//! - pop each Node
-//! - ask each Parent type in turn: `Message`, then `Job`
-//! - check that each type recovered its own Parent once
+//! - Stamp a `Message` and a `Job`.
+//! - Append both Nodes to one `std.DoublyLinkedList`.
+//! - Pop each Node.
+//! - Ask `Message` first, then `Job`.
+//! - Check that each type came back exactly once.
 
 const Message: type = struct {
     text: []const u8,
@@ -48,7 +48,7 @@ pub fn mixed_list(allocator: std.mem.Allocator, io: std.Io) !void {
     if (counts.messages != 1 or counts.jobs != 1) return error.WrongCount;
 }
 
-/// Asks each Parent type in turn. A Node no type claims is an error.
+/// Asks each Parent type in turn. A Node that no type claims is an error.
 fn recoverAndCount(node: *std.DoublyLinkedList.Node, counts: *Counts) !void {
     if (TypedMessage.parentFromNode(node)) |m| {
         std.log.info("message: {s}", .{m.*.text});

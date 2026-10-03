@@ -1,15 +1,16 @@
-//! `*Anchor` as one variant of a tagged union. The Parent stays where it is.
+//! Send a large struct through a union of events, by pointer, without copying it.
 //!
-//! Small events travel by value.
-//! A Parent that must not be copied travels as a pointer to its Anchor.
+//! Small events travel by value in a tagged union.
+//! A large struct, or one that must not be copied, travels as its `*Anchor`.
+//! The handler gets the struct back with a type check.
 //!
-//! - a `Download` keeps a large buffer, and is never copied
-//! - build three `Event`s: a tick, a resize, and the `Download`'s `*Anchor`
-//! - copy the events into a second array, as a queue would
-//! - handle each event, and recover the `Download` with `fromAnchor`
-//! - check that it is the same `Download`, not a copy
+//! - Stamp a `Download`. It has a 4 KB buffer, too large to copy.
+//! - Build three `Event`s: a tick, a resize, and the `Download`'s `*Anchor`.
+//! - Copy the events into a second array, as a queue would.
+//! - Handle each event, and get the `Download` back with `fromAnchor`.
+//! - Check that it is the same `Download`, not a copy.
 
-/// Too large to copy around.
+/// It is too large to copy. Events carry a pointer to it.
 const Download: type = struct {
     link: paternitas.SLink = .{},
     buffer: [4096]u8 = undefined,
@@ -41,7 +42,8 @@ pub fn anchor_in_union(allocator: std.mem.Allocator, io: std.Io) !void {
         .{ .parent = TypedDownload.anchor(&download) },
     };
 
-    // A copy, as a queue makes. Each Event is small. The Download is not in it.
+    // Copy the events, as a queue would. Each Event is small, and the
+    // Download is not in it.
     var received: [sent.len]Event = undefined;
     @memcpy(&received, &sent);
 

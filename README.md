@@ -1,99 +1,128 @@
 # paternitas
 
-Intrusive, type-erased programming for Zig.
+Put different struct types in one Zig std list, and get each one back as
+itself, or get null.
 
-- A std Node does not say which Parent it lives in. paternitas says.
-- It depends on `std` only. It allocates nothing.
-- Zig 0.16.0.
+Zig 0.16.0. It needs only `std`, and it allocates nothing.
 
 *Paternitas* is Latin for "fatherhood".
 
 ## The problem
 
-Zig's std lists are intrusive.
+Zig's std lists are intrusive. You put a `Node` inside your struct, and the
+list links the Nodes. To get your struct back, you call `@fieldParentPtr`.
 
-- A Parent struct contains a std Node.
-- The list sees only the Node. The Parent type is gone.
-- `@fieldParentPtr` gets the Parent back, but does not check it.
-  - Two structs can put their Nodes in one list.
-  - The wrong Parent comes back, and the compiler cannot see it.
-  - The ziggit thread:
-    [New LinkedList API footgun](https://ziggit.dev/t/new-linkedlist-api-footgun/10853).
+`@fieldParentPtr` trusts you. It returns whatever type you ask for.
 
-A second problem.
-
-- A container that stores by value copies its items.
-- Some items must not be copied: a mutex, a file handle, a large buffer.
-- They need a container of pointers, and a way to know their type again.
-
-## The model
-
-```text
-Parent
- |
- +-- Link  (one per Parent)
-      |
-      +-- node:   std Node (single or double)
-      +-- anchor: Anchor ---> TypeInfo (static, one per Parent type)
-```
-
-- **Link** — a std Node and an Anchor, as one type. `SLink` or `DLink`.
-- **Anchor** — one stamped word. Its address is the erased reference to the
-  Parent.
-- **TypeId** — the address of the Parent type's `TypeInfo`.
-- **`Typed(P)`** — the typed helper for one Parent type, built at comptime.
-- **AnyParent** — the dispatch view: the Parent address and its TypeId.
-
-## A first look
+This comes from the ziggit thread
+[New LinkedList API footgun](https://ziggit.dev/t/new-linkedlist-api-footgun/10853).
+Two vendors put their items in the same list.
 
 ```zig
-const Message = struct {
-    text: []const u8,
-    link: paternitas.DLink = .{},
+const L = struct {
+    data: u32,
+    node: std.SinglyLinkedList.Node = .{},
 };
-const TypedMessage = paternitas.Typed(Message);
+const M = struct {
+    data: u8,
+    node: std.SinglyLinkedList.Node = .{},
+};
 
-var message: Message = .{ .text = "hello" };
-TypedMessage.stamp(&message);
+var l: L = .{ .data = 1234567 };
+var m: M = .{ .data = 255 };
 
-var list: std.DoublyLinkedList = .{};
-list.append(TypedMessage.node(&message));
+var list: std.SinglyLinkedList = .{};
+list.prepend(&m.node); // vendor B
+list.prepend(&l.node); // vendor A
 
-// Null when the Node belongs to another Parent type.
-const m: ?*Message = TypedMessage.parentFromNode(list.popFirst().?);
+const node = list.popFirst().?;
+const x: *M = @fieldParentPtr("node", node); // it is an L
 ```
 
-The std list, its calls and its Node type stay as they are.
+It compiles and it runs. `x` points at an `L`, and `x.data` reads whatever
+byte is there. Nothing tells you.
 
-## Two audiences
+## The same code with paternitas
 
-Application code.
+```zig
+const L = struct {
+    data: u32,
+    link: paternitas.SLink = .{},
+};
+const M = struct {
+    data: u8,
+    link: paternitas.SLink = .{},
+};
+const TypedL = paternitas.Typed(L);
+const TypedM = paternitas.Typed(M);
 
-- `Typed(P)`, `SLink`, `DLink`, `*Anchor`, `AnyParent`.
-- Recover a Parent from a Node, from an Anchor, or from an AnyParent.
-- Each recovery checks the type first.
+var l: L = .{ .data = 1234567 };
+var m: M = .{ .data = 255 };
+TypedL.stamp(&l);
+TypedM.stamp(&m);
 
-Container authors.
+var list: std.SinglyLinkedList = .{};
+list.prepend(TypedM.node(&m)); // vendor B
+list.prepend(TypedL.node(&l)); // vendor A
 
-- `paternitas.container`: `TypeInfo`, `NodeKind`.
-- `TypeInfo.nextField` says where the Node's `next` word is.
-- The container decides what goes in it.
+const node = list.popFirst().?;
+const as_m: ?*M = TypedM.parentFromNode(node); // null: the Node is in an L
+const as_l: ?*L = TypedL.parentFromNode(node); // the L, data 1234567
+```
+
+What changed:
+
+- `SLink` replaces the std Node. `DLink` is the one for
+  `std.DoublyLinkedList`.
+- `Typed(L)` gives you the calls for `L`. Declare it once per struct.
+- `stamp` writes the struct's type into its `SLink`. Call it once, before
+  the struct goes in a list. Without it, `parentFromNode` returns null.
+- `parentFromNode` checks the type first. The wrong type gets null.
+
+The list is still the plain std list. Its calls do not change.
+
+## When you must not copy
+
+Some items must not be copied: a mutex, a file handle, a large buffer. A
+queue that stores by value copies them. A queue of `*Connection` takes only
+one type.
+
+Send a `*paternitas.Anchor` instead. Every struct with an `SLink` or `DLink`
+has one, so one queue carries them all. The receiver gets the typed pointer
+back, with a type check.
+
+```zig
+var buffer: [8]*paternitas.Anchor = undefined;
+var queue: std.Io.Queue(*paternitas.Anchor) = .init(&buffer);
+
+TypedConnection.stamp(&connection);
+try queue.putOne(io, TypedConnection.anchor(&connection));
+
+// on the other side
+const a = try queue.getOne(io);
+if (TypedConnection.fromAnchor(a)) |c| {
+    // c is the same connection, not a copy
+}
+```
+
+The same `*Anchor` fits in a hash map, a union field, or a C callback's
+context.
 
 ## What paternitas does not do
 
-paternitas is mechanism, not policy.
+- It has no list, queue or pool of its own. You keep using std, or your own.
+- It does not allocate, free or lock anything.
+- It tells you the type. It does not tell you the struct is still alive.
+- A type id is valid only inside one running program. A shared library gets
+  its own id for the same type.
 
-- No list, queue, mailbox or pool of its own.
-- No allocation, no lifetime management, no synchronization.
-- No rule for who frees a Parent. The application decides.
-- A TypeId is a type identity. It does not prove the Parent is alive.
+## More
 
-## Read more
-
-- [Examples](https://g41797.github.io/paternitas/examples/001-stamp_and_recover/)
-  — one pattern per page.
-- [API docs](https://g41797.github.io/paternitas/apidocs/).
+- The [examples](https://g41797.github.io/paternitas/examples/001-stamp_and_recover/),
+  one pattern each: mixed lists, a timeout list, dispatch by type, a union
+  field, a chain of your own.
+- The [API docs](https://g41797.github.io/paternitas/apidocs/).
 
 ## License
 
-MIT.
+paternitas is under the MIT license.
