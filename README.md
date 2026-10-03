@@ -1,26 +1,19 @@
-# paternitas
 
-Put different struct types in one Zig std list, and get each one back as
-itself, or get null.
 
-Zig 0.16.0. It needs only `std`, and it allocates nothing.
-
-*Paternitas* is Latin for "fatherhood".
-
-## Two uses
-
-1. **One list, many types.** Several struct types share one std list. Each
-   one comes back as itself, or you get null.
-2. **Pass it on, handle by type.** A struct leaves its list for a queue, a
-   map or a union field, as an `AnyParent`. The other side gets it back, or
-   picks a handler by its type. Nothing is copied.
+---
 
 ## Two words first
 
 Zig's std lists are intrusive and type-erased. Here is what the two words
 mean, and what each one costs you.
 
+---
+
+
 ### Intrusive
+
+---
+
 
 An intrusive list keeps its link inside your struct. A non-intrusive
 container wraps your item in a node of its own, and stores a copy.
@@ -50,7 +43,18 @@ What it costs:
 
 If you come from C, this is Linux's `list_head` with `container_of`.
 
+Zig calls the struct that contains a field its parent: `@fieldParentPtr`
+goes from the field to the parent. paternitas uses the same word. Your
+`Message` is the Parent of its Node, and paternitas finds the Parent of a
+Node, with its type checked. Hence the name: *paternitas*, fatherhood.
+
+---
+
+
 ### Type-erased
+
+---
+
 
 The list sees a `Node`, never your `Message`. That is why one
 `std.DoublyLinkedList` serves every struct type, with one copy of its code.
@@ -61,89 +65,131 @@ you know which struct it is in.
 paternitas keeps the erasure. It writes the type next to the Node when the
 struct goes in, and checks it when the Node comes out.
 
-## One list, many types: the problem
+---
 
-Zig's std lists are intrusive. You put a `Node` inside your struct, and the
-list links the Nodes. To get your struct back, you call `@fieldParentPtr`.
 
-`@fieldParentPtr` trusts you. It returns whatever type you ask for.
+## The problem
 
-This comes from the ziggit thread
-[New LinkedList API footgun](https://ziggit.dev/t/new-linkedlist-api-footgun/10853).
-Two vendors put their items in the same list.
+---
 
-```zig
-const L = struct {
-    data: u32,
-    node: std.SinglyLinkedList.Node = .{},
-};
-const M = struct {
-    data: u8,
-    node: std.SinglyLinkedList.Node = .{},
-};
 
-var l: L = .{ .data = 1234567 };
-var m: M = .{ .data = 255 };
+You keep Messages and Jobs in one `std.DoublyLinkedList`. You pop a Node.
+Is it in a Message or in a Job?
 
-var list: std.SinglyLinkedList = .{};
-list.prepend(&m.node); // vendor B
-list.prepend(&l.node); // vendor A
-
-const node = list.popFirst().?;
-const x: *M = @fieldParentPtr("node", node); // it is an L
-```
-
-It compiles and it runs. `x` points at an `L`, and `x.data` reads whatever
-byte is there. Nothing tells you.
-
-## The same code with paternitas
+The list does not know. `@fieldParentPtr` returns whatever type you ask
+for:
 
 ```zig
-const L = struct {
-    data: u32,
-    tnode: paternitas.SinglyTypedNode = .{},
+const Message = struct {
+    text: []const u8,
+    node: std.DoublyLinkedList.Node = .{},
 };
-const M = struct {
-    data: u8,
-    tnode: paternitas.SinglyTypedNode = .{},
+const Job = struct {
+    id: u32,
+    node: std.DoublyLinkedList.Node = .{},
 };
-const TypedL = paternitas.Typed(L);
-const TypedM = paternitas.Typed(M);
 
-var l: L = .{ .data = 1234567 };
-var m: M = .{ .data = 255 };
-TypedL.setTypeId(&l);
-TypedM.setTypeId(&m);
+var message: Message = .{ .text = "hi" };
+var job: Job = .{ .id = 42 };
 
-var list: std.SinglyLinkedList = .{};
-list.prepend(TypedM.node(&m)); // vendor B
-list.prepend(TypedL.node(&l)); // vendor A
+var list: std.DoublyLinkedList = .{};
+list.append(&message.node);
+list.append(&job.node);
 
 const node = list.popFirst().?;
-const as_m: ?*M = TypedM.parentFromNode(node); // null: the Node is in an L
-const as_l: ?*L = TypedL.parentFromNode(node); // the L, data 1234567
+const j: *Job = @fieldParentPtr("node", node); // it is a Message
 ```
 
-What changed:
+It compiles and it runs. `j` points into a Message, and `j.id` reads
+whatever bytes are there. Nothing tells you.
 
-- `SinglyTypedNode` replaces the std Node. It is the std Node with a type
-  check added.
-- `DoublyTypedNode` is the one for `std.DoublyLinkedList`. `STNode` and
-  `DTNode` are short for the two.
-- `Typed(L)` does the `@fieldParentPtr` work for `L`, and checks the type.
-  You never write the field's name. Declare it once per struct.
-- `setTypeId` writes the struct's type into its TypedNode. Call it once,
-  before the struct goes in a list. Without it, `parentFromNode` returns
-  null.
-- `parentFromNode` checks the type first. The wrong type gets null.
-- The TypedNode field can have any name, anywhere in the struct. `Typed`
-  finds it by its type. A struct has one TypedNode.
 
-The list is still the plain std list. Its calls do not change.
+---
 
-## A whole program
 
-Copy it, run it, and it prints `hello`.
+## What is `Typed(P)`?
+
+---
+
+
+P is the Parent: your struct. `Typed(P)` is a helper you declare next to
+it, once. It does the housekeeping, so you do not:
+
+- It finds the TypedNode field in P, by its type.
+- It does the `@fieldParentPtr` arithmetic.
+- It writes P's type next to the Node, and checks it when the Node comes
+  back.
+
+Two lines go in your code. A TypedNode goes in the struct, where the std
+Node was, and the helper goes next to the struct:
+
+```zig
+const Message: type = struct {
+    text: []const u8,
+    tnode: paternitas.DoublyTypedNode = .{},
+};
+const TypedMessage: type = paternitas.Typed(Message);
+```
+
+- `DoublyTypedNode` is for `std.DoublyLinkedList`. `SinglyTypedNode` is for
+  `std.SinglyLinkedList`. `DTNode` and `STNode` are short for the two.
+- It is the std Node, with the type kept next to it.
+- The field can have any name, anywhere in the struct. A struct has one
+  TypedNode.
+
+Then the helper gives you four calls.
+
+`setTypeId(&p)` writes P's type into its TypedNode. Call it once, before
+the struct goes in a list. Without it, every check returns null.
+
+```zig
+TypedMessage.setTypeId(&message);
+```
+
+`node(&p)` gives you the std Node for the list.
+
+```zig
+list.append(TypedMessage.node(&message));
+```
+
+`parentFromNode(n)` gives you your struct back, or null when the Node is in
+another type. Ask each type in turn:
+
+```zig
+if (TypedMessage.parentFromNode(node)) |m| {
+    std.log.info("message: {s}", .{m.*.text});
+    return;
+}
+if (TypedJob.parentFromNode(node)) |j| {
+    std.log.info("job: {d}", .{j.*.id});
+    return;
+}
+return error.UnknownParent;
+```
+
+`mustParentFromNode(n)` gives you your struct back, and panics for another
+type, in every build mode. Use it where only P can be.
+
+```zig
+const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
+```
+
+The first three snippets come from examples 001 and 002.
+
+---
+
+
+## The same program with paternitas
+
+---
+
+
+Copy it and run it. It prints:
+
+```
+Hello Message: hi
+Hello Job: 42
+```
 
 ```zig
 const std = @import("std");
@@ -153,23 +199,42 @@ const Message = struct {
     text: []const u8,
     tnode: paternitas.DoublyTypedNode = .{},
 };
+const Job = struct {
+    id: u32,
+    tnode: paternitas.DoublyTypedNode = .{},
+};
 const TypedMessage = paternitas.Typed(Message);
+const TypedJob = paternitas.Typed(Job);
 
 pub fn main() void {
-    var message: Message = .{ .text = "hello" };
+    var message: Message = .{ .text = "hi" };
+    var job: Job = .{ .id = 42 };
     TypedMessage.setTypeId(&message);
+    TypedJob.setTypeId(&job);
 
     var list: std.DoublyLinkedList = .{};
     list.append(TypedMessage.node(&message));
+    list.append(TypedJob.node(&job));
 
-    const node = list.popFirst() orelse return;
-    if (TypedMessage.parentFromNode(node)) |m| {
-        std.debug.print("{s}\n", .{m.text});
+    while (list.popFirst()) |node| {
+        if (TypedMessage.parentFromNode(node)) |m| {
+            std.debug.print("Hello Message: {s}\n", .{m.text});
+        } else if (TypedJob.parentFromNode(node)) |j| {
+            std.debug.print("Hello Job: {d}\n", .{j.id});
+        }
     }
 }
 ```
 
-## Move your code to paternitas
+The list is still the plain std list. Its calls do not change.
+
+---
+
+
+## Migrate your code to paternitas
+
+---
+
 
 Put a TypedNode where the Node was. It is the same std Node, with the
 struct's type kept next to it.
@@ -217,6 +282,10 @@ list.append(TypedMessage.node(&message));
 const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 ```
 
+Job gets the same change: its `std.DoublyLinkedList.Node` becomes a
+`paternitas.DoublyTypedNode`, and it gets its own
+`const TypedJob = paternitas.Typed(Job);`.
+
 Do it this way, for each struct in the list:
 
 1. `std.SinglyLinkedList.Node` becomes `paternitas.SinglyTypedNode`.
@@ -234,89 +303,16 @@ missed in steps 4 and 5.
 Then, where a Node of another type is expected, use `parentFromNode`.
 It returns null for another type.
 
-## Pass it on, handle by type
-
-Most other containers are non-intrusive: `std.Io.Queue`, `std.ArrayList`,
-a hash map, a union field. They store a copy of each item you put in. A
-large struct, or one that must not be copied, does not fit. A
-`*Connection` fits, but it carries only a `Connection`.
-
-Put in an `AnyParent`. It is the struct's address and its type id, two
-words. The container copies the two words, never your struct.
-
-```
-Message                 Connection
-   | toAny                  | toAny
-   v                        v
-+------------------------------------------+
-|  a non-intrusive container of AnyParent  |
-|  std.Io.Queue, std.ArrayList, a map      |
-+---------------------+--------------------+
-                      |
-         +------------+-------------+
-         v                          v
-TypedConnection.fromAny(any)   handlers.get(any.type_id)
- -> *Connection, or null        -> the handler for its type
-```
-
-Get the struct back:
-
-```zig
-var buffer: [4]paternitas.AnyParent = undefined;
-var queue: std.Io.Queue(paternitas.AnyParent) = .init(&buffer);
-
-TypedConnection.setTypeId(&connection);
-try queue.putOne(io, TypedConnection.toAny(&connection));
-
-// on the other side
-const any: paternitas.AnyParent = try queue.getOne(io);
-const c: *Connection = TypedConnection.fromAny(any) orelse return error.WrongParent;
-// c is the same connection, not a copy
-```
-
-Or pick a handler by type. The code that picks it never names a type:
-
-```zig
-var handlers: std.AutoHashMap(paternitas.TypeId, Handler) = .init(allocator);
-try handlers.put(TypedMessage.typeId(), onMessage);
-try handlers.put(TypedJob.typeId(), onJob);
-
-// the event loop
-if (handlers.get(any.type_id)) |h| h(any.ptr, counts);
-```
-
-The handler casts `ptr` to its own type. The map matched the type id, so
-the type is right.
-
-A union field works the same way: `parent: paternitas.AnyParent`.
-
-Nothing is copied, so the struct MUST stay alive while its `AnyParent` is in
-use.
-
-## The calls of `Typed(P)`
-
-| call | what it does |
-|---|---|
-| `setTypeId(&p)` | writes P's type into its TypedNode. Call it once, before the first list or queue |
-| `node(&p)` | the std Node to give to a std list |
-| `parentFromNode(n)` | your struct back, or null for another type |
-| `mustParentFromNode(n)` | your struct back. Another type panics, in every build mode |
-| `toAny(&p)` | an `AnyParent`, to pass through a queue, a map or a union field |
-| `fromAny(any)` | your struct back, or null for another type |
-| `typeId()` | P's type id, as a key for a handler map |
-
-The rest are in the API docs.
-
 ## Do you need it?
 
 You do not need paternitas when each list keeps one struct type, and you
 know which one. Plain `@fieldParentPtr` is fine there.
 
-You need it when:
+You need it when one std list carries several struct types, as Messages
+and Jobs in a mailbox. Each comes back as itself, or you get null.
 
-- one std list carries several struct types, or
-- a queue, a map or a union field carries them, and the code in between
-  does not know the type: a mailbox, a dispatcher, an event loop.
+To pass a struct on, through a queue, a map or a union field, see
+"Advanced topics".
 
 A type check costs one pointer compare. There are no type names to compare
 and no table to register in.
@@ -330,15 +326,15 @@ and no table to register in.
 - A type id is valid only inside one running program. A shared library gets
   its own id for the same type.
 
-## More
+## Advanced topics
 
-- The [examples](https://g41797.github.io/paternitas/examples/001-set_type_id_and_recover/),
-  one pattern each: mixed lists, a timeout list, dispatch by type, a union
-  field, a chain of your own.
-- The [API docs](https://g41797.github.io/paternitas/apidocs/).
-- Writing your own container? `*Anchor` and `paternitas.container` are in
-  the API docs.
+You do not need these to move a std list to paternitas. Each one is in the
+[API docs](https://g41797.github.io/paternitas/apidocs/), and has an
+[example](https://g41797.github.io/paternitas/examples/001-set_type_id_and_recover/).
 
-## License
-
-paternitas is under the MIT license.
+- `AnyParent`: pass a struct through a queue, a map or a union field, as its
+  address and its type. Get it back with `fromAny`. Examples 003 and 005.
+- A handler per type: `typeId()` as a map key, and an `AnyParent` to call
+  the handler. Example 004.
+- `Anchor` and `paternitas.container`: for writing your own container.
+  Example 006.

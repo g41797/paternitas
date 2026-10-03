@@ -4,6 +4,70 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — README for the migration only
+
+The owner's intent: after the README, a user can migrate a std intrusive list
+to paternitas by hand. Anything else goes to the comments, or to the
+"Advanced topics" list. The owner had edited the README first: the title
+block is gone, `---` rules frame the headings, and "Move your code" is now
+"Migrate your code to paternitas". Claude kept all of it.
+
+- "Two words first": a paragraph on why we say Parent. Zig's
+  `@fieldParentPtr` calls the struct that contains a field its parent, and
+  paternitas uses the same word. Hence the name.
+- New "What is `Typed(P)`?", before the program. P is the Parent.
+  `Typed(P)` is a helper that does the housekeeping. It shows the
+  TypedNode, then four calls with snippets: `setTypeId` and `node` from 001,
+  `parentFromNode` from 002, `mustParentFromNode` from the migration.
+- "What changed" after the program is gone. The Typed section says it
+  before the program.
+- "Pass it on, handle by type" and the calls table are gone. That material
+  is in the comments and in examples 003, 004 and 005.
+- "Do you need it?" has use 1 only, and points to "Advanced topics".
+- "More" and "License" are replaced by "Advanced topics": `AnyParent`, a
+  handler per type, `Anchor` and `container`, with the examples and the API
+  docs. The LICENSE file stays.
+
+All six gates pass. The README is 226 lines of text.
+
+## 2026-10-03 — README and header follow rules 010
+
+At the owner's request ("go"):
+
+- README order:
+  1. The title line, in words a Zig programmer knows.
+  2. "Two words first".
+  3. "The problem", with Messages and Jobs.
+  4. "The same program with paternitas".
+  5. Move your code.
+  6. "Pass it on".
+  7. The calls table.
+  8. "Do you need it?", which now has the two uses.
+- The "Two uses" section above "Two words first" is gone. It used
+  `AnyParent` before it was explained.
+- The footgun uses Message and Job. It ran from `$S/docex` and printed 0
+  for `j.id`. The ziggit thread stays as the source.
+- The fix is one runnable program, which prints `Hello Message: hi` and
+  `Hello Job: 42`. It ran in Debug and ReleaseFast.
+- Migration stays based on Message. One line says Job gets the same change.
+- The `//!` header gets the same opening line, the same problem in
+  Message/Job, and the same Job line.
+
+Checks: all six gates pass. `build_site.sh` and `mkdocs build --strict`
+pass. `apidocs/` loads in headless Chrome with no errors. The README is 249
+lines of text.
+
+## 2026-10-03 — rules 010, explain a term before you use it
+
+The owner rejected Claude's proposed README opening. It started with "You
+pop a Node. Is it a Message or a Job?" before the reader knew what an
+intrusive, type-erased list is. The owner's claim: never describe what the
+reader does not know yet. Claude confirmed it.
+
+Rules 010, Part 5: a term or construct MUST be explained before the text
+uses it. The opening uses only words a Zig programmer already knows. Rules
+009 is in `backup/`.
+
 ## 2026-10-03 — README, four pieces from an outside draft
 
 The owner pasted an outside README draft and asked for an analysis.

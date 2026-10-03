@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Get your struct back from a std list Node, with a type check.
+//! For Zig std linked lists that keep more than one struct type.
 //!
 //! Zig's std lists are intrusive and type-erased.
 //!
@@ -13,10 +13,11 @@
 //!
 //! The problem:
 //!
-//! - To get your struct back, you call `@fieldParentPtr`. It returns
-//!   whatever type you ask for.
-//! - When one list has two struct types, you can get the wrong one. It
-//!   compiles, it runs, and nothing warns you.
+//! - You keep Messages and Jobs in one `std.DoublyLinkedList`. You pop a
+//!   Node. Is it in a Message or in a Job? The list does not know.
+//! - `@fieldParentPtr` returns whatever type you ask for. Ask for a Job when
+//!   it is a Message, and you read a Message as a Job. It compiles, it runs,
+//!   and nothing warns you.
 //!
 //! The fix: put a TypedNode where the Node was. It is the same std Node,
 //! with the struct's type kept next to it.
@@ -63,6 +64,10 @@
 //!
 //! const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 //! ```
+//!
+//! Job gets the same change: its `std.DoublyLinkedList.Node` becomes a
+//! `paternitas.DoublyTypedNode`, and it gets its own
+//! `const TypedJob = paternitas.Typed(Job);`.
 //!
 //! Do it this way, for each struct in the list:
 //!

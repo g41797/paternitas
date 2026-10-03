@@ -6,7 +6,7 @@ Current state only. Updated in place. The narrative is in
 ## Start here — every session
 
 1. Read this file in full.
-2. Read Part 0 of [rules-009.md](rules-009.md).
+2. Read Part 0 of [rules-010.md](rules-010.md).
 3. Read the plan, [implementation-plan-012.md](implementation-plan-012.md), for
    the stage the owner names. Not before they name it.
 4. Read the design, [paternitas-design-011.md](paternitas-design-011.md), for
@@ -22,7 +22,7 @@ Current state only. Updated in place. The narrative is in
 
 | what | where |
 |---|---|
-| rules | [rules-009.md](rules-009.md) |
+| rules | [rules-010.md](rules-010.md) |
 | design decisions, and what paternitas keeps from ztk | [paternitas-design-011.md](paternitas-design-011.md) |
 | the plan | [implementation-plan-012.md](implementation-plan-012.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
