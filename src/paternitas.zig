@@ -9,7 +9,7 @@
 //!   allocates nothing.
 //! - Type-erased: the list sees only Nodes, never your struct's type.
 //!
-//! paternitas keeps both, and lets you check the type again.
+//! Paternitas keeps both, and lets you check the type again.
 //!
 //! The problem:
 //!
@@ -95,7 +95,7 @@
 //!
 //! Writing your own container? See `Anchor` and `container`.
 //!
-//! paternitas has no list or queue of its own, and it allocates nothing.
+//! Paternitas has no list or queue of its own, and it allocates nothing.
 
 const _doc_stub = void;
 

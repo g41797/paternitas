@@ -1,8 +1,24 @@
-# paternitas — Rules (007)
+# paternitas — Rules (011)
 
 All coding, doc, and process rules for paternitas.
 
-Change from 006: NAME 01. `Link` is now `TypedNode`, and `stamp` is now
+Change from 010: the owner added two rules to Part 5, "Three kinds of
+documentation". The project name is Paternitas. The README is written
+for a plain user, in staccato. 2026-10-03.
+
+Change from 009, kept: the owner added a MUST rule to Part 5, "Three kinds of
+documentation": explain a term before you use it. 2026-10-03.
+
+Change from 008, kept: the owner added a MUST rule to Part 5, "Three kinds of
+documentation". The design MAY stay mechanism-first. The README MUST be
+user-first. 2026-10-03, after EXPL 02.
+
+Change from 007, kept: the owner added a rule to Part 3, "What a comment says".
+A comment answers "What do I need to know to use this?", not "How did the
+paternitas implementation achieve this?". 2026-10-03. Later the same day,
+Part 4's scan scope skips the owner's two analysis reports.
+
+Change from 006, kept: NAME 01. `Link` is now `TypedNode`, and `stamp` is now
 `setTypeId`. The examples in Part 3 and Part 5 use the new names. No rule
 changed.
 
@@ -44,7 +60,7 @@ Source: a trimmed copy of the Matryoshka rules,
   implementation invariants, its patterns and its provenance.
 - What was added: the git rules, and the stage sequence in Part 1.
 
-Companion: [paternitas-design-010.md](paternitas-design-010.md) — the design
+Companion: [paternitas-design-011.md](paternitas-design-011.md) — the design
 decisions and what paternitas keeps from ztk.
 
 ---
@@ -288,6 +304,9 @@ Layout of an example file, top to bottom.
 
 Staccato applies. It is defined once, in Part 5.
 
+- A comment answers the question "What do I need to know to use this?". It
+  does not answer "How did the paternitas implementation achieve this?".
+  - The how belongs in the design. Part 5, "Three kinds of documentation".
 - Do not explain WHAT. Names do that.
 - Explain WHY only if non-obvious.
 - No multi-paragraph docstrings.
@@ -370,6 +389,9 @@ Scan scope.
 
 - Skip `design/STATUS-LOG.md` and `design/backup/`. Both record what is gone.
 - Skip `design/paternitas-001.md`. It is kept untouched.
+- Skip `design/intrusive-type-erased-best-C.md` and
+  `design/zelda-and-paternitas.md`. They are the owner's analysis reports,
+  kept as is.
 - Skip `design/source/`. It is a copy of the owner's outside work, kept as is.
 - The gate skips this rules file, because it has to name every word. Scan it
   by hand, and read each hit: a hit outside the lists below is a real one.
@@ -454,6 +476,7 @@ Each kind has its own reader. Write for that reader only.
 
 - The design is for whoever builds or changes paternitas.
   - It has the intent, the reasons and the implementation.
+  - It MAY be mechanism-first: how it works, then what it is for.
 - Source comments, `///` and `//!`, are for someone who calls the API.
   - They say what a declaration is for, what it promises, and when it fails
     or returns null.
@@ -462,10 +485,23 @@ Each kind has its own reader. Write for that reader only.
     design.
 - The README, the site and the examples are for someone deciding whether to
   use paternitas.
+  - The README MUST be user-first. It starts from what the user does and
+    gets, never from how paternitas works. A mechanism appears only when
+    the user must act on it, and then in the user's words.
+  - The README is for a plain user, not for an expert. Staccato applies
+    in full: short sentences, one fact each, bullets.
+  - A term or construct MUST be explained before the text uses it. Do not
+    describe a situation the reader cannot picture yet. The opening uses
+    only words a Zig programmer already knows. "Intrusive", "type-erased",
+    `Node`, `@fieldParentPtr` and `AnyParent` come after their
+    explanation, never before it.
   - Start from a real problem, in code.
   - Show the code without paternitas, and where it breaks.
   - Show the same code with paternitas.
   - Internals do not appear.
+- The project is Paternitas, with a capital P, in all prose.
+  - `paternitas`, in lower case, is the repo, the module and the import.
+  - It appears only in code, paths and URLs.
 - Never copy text from the design into a comment or the README. Write it
   again for that reader.
 

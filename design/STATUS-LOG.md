@@ -4,6 +4,38 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — README, "Why Paternitas"
+
+The owner's text goes at the very end, in staccato. It covers *affirmatio*
+and *investigatio paternitatis*. Each term has its call:
+
+- *affirmatio*: `setTypeId`;
+- *investigatio*: `parentFromNode`.
+
+All six gates pass.
+
+## 2026-10-03 — README in staccato, Paternitas by name, rules 011
+
+At the owner's request:
+
+- "What is `Typed(P)`?" moved after "The same program with Paternitas".
+- New subsection "All the calls, at a glance": a table of ten `Typed`
+  calls, each one written as a snippet.
+- Parent: the text says it is Zig's word, from `@fieldParentPtr`, and not
+  a Paternitas invention.
+- Paternitas is the project name, in prose. `paternitas` is the repo and
+  the module, in code. This applies to the README and to the comments in
+  `src/` and `examples/`.
+- All the README prose is rewritten in staccato. The owner found long
+  chained sentences: rules Part 5, "Staccato", was broken. Claude confirmed
+  it. The code and the owner's layout did not change.
+- Rules 011, Part 5:
+  - the project name rule;
+  - the README is for a plain user, with staccato in full.
+  - Rules 010 is in `backup/`.
+
+All six gates pass.
+
 ## 2026-10-03 — README for the migration only
 
 The owner's intent: after the README, a user can migrate a std intrusive list

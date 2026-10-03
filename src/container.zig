@@ -17,10 +17,10 @@
 
 const _doc_stub = void;
 
-/// What paternitas knows about one Parent type. Get it with `anchor.info()`.
+/// What Paternitas knows about one Parent type. Get it with `anchor.info()`.
 ///
 /// - There is one per Parent type, and it lives as long as the program.
-/// - paternitas makes it. You do not make one.
+/// - Paternitas makes it. You do not make one.
 pub const TypeInfo = struct {
     /// Do not use.
     _tag: *const u8,
@@ -38,7 +38,7 @@ pub const TypeInfo = struct {
     /// through it.
     ///
     /// - It works for both Node kinds.
-    /// - paternitas never reads or writes this word. What you put in it is
+    /// - Paternitas never reads or writes this word. What you put in it is
     ///   up to your container.
     /// - A std list uses the same word. A Parent MUST NOT be in your
     ///   container and in a std list at the same time.
@@ -68,7 +68,7 @@ pub const TypeInfo = struct {
     }
 
     /// Returns the Parent's address, with no type. For code that knows
-    /// nothing of paternitas, such as a C callback's `void*`.
+    /// nothing of Paternitas, such as a C callback's `void*`.
     pub inline fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque {
         return addOffset(a, -@as(isize, @intCast(ti.*.anchor_offset)));
     }
