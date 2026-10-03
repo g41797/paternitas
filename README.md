@@ -136,8 +136,38 @@ What changed:
   before the struct goes in a list. Without it, `parentFromNode` returns
   null.
 - `parentFromNode` checks the type first. The wrong type gets null.
+- The TypedNode field can have any name, anywhere in the struct. `Typed`
+  finds it by its type. A struct has one TypedNode.
 
 The list is still the plain std list. Its calls do not change.
+
+## A whole program
+
+Copy it, run it, and it prints `hello`.
+
+```zig
+const std = @import("std");
+const paternitas = @import("paternitas");
+
+const Message = struct {
+    text: []const u8,
+    tnode: paternitas.DoublyTypedNode = .{},
+};
+const TypedMessage = paternitas.Typed(Message);
+
+pub fn main() void {
+    var message: Message = .{ .text = "hello" };
+    TypedMessage.setTypeId(&message);
+
+    var list: std.DoublyLinkedList = .{};
+    list.append(TypedMessage.node(&message));
+
+    const node = list.popFirst() orelse return;
+    if (TypedMessage.parentFromNode(node)) |m| {
+        std.debug.print("{s}\n", .{m.text});
+    }
+}
+```
 
 ## Move your code to paternitas
 
@@ -263,6 +293,20 @@ A union field works the same way: `parent: paternitas.AnyParent`.
 Nothing is copied, so the struct MUST stay alive while its `AnyParent` is in
 use.
 
+## The calls of `Typed(P)`
+
+| call | what it does |
+|---|---|
+| `setTypeId(&p)` | writes P's type into its TypedNode. Call it once, before the first list or queue |
+| `node(&p)` | the std Node to give to a std list |
+| `parentFromNode(n)` | your struct back, or null for another type |
+| `mustParentFromNode(n)` | your struct back. Another type panics, in every build mode |
+| `toAny(&p)` | an `AnyParent`, to pass through a queue, a map or a union field |
+| `fromAny(any)` | your struct back, or null for another type |
+| `typeId()` | P's type id, as a key for a handler map |
+
+The rest are in the API docs.
+
 ## Do you need it?
 
 You do not need paternitas when each list keeps one struct type, and you
@@ -280,7 +324,8 @@ and no table to register in.
 ## What paternitas does not do
 
 - It has no list, queue or pool of its own. You keep using std, or your own.
-- It does not allocate, free or lock anything.
+- It does not allocate, free or lock anything. Your struct lives where you
+  put it, for as long as you keep it.
 - It tells you the type. It does not tell you the struct is still alive.
 - A type id is valid only inside one running program. A shared library gets
   its own id for the same type.

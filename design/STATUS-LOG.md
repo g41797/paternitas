@@ -4,6 +4,38 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-03 — README, four pieces from an outside draft
+
+The owner pasted an outside README draft and asked for an analysis.
+Claude's advice was not to adopt it:
+
+- It used the old API names.
+- It claimed a struct can have two links, which is false: a second
+  TypedNode is a compile error.
+- It dropped the footgun and `AnyParent`, and opened with a glossary.
+
+Four pieces were taken, at the owner's request:
+
+- "A whole program": about 20 lines that print `hello`. It ran in all four
+  modes from `$S/docex`.
+- The TypedNode field can have any name, anywhere in the struct. A struct
+  has one TypedNode.
+- "The calls of `Typed(P)`": a table of seven calls.
+- "What paternitas does not do": your struct lives where you put it.
+
+The README is 258 lines of text. All six gates pass.
+
+## 2026-10-03 — rules 009, the README is user-first
+
+The owner added a MUST rule to Part 5, "Three kinds of documentation":
+
+- The design MAY stay mechanism-first.
+- The README MUST be user-first. It starts from what the user does and
+  gets. A mechanism appears only when the user must act on it, and then in
+  the user's words.
+
+Rules 008 is in `backup/`. The live references point to rules 009.
+
 ## 2026-10-03 — EXPL 02, two uses, AnyParent for the user
 
 Opus 5.5. No behaviour changed.
