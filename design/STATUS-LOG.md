@@ -4,6 +4,13 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-04 — README: opening and small fixes
+
+- Opening: "Then you will:" with three parallel bullets, and the stray period removed.
+- Trailing spaces and the extra blank lines removed.
+- "`@fieldParentPtr` trusts you. A wrong guess is not caught."
+- Credits line wrapped.
+
 ## 2026-10-04 — README: ChatGPT review, round 2
 
 Taken: the build.zig lines split for narrow screens, "Requirements:" in

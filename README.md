@@ -1,27 +1,28 @@
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Linux](https://github.com/g41797/paternitas/actions/workflows/linux.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/linux.yml)
 [![Windows](https://github.com/g41797/paternitas/actions/workflows/windows.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/windows.yml)
 [![macOS](https://github.com/g41797/paternitas/actions/workflows/mac.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/mac.yml)
 [![Deploy Documentation](https://github.com/g41797/paternitas/actions/workflows/docs.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/docs.yml)
 
-
 ---
+
 _Paternitas_ makes **intrusive**, **type-erased** containers **safer** to use in Zig.
-
-- A wrong type gives null, or a panic that names both types. Never garbage.
-- Zig's std linked lists are such containers.
-
 
 ---
 
 "Intrusive" and "type-erased" sound scary?
 
-Do not leave. The next section explains both.
+Or you simply do not care...
+
+Do not leave.
 
 Read on. One day you will build your **first big Zig system**.
 
-Then you will remember this strange name, and use **_Paternitas_**.
+Then you will:
+
+- remember this strange name,
+- check what _Paternitas_ does,
+- use it.
 
 ---
 
@@ -83,7 +84,7 @@ your struct
 
 - The list does not know your struct.
   - You get it back with `@fieldParentPtr`.
-  - `@fieldParentPtr` trusts you.
+  - `@fieldParentPtr` trusts you. A wrong guess is not caught.
 - The struct's memory is yours.
   - The list does not free it.
   - The list does not know when the struct is gone.
@@ -603,4 +604,6 @@ ztk will use it as a third-party package.
 
 ## Credits
 
-- [Karl Seguin](https://github.com/karlseguin), for the article that introduced [Zig's new LinkedList API](https://www.openmymind.net/Zigs-New-LinkedList-API/).
+- [Karl Seguin](https://github.com/karlseguin), for the article that
+  introduced
+  [Zig's new LinkedList API](https://www.openmymind.net/Zigs-New-LinkedList-API/).
