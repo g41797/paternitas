@@ -1,7 +1,19 @@
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Linux](https://github.com/g41797/paternitas/actions/workflows/linux.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/linux.yml)
+[![Windows](https://github.com/g41797/paternitas/actions/workflows/windows.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/windows.yml)
+[![macOS](https://github.com/g41797/paternitas/actions/workflows/mac.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/mac.yml)
+[![Deploy Documentation](https://github.com/g41797/paternitas/actions/workflows/docs.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/docs.yml)
+
+
+---
 _Paternitas_ makes **intrusive**, **type-erased** containers **safer** to use in Zig.
 
 - A wrong type gives null, or a panic that names both types. Never garbage.
 - Zig's std linked lists are such containers.
+
+
+---
 
 "Intrusive" and "type-erased" sound scary?
 
