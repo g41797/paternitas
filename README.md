@@ -26,12 +26,10 @@ Then you will:
 
 ---
 
-## Two words first
+## Three words first
 
 Zig's std lists are intrusive and type-erased.
-
-- What the two words mean.
-- What each one costs you.
+And the struct you get back has a name: Parent.
 
 ### Intrusive
 
@@ -91,12 +89,6 @@ your struct
 
 If you come from C, this is Linux's `list_head` with `container_of`.
 
-**_Parent_** is Zig's word. _Paternitas_ did not invent it.
-
-- Zig calls the struct that contains a field the field's _parent_.
-- `@fieldParentPtr` goes from the field to its parent.
-- `Job` is the _Parent_ of its `node` field.
-
 ### Type-erased
 
 Type-erased: the list forgets your struct's type.
@@ -127,6 +119,16 @@ A small program does not show the difference. A large system does:
 
 - The type is gone.
 - A Node comes out of the list. Only you know which struct it is in.
+
+### Parent
+
+_Parent_ is Zig's word. _Paternitas_ did not invent it.
+
+- Zig calls the struct that contains a field the field's _parent_.
+- `@fieldParentPtr` goes from the field to its parent.
+- `Job` is the _Parent_ of its `node` field.
+
+The list gives you a Node. You need its Parent.
 
 ---
 

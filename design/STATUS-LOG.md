@@ -4,6 +4,12 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-04 — README: Parent gets its own section
+
+- "Two words first" is now "Three words first". Its two lead bullets are gone.
+- "### Parent" follows "Type-erased". It ends: "The list gives you a Node.
+  You need its Parent."
+
 ## 2026-10-04 — README: opening and small fixes
 
 - Opening: "Then you will:" with three parallel bullets, and the stray period removed.
