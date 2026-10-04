@@ -1,14 +1,20 @@
-//! Build your own stack of mixed struct types, with no extra memory per item.
+//! Title: Your own stack
 //!
-//! You write a container that keeps items of several types.
-//! Each item has a std Node, and its `next` field is free while the item is in no std list.
-//! `TypeInfo.nextField` gives you that field for any type, so your stack chains through it.
-//! That makes it an intrusive stack: the link lives in the item, as in a std list.
+//! Build your own stack of mixed struct types. It needs no extra memory per item.
+//!
+//! The stack keeps items of several types.
+//! Each item has a std Node.
+//! Its `next` field is free while the item is in no std list.
+//! `TypeInfo.nextField` gives you that field, for any type.
+//! The stack chains its items through it.
+//! The link lives in the item, as in a std list. So the stack is intrusive.
 //!
 //! - Write a `Stack` that keeps `*Anchor`s, chained through each item's `next` field.
-//! - Push a `Message` with a `SinglyTypedNode` and a `Job` with a `DoublyTypedNode`. Two Node types share one chain.
+//! - Push a `Message` with a `SinglyTypedNode`.
+//! - Push a `Job` with a `DoublyTypedNode`. Two Node types share one chain.
 //! - Pop each, and get it back with `parentFromAnchor`.
-//! - Check the order, and that each `next` field is null again.
+//! - Check the order.
+//! - Check that each `next` field is null again.
 //!
 //! A std list uses the same `next` field. An item on this stack MUST NOT be in a std list.
 //!

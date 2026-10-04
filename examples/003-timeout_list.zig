@@ -1,16 +1,23 @@
-//! A connection leaves the timeout list, goes through a queue, and comes back.
+//! Title: Timeout list and a queue
 //!
-//! A server keeps its open connections in a timeout list, a plain `std.DoublyLinkedList`.
+//! A connection leaves the timeout list. It goes through a queue. Then it comes back.
+//!
+//! A server keeps its open connections in a timeout list.
+//! The list is a plain `std.DoublyLinkedList`.
 //! Sometimes a connection goes to another thread for a while, through a queue.
-//! A `std.Io.Queue` is non-intrusive: it stores a copy of what you put in.
-//! A connection must not be copied, so the queue carries its `AnyParent`: its address and its type id.
-//! The other side gets the `Connection` back with a type check.
+//! A `std.Io.Queue` stores a copy of what you put in.
+//! A connection must not be copied.
+//! So the queue carries its `AnyParent`: its address and its type id.
+//! The other side gets the `Connection` back, with a type check.
 //!
-//! - Call `setTypeId` on three `Connection`s and append them to the timeout list.
+//! - Call `setTypeId` on three `Connection`s.
+//! - Append them to the timeout list.
 //! - Remove the middle one from the list.
 //! - Send its `AnyParent` through a `std.Io.Queue`.
-//! - Receive the `AnyParent`, and get the `Connection` back with `fromAny`.
-//! - Give it a new deadline, and append it to the list again.
+//! - Receive the `AnyParent`.
+//! - Get the `Connection` back with `fromAny`.
+//! - Give it a new deadline.
+//! - Append it to the list again.
 //! - Check the order of the list.
 //!
 //! ```

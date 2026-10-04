@@ -1,15 +1,17 @@
-//! One std list, two struct types, and each one comes back as itself.
+//! Title: Two types, one list
+//!
+//! One std list carries two struct types. Each one comes back as itself.
 //!
 //! A mailbox list often carries more than one kind of item.
-//! The list is type-erased: it sees only Nodes, never a `Message` or a `Job`.
-//! With a plain std Node, `@fieldParentPtr` returns whatever type you ask for, right or wrong.
-//! Here each type asks `parentFromNode`, and the wrong type gets null.
+//! The list sees only Nodes. It does not know the types.
+//! A plain `@fieldParentPtr` gives you any type you ask for. It does not check.
+//! Here each type asks `parentFromNode`. The wrong type gets null.
 //!
 //! - Call `setTypeId` on a `Message` and a `Job`.
 //! - Append both Nodes to one `std.DoublyLinkedList`.
 //! - Pop each Node.
 //! - Ask `Message` first, then `Job`.
-//! - Check that each type came back exactly once.
+//! - Check that each type came back once.
 
 const Message: type = struct {
     text: []const u8,

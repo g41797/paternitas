@@ -1,8 +1,10 @@
-//! The smallest use: one struct, one std list, and the struct back with a type check.
+//! Title: One struct, one list
+//!
+//! The smallest use. One struct goes into a std list. It comes back with a type check.
 //!
 //! The struct has a `DoublyTypedNode` where it would have a std Node.
 //!
-//! - Call `setTypeId` on a `Message`, so it carries its type.
+//! - Call `setTypeId` on a `Message`.
 //! - Append its Node to a `std.DoublyLinkedList`.
 //! - Pop the Node.
 //! - Get the `Message` back with `parentFromNode`. A Node of another type would give null.

@@ -4,6 +4,27 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-04 — Examples: short titles, staccato descriptions
+
+- Each example's `//!` block opens with `//! Title: ...`.
+  - `gen_examples_docs.sh` uses it as the page title and drops it from the
+    description.
+  - Without it, the first description line is the title, as before.
+  - `rules-013.md`, "Description as code", now requires the `Title:` line.
+- The six descriptions are rewritten in staccato. One sentence holds one fact.
+  Each step is its own bullet.
+- Staccato in descriptions and comments is an ongoing fix. Fix any long
+  sentence found later.
+
+## 2026-10-04 — README: "type id", not "type"
+
+- Zig's `type` exists only at compile time. Paternitas makes its own type id.
+- README explains the term once, before "The four calls you need".
+- Where Paternitas writes or checks it, the README now says "type id":
+  the `Typed(P)` bullets, `setTypeId`, the reset note, the calls table.
+- Plain "type" stays where it means the Zig struct type.
+- `src/paternitas.zig`: the TypedNode and Anchor docs say "type id" too.
+
 ## 2026-10-04 — README: Parent gets its own section
 
 - "Two words first" is now "Three words first". Its two lead bullets are gone.

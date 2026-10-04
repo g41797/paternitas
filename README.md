@@ -252,12 +252,15 @@ const TypedMessage = paternitas.Typed(Message);
 
 - It finds the TypedNode field in your struct, by its type.
 - It does the `@fieldParentPtr` arithmetic.
-- It writes your struct's type into the TypedNode.
-- It checks the type when the Node comes back.
+- It writes your struct's type id into the TypedNode.
+- It checks the type id when the Node comes back.
+
+Zig has no type id at run time. `type` exists only at compile time.
+Paternitas gives each struct type its own id: the _type id_.
 
 The four calls you need:
 
-`setTypeId(&p)` writes your struct's type into its TypedNode.
+`setTypeId(&p)` writes your struct's type id into its TypedNode.
 
 - Call it right after you create the struct.
   - Even when every field has its default value.
@@ -304,13 +307,13 @@ return error.UnknownParent;
 const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 ```
 
-Reset? A whole-struct write erases the type:
+Reset? A whole-struct write erases the type id:
 
 - `message = .{ .text = "new" };`
 - a reset, clear or zero-fill of the whole struct
 
 Call `setTypeId` again after each one. Writing one field, such as
-`message.text = "new";`, keeps the type.
+`message.text = "new";`, keeps the type id.
 
 ### All the calls, at a glance
 
@@ -318,7 +321,7 @@ For the taste (or smell). The details are in the API docs.
 
 | call | what you get |
 |---|---|
-| `TypedMessage.setTypeId(&message)` | the type written into the struct. Again after a whole-struct write |
+| `TypedMessage.setTypeId(&message)` | the type id written into the struct. Again after a whole-struct write |
 | `TypedMessage.node(&message)` | the std Node for the list |
 | `TypedMessage.parentFromNode(node)` | `?*Message`: the Message, or null |
 | `TypedMessage.mustParentFromNode(node)` | `*Message`, or a panic |

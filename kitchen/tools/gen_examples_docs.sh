@@ -34,8 +34,14 @@ gen_one() {
         started { exit }
     ' "$src")"
 
-    local title
-    title="$(printf '%s\n' "$desc" | sed -n '1{s/[.]*$//;p;q}')"
+    # The title comes from a `//! Title: ...` first line. That line, and the
+    # blank line after it, are not part of the description.
+    local title=""
+    if printf '%s\n' "$desc" | head -1 | grep -q '^Title: '; then
+        title="$(printf '%s\n' "$desc" | sed -n '1{s/^Title: *//;p;q}')"
+        desc="$(printf '%s\n' "$desc" | sed '1d' | sed '1{/^$/d}')"
+    fi
+    [ -n "$title" ] || title="$(printf '%s\n' "$desc" | sed -n '1{s/[.]*$//;p;q}')"
     [ -n "$title" ] || title="$(basename "$src" .zig)"
 
     # Split desc into prose (before the first fenced ``` line, trailing

@@ -120,7 +120,7 @@ pub const DTNode = DoublyTypedNode;
 /// - You do not call `TypedNode` yourself.
 /// - A Parent has exactly one.
 /// - It contains the std Node, and the place where `setTypeId` writes the
-///   type.
+///   type id.
 /// - Any `N` other than the two std Node types is a compile error.
 pub fn TypedNode(comptime N: type) type {
     const node_kind: NodeKind = comptime kindOf(N);
@@ -315,7 +315,7 @@ pub fn Typed(comptime P: type) type {
 /// `void*` context.
 ///
 /// - Every struct with a TypedNode has one Anchor, inside the TypedNode.
-///   `setTypeId` writes the struct's type into it.
+///   `setTypeId` writes the struct's type id into it.
 /// - Get it with `TypedMessage.anchor(&message)`.
 /// - Get the struct back with `TypedMessage.parentFromAnchor(a)`. You get
 ///   null for another type.

@@ -1,14 +1,18 @@
-//! Send a large struct through a union of events, without copying it.
+//! Title: Large struct in a union
+//!
+//! A large struct travels in a union of events. It is never copied.
 //!
 //! Small events travel by value in a tagged union.
-//! A union field is non-intrusive: it stores a copy of what you put in.
-//! A large struct, or one that must not be copied, travels as its `AnyParent`: its address and its type id.
-//! The handler gets the struct back with a type check.
+//! A union field stores a copy of what you put in.
+//! A large struct must not be copied.
+//! So it travels as its `AnyParent`: its address and its type id.
+//! The handler gets the struct back, with a type check.
 //!
-//! - Call `setTypeId` on a `Download`. It has a 4 KB buffer, too large to copy.
-//! - Build three `Event`s: a tick, a resize, and the `Download`'s `AnyParent`.
+//! - Call `setTypeId` on a `Download`. Its 4 KB buffer is too large to copy.
+//! - Build three `Event`s: a tick, a resize and the `Download`'s `AnyParent`.
 //! - Copy the events into a second array, as a queue would.
-//! - Handle each event, and get the `Download` back with `fromAny`.
+//! - Handle each event.
+//! - Get the `Download` back with `fromAny`.
 //! - Check that it is the same `Download`, not a copy.
 
 /// It is too large to copy. Events carry its address and type id.

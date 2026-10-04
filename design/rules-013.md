@@ -394,7 +394,10 @@ First-declaration doc-stub rule.
 
 An example's `//!` description is written like its code.
 
-- One-line intent first. This is the coordinator line.
+- The first line is `//! Title: ...`, then a blank `//!` line.
+  - The title is a short name, a few words.
+  - The site uses it as the page title. It is not part of the description.
+- One-line intent next. This is the coordinator line.
 - Then named steps as bullets, one per bullet, in the order they run.
 - A step is a command: "Pop each Node.", not "You pop each Node."
 - Any ASCII diagram inside a `//!` block sits in a fenced code block.

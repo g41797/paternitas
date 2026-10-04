@@ -1,14 +1,18 @@
-//! Pick a handler by type, with a map from type id to handler.
+//! Title: Handler map
 //!
-//! An event loop gets items of many types as `AnyParent`s: an address and a type id each.
-//! It keeps one handler per type in a map, keyed by `TypeId`.
-//! Picking the handler needs only the type id, not the type itself.
+//! An event loop picks a handler by type id.
+//!
+//! The loop gets items of many types, as `AnyParent`s.
+//! Each one is an address and a type id.
+//! The loop keeps one handler per type, in a map keyed by `TypeId`.
+//! It needs only the type id to pick the handler.
 //!
 //! - Register one handler per type, under its `TypeId`.
 //! - Receive a `Message`, a `Job` and a `Ping` as `AnyParent`s.
-//! - Find the handler by `type_id`, and call it with `ptr`.
-//! - Count the `Ping` as unhandled. No handler is registered for it.
-//! - Get a `Message` back from an `AnyParent` with `fromAny`, which checks the type.
+//! - Find the handler by `type_id`.
+//! - Call it with `ptr`.
+//! - Count the `Ping` as unhandled. It has no handler.
+//! - Get a `Message` back from an `AnyParent` with `fromAny`. It checks the type id.
 
 const Message: type = struct {
     text: []const u8,
