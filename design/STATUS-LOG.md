@@ -9,6 +9,14 @@ Append-only. Newest entries at top. Only the head is read.
 - "Two words first" is now "Three words first". Its two lead bullets are gone.
 - "### Parent" follows "Type-erased". It ends: "The list gives you a Node.
   You need its Parent."
+- "Why Paternitas": the two bullets before the table are gone. The table
+  says it.
+- The Latin section "## Why Paternitas" is now "## Why the name". The Recap
+  keeps "### Why Paternitas".
+- "And one more word: Parent." "There is one copy of its code." is gone.
+  "The problem" says Paternitas "catches" the wrong guess, not makes it safe.
+  Then removed: "The problem" ends at "Nothing tells you." The next
+  section shows the fix.
 
 ## 2026-10-04 — README: opening and small fixes
 

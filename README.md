@@ -29,7 +29,7 @@ Then you will:
 ## Three words first
 
 Zig's std lists are intrusive and type-erased.
-And the struct you get back has a name: Parent.
+And one more word: Parent.
 
 ### Intrusive
 
@@ -98,7 +98,6 @@ The list sees a `Node`. It never sees your `Job`.
 **What you get:**
 
 - One `std.DoublyLinkedList` serves every struct type.
-- There is one copy of its code.
 - The code built on the list never names your struct types.
   - Examples: a queue, a scheduler, a dispatcher.
   - Add a struct type: that code does not change.
@@ -167,9 +166,6 @@ const j: *Job = @fieldParentPtr("node", node); // it is a Message
 - `j` points into a Message.
 - `j.id` reads whatever bytes are there.
 - Nothing tells you.
-
-Paternitas makes that wrong guess safe: you get null, or a panic that
-names both types. Never garbage.
 
 ---
 
@@ -444,11 +440,7 @@ The price:
 
 ### Why Paternitas
 
-Paternitas removes most of that price.
-
-- A wrong guess gives null, or a panic that names both types.
-- It does not check that the struct is still alive.
-- Side by side:
+Paternitas removes most of that price. Side by side:
 
 | | plain std list | with Paternitas |
 |---|---|---|
@@ -513,7 +505,7 @@ Have fun.
 
 ---
 
-## Why Paternitas
+## Why the name
 
 *Paternitas* is Latin for "fatherhood".
 
@@ -579,8 +571,11 @@ const paternitas = @import("paternitas");
 Requirements:
 
 - Zig 0.16.0.
+
+Dependencies:
+
 - Only `std`.
-- There is no release tag yet. `zig fetch` takes the main branch.
+
 
 ---
 
