@@ -265,7 +265,7 @@ The four calls you need:
 - Call it right after you create the struct.
   - Even when every field has its default value.
   - Paternitas does not mark a new struct by itself.
-- Without it, every check returns null.
+- Without it, `parentFromNode` returns null for this struct.
 
 ```zig
 var message: Message = .{ .text = "hi" };
@@ -484,8 +484,12 @@ Paternitas removes most of that price. Side by side:
 - Your struct lives where you put it.
 - It tells you the type.
   - It does not tell you the struct is still alive.
-- A type id is valid only inside one running program.
-  - A shared library gets its own id for the same type.
+
+A type id has limits:
+
+- It is valid only inside one running program.
+- A shared library has its own type ids, even for the same struct type.
+  - A struct marked in the library fails the type check in the program.
 
 ---
 

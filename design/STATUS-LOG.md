@@ -4,6 +4,55 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-04 — Negative test: fromAny after toAny without setTypeId
+
+- New `negative/panic/from_any_to_any_no_type.zig`. It gets an `AnyParent`
+  from `toAny` on a struct that never had `setTypeId` called, then calls `fromAny`.
+  - Debug and ReleaseSafe: it aborts with "fromAny: setTypeId was never called
+    on the Parent".
+  - ReleaseFast and ReleaseSmall: it exits 0.
+- It joins `from_any_no_type.zig`, which builds the `AnyParent` by hand.
+- It is registered in `build.zig`, `refused_at_run_time`.
+
+## 2026-10-04 — Limits split from "not a container"; comments re-checked
+
+- The module header and the README now separate two things.
+  - Paternitas is not a container library: no list, no allocation, no locking,
+    no liveness check.
+  - A type id has limits: one running program, and a shared library has its own ids.
+- The shared-library limit now names its consequence. A struct marked in the
+  library fails the type check in the program.
+- Every comment claim was checked against the source. Four were corrected.
+  - `parentFromNode`: a plain std Node makes the check read memory that is not
+    a type id. It said "outside your struct", which field order does not promise.
+  - `parentFromNodeUnchecked`: "Nothing checks it, in any build mode."
+  - `Anchor._type_id`: "Paternitas trusts this value." It said a written value
+    "passes every type check", which is false.
+  - `AnyParent`: "Paternitas trusts its fields." In safe builds `fromAny` still
+    checks that the struct was marked.
+- The example comments match their code. They are unchanged.
+
+## 2026-10-04 — Doc comments: staccato, limitations stated
+
+- `src/paternitas.zig` and `src/container.zig` doc comments are rewritten in
+  staccato. One sentence holds one fact. There are no labels in place of sentences.
+- The module header gets a list of limits: no list of its own, no allocation, no
+  locking, no liveness check, and a type id valid only in one running program.
+- `fromAny` was documented wrong. Without `setTypeId`, it does not return null.
+  It panics when runtime safety is on. Otherwise nothing catches it. Both
+  `setTypeId` and `fromAny` now say so.
+- `toAny` now says that it does not check `setTypeId`, and that `p` MUST stay alive.
+- `parentFromNode` now says that a plain std Node is not caught.
+- `Anchor` now says that a `*Anchor` does not keep the struct alive.
+- `TypeId` now says that Zig's `type` exists only at compile time.
+- README: "Without it, every check returns null." becomes "Without it,
+  `parentFromNode` returns null for this struct."
+- Example comments in 003, 005 and 006: chained sentences are split.
+- Each sentence in a doc-comment paragraph now sits on its own line, with a blank
+  comment line before the next one. Autodoc joins lines otherwise.
+  - The migration steps in the module header use nested bullets.
+  - Bullets keep a fact and its consequence together.
+
 ## 2026-10-04 — Examples: short titles, staccato descriptions
 
 - Each example's `//!` block opens with `//! Title: ...`.

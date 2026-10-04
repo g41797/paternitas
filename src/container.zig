@@ -1,41 +1,54 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! For you if you write your own container: a queue, a stack, a pool.
+//! For you, if you write your own container: a queue, a stack, a pool.
 //!
-//! Your container keeps `*Anchor`s of many Parent types. This part tells you,
-//! for any of them, without knowing the type:
+//! Your container keeps `*Anchor`s of many Parent types.
 //!
-//! - where a pointer-sized word sits that you can chain through, so the
-//!   container needs no extra memory per item
-//! - the std Node, typed
-//! - the Parent's address
+//! You do not need to know their types.
 //!
-//! Start from `anchor.info()`. It gives you the `TypeInfo` of that Parent.
+//! For any of them, this part gives you three things:
 //!
-//! Application code does not need this part. `Typed(P)` covers it.
+//! - A pointer-sized word to chain through. Your container needs no extra
+//!   memory per item.
+//! - The std Node, as its own type.
+//! - The Parent's address.
+//!
+//! Start from `anchor.info()`.
+//!
+//! It gives you the `TypeInfo` of that Parent.
+//!
+//! Application code does not need this part.
+//!
+//! `Typed(P)` covers it.
 
 const _doc_stub = void;
 
-/// What Paternitas knows about one Parent type. Get it with `anchor.info()`.
+/// What Paternitas knows about one Parent type.
+///
+/// Get it with `anchor.info()`.
 ///
 /// - There is one per Parent type, and it lives as long as the program.
 /// - Paternitas makes it. You do not make one.
 pub const TypeInfo = struct {
     /// Do not use.
     _tag: *const u8,
-    /// The Parent's type name. For logs and panic messages.
+    /// The Parent's type name.
+    ///
+    /// Use it in logs and panic messages.
     name: []const u8,
     /// The distance from the start of the Parent to its Anchor.
     anchor_offset: usize,
-    /// The distance from the Anchor to the Node's `next` field. It can be
-    /// negative.
+    /// The distance from the Anchor to the Node's `next` field.
+    ///
+    /// It can be negative.
     node_next_offset: isize,
     /// `.single` for `SinglyTypedNode`, `.double` for `DoublyTypedNode`.
     node_kind: NodeKind,
 
-    /// Returns a pointer to the Node's `next` field. Chain your items
-    /// through it.
+    /// Returns a pointer to the Node's `next` field.
+    ///
+    /// Chain your items through it.
     ///
     /// - It works for both Node kinds.
     /// - Paternitas never reads or writes this word. What you put in it is
@@ -53,7 +66,7 @@ pub const TypeInfo = struct {
 
     /// Returns the std Node of the Parent, as type `N`.
     ///
-    /// Panics in every build mode when `N` is the wrong Node type for this
+    /// It panics in every build mode when `N` is the wrong Node type for this
     /// Parent.
     ///
     /// ```zig
@@ -67,13 +80,15 @@ pub const TypeInfo = struct {
         return &tn.*.node;
     }
 
-    /// Returns the Parent's address, with no type. For code that knows
-    /// nothing of Paternitas, such as a C callback's `void*`.
+    /// Returns the Parent's address, with no type.
+    ///
+    /// Give it to code that knows nothing of Paternitas, such as a C callback's
+    /// `void*`.
     pub inline fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque {
         return addOffset(a, -@as(isize, @intCast(ti.*.anchor_offset)));
     }
 
-    /// Returns the Parent's address and type id, to pick a handler by type.
+    /// Returns an `AnyParent` for the Parent: its address and its type id.
     pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) AnyParent {
         return .{ .ptr = ti.parent(a), .type_id = a.typeId() };
     }
@@ -90,7 +105,11 @@ pub const uniform_next_offset: ?isize =
 /// for `DoublyTypedNode`.
 pub const NodeKind = enum { single, double };
 
-/// Do not use. It is `pub` only for a test. Call `nextField` instead.
+/// Do not use.
+///
+/// It is `pub` only for a test.
+///
+/// Call `nextField` instead.
 pub inline fn _nextFieldAt(a: *Anchor, off: isize) *?*anyopaque {
     return @ptrCast(@alignCast(addOffset(a, off)));
 }

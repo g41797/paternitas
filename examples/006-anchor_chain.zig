@@ -78,10 +78,10 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
     std.log.info("popped job {d}, then message {s}", .{ j.*.id, m.*.text });
 }
 
-/// Returns the item's `next` field, typed as this stack uses it: a pointer
-/// to the next `*Anchor`.
+/// Returns the item's `next` field. This stack keeps a pointer to the next
+/// `*Anchor` in it.
 ///
-/// Fails when `setTypeId` was never called on the item.
+/// Returns `error.NoTypeId` when `setTypeId` was never called on the item.
 fn chainWord(a: *paternitas.Anchor) !*?*paternitas.Anchor {
     const ti: *const paternitas.container.TypeInfo = a.info() orelse return error.NoTypeId;
     return @ptrCast(ti.nextField(a));

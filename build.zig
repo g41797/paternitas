@@ -156,6 +156,7 @@ fn addNegative(
         .{ .file = "negative/panic/must_parent_from_node.zig", .says = "mustParentFromNode: asked for must_parent_from_node.Msg, found <no type>" },
         .{ .file = "negative/panic/wrong_node_kind.zig", .says = "TypeInfo.node: wrong_node_kind.Msg has another Node kind" },
         .{ .file = "negative/panic/from_any_no_type.zig", .says = "fromAny: setTypeId was never called on the Parent", .every_mode = false },
+        .{ .file = "negative/panic/from_any_to_any_no_type.zig", .says = "fromAny: setTypeId was never called on the Parent", .every_mode = false },
     };
 
     const safety_is_on: bool = optimize == .Debug or optimize == .ReleaseSafe;

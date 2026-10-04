@@ -47,8 +47,8 @@ pub fn large_struct_in_union(allocator: std.mem.Allocator, io: std.Io) !void {
         .{ .parent = TypedDownload.toAny(&download) },
     };
 
-    // Copy the events, as a queue would. Each Event is small, and the
-    // Download is not in it.
+    // Copy the events, as a queue would. Each Event is small. The Download
+    // is not in it.
     var received: [sent.len]Event = undefined;
     @memcpy(&received, &sent);
 

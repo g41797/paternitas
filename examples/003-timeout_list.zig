@@ -32,7 +32,7 @@
 //!  timeout list:   c1 <-> c3 <-> c2
 //! ```
 
-/// It has a `DoublyTypedNode`, so the timeout list can remove it from anywhere.
+/// It has a `DoublyTypedNode`. The timeout list can remove it from anywhere.
 const Connection: type = struct {
     id: u32,
     deadline: u64,
@@ -65,14 +65,14 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
     try checkOrder(&timeouts, &.{ 1, 3, 2 });
 }
 
-/// Takes the connection out of the list, and sends its address and type id
-/// through the queue.
+/// Takes the connection out of the list. Sends its `AnyParent` through the
+/// queue.
 fn removeAndSend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: *Connection) !void {
     timeouts.remove(TypedConnection.node(c));
     try queue.putOne(io, TypedConnection.toAny(c));
 }
 
-/// Gets an `AnyParent` from the queue, and puts the connection back in the list
+/// Gets an `AnyParent` from the queue. Puts the connection back in the list,
 /// with a new deadline.
 fn receiveAndAppend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) !void {
     const any: paternitas.AnyParent = try queue.getOne(io);
