@@ -4,6 +4,69 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-04 — README: ChatGPT review, round 2
+
+Taken: the build.zig lines split for narrow screens, "Requirements:" in
+Install, and "Do not touch the fields inside it. Use `Typed(P)`." under
+The TypedNode. Rejected: example before "Two words first" (rules 010),
+several TypedNodes per struct (false: a compile error), no jokes, and
+`Anchor` in the README (owner's rulings).
+
+---
+
+## 2026-10-04 — README: "Why Paternitas" lead-in
+
+"Paternitas pays that price back" was too clever. It now says plainly:
+Paternitas removes most of that price, a wrong guess gives null or a
+panic, it does not check that the struct is alive, then the table.
+
+---
+
+## 2026-10-04 — README: "The price" made concrete
+
+The owner: "The type is gone / `@fieldParentPtr` trusts you" lets a user
+say "so what". It now lists what a wrong guess does: it compiles and runs,
+no build mode checks the type, a read gets foreign bytes, a write corrupts
+another struct, the crash comes later or never, days of debugging.
+
+---
+
+## 2026-10-04 — README: the Recap in two parts
+
+The owner: the Recap showed what Paternitas improves, not why a user needs
+intrusive, type-erased lists at all. It now has two parts:
+
+- "Why intrusive and type-erased": a typed container of values against an
+  intrusive, type-erased list (allocation, copy, pointer stability, mutex,
+  remove, move, new types, fixed infrastructure), then "The price".
+- "Why Paternitas": the old table, opened by "Paternitas pays that price
+  back."
+
+---
+
+## 2026-10-04 — README: review fixes after the owner's edit
+
+- Type-erased said "your `Message`"; the Intrusive section now uses `Job`.
+- The opening is one sentence again, and the "never garbage" claim is back.
+- Type-erased gets a one-line meaning.
+- Advanced topics: grammar, and the list item no longer breaks.
+- Credits: no "me"; a heading and a rule like the other sections.
+- "It gives you four calls" became "The four calls you need".
+- Formatting: 4-space snippets, `text` diagrams with no stray spaces, one
+  `---` before each H2 only, single blank lines, bold "What you get" and
+  "What it costs", no trailing whitespace.
+
+---
+
+## 2026-10-03 — README: `Message` shown before use
+
+The Parent paragraph said "Your `Message` is the Parent of its Node", but
+`Message` first appeared later, in "The problem". The Intrusive section
+now shows the `Message` struct right after its first bullets. The Parent
+line reads "`Message` is the _Parent_ of its `node` field." Rules 010.
+
+---
+
 ## 2026-10-03 — README: "Where it came from", the ztk line
 
 The owner's new line said "Now ztk uses it as an 3rd party package". It
