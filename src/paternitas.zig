@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! For Zig std linked lists that keep more than one struct type.
+//! Paternitas adds a runtime type check to Zig's intrusive, type-erased lists.
 //!
-//! Zig's std lists are intrusive and type-erased.
+//! Three words first.
 //!
 //! - Intrusive: the Node lives in your struct.
 //!   - The list copies nothing.
 //!   - The list allocates nothing.
 //! - Type-erased: the list sees only Nodes, never your struct's type.
 //!   - Code built on the list does not change when you add a struct type.
+//! - Parent: the struct that contains the Node.
 //!
-//! Paternitas keeps both.
+//! Paternitas keeps intrusive and type-erased.
 //!
 //! It adds a type check.
 //!
@@ -29,6 +30,38 @@
 //! - The panic names both types.
 //! - This works in every build mode.
 //!
+//! Your list is still the std list. No allocator. No lock.
+//!
+//! The full program and the migration are in the
+//! [README](https://github.com/g41797/paternitas#readme).
+//!
+//! ## The four calls you will use
+//!
+//! - `Typed(P)` makes the helper for one struct type.
+//! - `setTypeId(&p)` marks the struct as that type.
+//! - `node(&p)` gives its Node to the std list.
+//! - `parentFromNode(n)` checks the Node and gives your struct back, or null.
+//!
+//! `mustParentFromNode` panics instead of returning null.
+//!
+//! Use it when another type is a bug.
+//!
+//! ## When you probably do not need Paternitas
+//!
+//! One list, one struct type? Plain `@fieldParentPtr` is fine.
+//!
+//! Paternitas is for lists that carry several struct types.
+//!
+//! Typical places:
+//!
+//! - a mailbox with different message types,
+//! - a scheduler with different job types,
+//! - a dispatcher,
+//! - a generic intrusive container,
+//! - a queue or a map that passes different structs around.
+//!
+//! ## Typical use
+//!
 //! You put a TypedNode where the Node was.
 //!
 //! - The change is mechanical.
@@ -42,7 +75,7 @@
 //! | node  <-- the list |       | tnode: DoublyTypedNode    |
 //! +--------------------+       | +-----------------------+ |
 //!                              | | node   <-- the list   | |
-//!                              | | internal info...      | |
+//!                              | | type id               | |
 //!                              | +-----------------------+ |
 //!                              +---------------------------+
 //! ```
@@ -90,7 +123,7 @@
 //! 2. Add `const TypedMessage = paternitas.Typed(Message);`, once.
 //! 3. Call `TypedMessage.setTypeId(&message)`.
 //!    - Call it right after the struct is created.
-//!    - Call it again after each whole-struct write, such as a reset.
+//!    - Call it again after each whole-struct write: a reset, a clear, `= .{...}`.
 //! 4. `&message.node` becomes `TypedMessage.node(&message)`.
 //! 5. `@fieldParentPtr("node", n)` becomes `TypedMessage.mustParentFromNode(n)`.
 //!    - It still returns `*Message`.
@@ -104,17 +137,43 @@
 //!
 //! It returns null for another type.
 //!
+//! ## A small but important rule
+//!
+//! Call `setTypeId` after you create the struct.
+//!
+//! A whole-struct write erases the type id. Call it again after each one.
+//!
+//! Writing one field keeps the type id.
+//!
+//! The struct MUST stay alive while its Node, Anchor or AnyParent is in use.
+//!
+//! ## Passing a struct through type-erased code
+//!
 //! Outside a std list, pass an `AnyParent`.
 //!
 //! - It holds the struct's address and its type id.
-//! - A queue, a map or a union field copies these two words. It never copies
-//!   your struct.
+//! - A queue, a map, a union field or a callback copies these two words. It
+//!   never copies your struct.
 //! - Get one with `toAny`. Get the struct back with `fromAny`.
 //! - Or look up a handler by its `type_id`, and give it `ptr`.
 //!
-//! Writing your own container?
+//! ```zig
+//! try handlers.put(TypedMessage.typeId(), onMessage);
+//! try handlers.put(TypedJob.typeId(), onJob);
+//!
+//! // The dispatch never names a type.
+//! if (handlers.get(any.type_id)) |h| h(any.ptr);
+//! ```
+//!
+//! ## Writing a container
+//!
+//! Most application code does not need `Anchor` or `container`.
+//!
+//! They are for you when you write the generic container itself.
 //!
 //! See `Anchor` and `container`.
+//!
+//! ## Limits
 //!
 //! Paternitas is not a container library.
 //!
@@ -133,11 +192,15 @@
 
 const _doc_stub = void;
 
-/// The TypedNode for a `std.SinglyLinkedList`.
+/// Use this in a struct that goes into a `std.SinglyLinkedList`.
+///
+/// It replaces `std.SinglyLinkedList.Node`.
 pub const SinglyTypedNode = TypedNode(std.SinglyLinkedList.Node);
 /// Short for `SinglyTypedNode`.
 pub const STNode = SinglyTypedNode;
-/// The TypedNode for a `std.DoublyLinkedList`.
+/// Use this in a struct that goes into a `std.DoublyLinkedList`.
+///
+/// It replaces `std.DoublyLinkedList.Node`.
 pub const DoublyTypedNode = TypedNode(std.DoublyLinkedList.Node);
 /// Short for `DoublyTypedNode`.
 pub const DTNode = DoublyTypedNode;
@@ -176,11 +239,17 @@ pub fn TypedNode(comptime N: type) type {
     };
 }
 
-/// Does the `@fieldParentPtr` work for `P`.
+/// Makes the helper for one Parent type.
+///
+/// ```zig
+/// const TypedMessage = paternitas.Typed(Message);
+/// ```
+///
+/// Declare it once per type.
+///
+/// It does the `@fieldParentPtr` work for `P`.
 ///
 /// It also checks the type.
-///
-/// Declare it once per type: `const TypedMessage = paternitas.Typed(Message);`
 ///
 /// - You never write `@fieldParentPtr` or the field's name.
 /// - It finds the TypedNode by its type.
@@ -233,7 +302,9 @@ pub fn Typed(comptime P: type) type {
             return &@field(p.*, field).node;
         }
 
-        /// Returns the `P` that contains the Node.
+        /// Returns the `P` that contains the Node, or null.
+        ///
+        /// Use it when the Node may be in several struct types.
         ///
         /// - Returns null when the Node is in another type.
         /// - Returns null when `setTypeId` was never called.
@@ -253,6 +324,8 @@ pub fn Typed(comptime P: type) type {
 
         /// Like `parentFromNode`, but panics instead of returning null.
         ///
+        /// Use it when another type is a bug.
+        ///
         /// - It panics in every build mode.
         /// - The panic message names both types.
         /// - The Node MUST be inside a `SinglyTypedNode` or `DoublyTypedNode`.
@@ -264,6 +337,8 @@ pub fn Typed(comptime P: type) type {
         ///
         /// It does not check the type.
         ///
+        /// Use it only when the type is already known.
+        ///
         /// - The Node MUST be inside a `P`.
         /// - A wrong Node gives you garbage. Nothing checks it, in any build
         ///   mode.
@@ -271,7 +346,7 @@ pub fn Typed(comptime P: type) type {
             return @fieldParentPtr(field, typedNodeOf(n));
         }
 
-        /// Returns true when the Node is inside a `P`.
+        /// Returns true when the Node is inside a `P` whose type id was set.
         ///
         /// - Returns false when `setTypeId` was never called.
         /// - The Node MUST be inside a `SinglyTypedNode` or `DoublyTypedNode`.
@@ -289,7 +364,7 @@ pub fn Typed(comptime P: type) type {
             return &@field(p.*, field).anchor;
         }
 
-        /// Returns the `P` behind the `*Anchor`.
+        /// Returns the `P` behind the `*Anchor`, or null.
         ///
         /// - Returns null when the Anchor is in another type.
         /// - Returns null when `setTypeId` was never called.
@@ -323,7 +398,7 @@ pub fn Typed(comptime P: type) type {
             return .{ .ptr = p, .type_id = typeId() };
         }
 
-        /// Returns the `P` behind an `AnyParent`.
+        /// Returns the `P` behind an `AnyParent`, or null.
         ///
         /// - Returns null when the `AnyParent` is of another type.
         /// - The `AnyParent` MUST come from `toAny`.
@@ -338,6 +413,8 @@ pub fn Typed(comptime P: type) type {
         }
 
         /// Returns the type id of `P`.
+        ///
+        /// Use it as a map key, when several Parent types share a map.
         pub inline fn typeId() TypeId {
             return &desc;
         }
@@ -372,6 +449,8 @@ pub fn Typed(comptime P: type) type {
     };
 }
 
+/// A one-word handle to a Parent.
+///
 /// The one fixed point in your struct.
 ///
 /// From it you reach the struct's type id, the struct itself and its Node.
@@ -381,7 +460,7 @@ pub fn Typed(comptime P: type) type {
 ///
 /// It is for container authors.
 ///
-/// Application code passes an `AnyParent`, which is two words.
+/// Application code usually passes an `AnyParent`, which is two words.
 ///
 /// A `*Anchor` is one word.
 ///
@@ -446,7 +525,7 @@ pub const Anchor = struct {
 /// A Parent's address and its type id.
 ///
 /// Pass it where the code in between does not know your struct's type: a queue,
-/// a map, a union field.
+/// a map, a union field, a callback.
 ///
 /// They copy the two words.
 ///

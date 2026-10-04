@@ -2,17 +2,30 @@
 //!
 //! An event loop picks a handler by type id.
 //!
-//! The loop gets items of many types, as `AnyParent`s.
-//! Each one is an address and a type id.
-//! The loop keeps one handler per type, in a map keyed by `TypeId`.
-//! It needs only the type id to pick the handler.
+//! ### When you need it
 //!
-//! - Register one handler per type, under its `TypeId`.
+//! The loop gets items of many types, as `AnyParent`s.
+//!
+//! It should not name every type.
+//!
+//! It keeps one handler per type, in a map keyed by `TypeId`.
+//!
+//! ### What it does
+//!
+//! - Register one handler per type, under its `typeId`.
 //! - Receive a `Message`, a `Job` and a `Ping` as `AnyParent`s.
 //! - Find the handler by `type_id`.
 //! - Call it with `ptr`.
 //! - Count the `Ping` as unhandled. It has no handler.
-//! - Get a `Message` back from an `AnyParent` with `fromAny`. It checks the type id.
+//! - Get a `Message` back from an `AnyParent` with `fromAny`.
+//!
+//! ### What to notice
+//!
+//! The dispatch needs only the type id.
+//!
+//! The handler casts `ptr` to its own type. The map matched the type id, so the type is right.
+//!
+//! `fromAny` checks the type id itself. Another type gives null.
 
 const Message: type = struct {
     text: []const u8,

@@ -4,6 +4,92 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-04 — Example headers, user-first
+
+- Each of 001–006 has the same header shape, under its title and one-line
+  summary: "When you need it", "What it does", "What to notice". Diagrams
+  stay last.
+- One sentence per paragraph. Prose lines are not wrapped:
+  `fix_md_hardbreaks.sh` turns a wrapped line into a hard break on the site.
+- 003 and 005 now say the struct MUST stay alive while its `AnyParent` is
+  in use. 006 says most code does not need its own container.
+- Comments only. All six gates pass. `check_docs.sh` is clean.
+  `build_site.sh` and `mkdocs build --strict` pass.
+
+---
+
+## 2026-10-04 — Comments in `src/container.zig`, user-first
+
+- Header rewritten under headings: when you need it, what you get, typical
+  use (the stack `push` from example 006), rules.
+- `TypeInfo`, `node` and `toAny` open with what they are for.
+  `uniform_next_offset` says you do not need it.
+- Comments only. All six gates pass. `check_docs.sh` is clean.
+  `build_site.sh` and `mkdocs build --strict` pass.
+
+---
+
+## 2026-10-04 — Comments in `src/paternitas.zig` follow the new README
+
+- The owner's draft `paternitas.zig` was reviewed. Its code was the same,
+  except seven long lines wrapped. It deleted many contract lines and field
+  docs. It was not taken as a whole.
+- Taken, in our style (13 items):
+  - Header: a new first line, "Three words first" with Parent, the headings
+    (four calls, when you do not need it, typical use, the rule, passing a
+    struct, writing a container, limits), a lifetime line, a handler-map
+    snippet, a README link.
+  - The TypedNode aliases open with "Use this in a struct that goes
+    into…".
+  - "Use it when…" lines for `parentFromNode`, `mustParentFromNode` and
+    `parentFromNodeUnchecked`.
+  - `Typed` opens with its usage line.
+  - `Anchor` opens with "A one-word handle to a Parent."
+  - `AnyParent` lists callbacks.
+- All six gates pass. `check_docs.sh` is clean. `build_site.sh` and
+  `mkdocs build --strict` pass.
+
+---
+
+## 2026-10-04 — New README, from the owner's draft
+
+- The owner's draft `paternitas-readme.md` replaces `README.md`. The old one
+  is in `design/backup/README-001.md`.
+- Nine fixes, each approved by the owner:
+  1. "object" meaning an item became "struct".
+  2. A "Three words first" section explains intrusive, type-erased and Parent.
+  3. The table row "wrong `@fieldParentPtr` → detected" became "wrong type →
+     a bad pointer / null, or a panic naming both types".
+  4. One line added: one struct, one TypedNode, a second is a compile error.
+  5. The full runnable program, with its output, is back in "Several types
+     in one list".
+  6. Links are back: the Ziggit footgun post and the three matryoshka repos.
+  7. "When should I use it?" was merged into "Do I need it?". "What does
+     Paternitas change?" was merged into "Move your code to Paternitas".
+  8. A handler map keyed by `TypeId`, from example 004, was added to the
+     `AnyParent` section. EXPL 02 stays open for the examples and `src`.
+  9. `-` bullets, no em dash, "That is the joke." dropped.
+- All six gates pass. `check_docs.sh` is clean. `build_site.sh` and
+  `mkdocs build --strict` pass. The README has 414 counted lines.
+
+---
+
+## 2026-10-04 — Six items taken from an outside comment review
+
+- The zip `paternitas-comments-improved.zip` was reviewed. Its code was the
+  same, except one joined line in 002. Its prose undid the staccato and the
+  sentence split. It was not taken as a whole.
+- Taken, in our style, in `src/paternitas.zig`:
+  - The diagram says `type id`, not `internal info...`. README too.
+  - `parentFromNode`, `parentFromAnchor` and `fromAny` start "..., or null."
+  - `is`: "inside a `P` whose type id was set."
+  - `typeId`: "Use it as a map key, when several Parent types share a map."
+  - `Anchor`: "Application code usually passes an `AnyParent`".
+  - Migration step: "a reset, a clear, `= .{...}`."
+- All six gates pass.
+
+---
+
 ## 2026-10-04 — Negative test: fromAny after toAny without setTypeId
 
 - New `negative/panic/from_any_to_any_no_type.zig`. It gets an `AnyParent`

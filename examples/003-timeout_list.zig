@@ -1,24 +1,38 @@
 //! Title: Timeout list and a queue
 //!
-//! A connection leaves the timeout list. It goes through a queue. Then it comes back.
+//! A connection leaves the timeout list.
 //!
-//! A server keeps its open connections in a timeout list.
-//! The list is a plain `std.DoublyLinkedList`.
+//! It goes through a queue. Then it comes back.
+//!
+//! ### When you need it
+//!
+//! A server keeps its open connections in a timeout list, a plain `std.DoublyLinkedList`.
+//!
 //! Sometimes a connection goes to another thread for a while, through a queue.
+//!
 //! A `std.Io.Queue` stores a copy of what you put in.
+//!
 //! A connection must not be copied.
-//! So the queue carries its `AnyParent`: its address and its type id.
-//! The other side gets the `Connection` back, with a type check.
+//!
+//! ### What it does
 //!
 //! - Call `setTypeId` on three `Connection`s.
 //! - Append them to the timeout list.
 //! - Remove the middle one from the list.
-//! - Send its `AnyParent` through a `std.Io.Queue`.
+//! - Send its `AnyParent` through a `std.Io.Queue`, with `toAny`.
 //! - Receive the `AnyParent`.
 //! - Get the `Connection` back with `fromAny`.
 //! - Give it a new deadline.
 //! - Append it to the list again.
 //! - Check the order of the list.
+//!
+//! ### What to notice
+//!
+//! The queue carries an `AnyParent`: the address and the type id. Two words.
+//!
+//! The `Connection` is never copied.
+//!
+//! It MUST stay alive while its `AnyParent` is in the queue.
 //!
 //! ```
 //!  timeout list:   c1 <-> c2 <-> c3

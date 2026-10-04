@@ -1,12 +1,18 @@
 //! Title: Large struct in a union
 //!
-//! A large struct travels in a union of events. It is never copied.
+//! A large struct travels in a union of events.
+//!
+//! It is never copied.
+//!
+//! ### When you need it
 //!
 //! Small events travel by value in a tagged union.
+//!
 //! A union field stores a copy of what you put in.
+//!
 //! A large struct must not be copied.
-//! So it travels as its `AnyParent`: its address and its type id.
-//! The handler gets the struct back, with a type check.
+//!
+//! ### What it does
 //!
 //! - Call `setTypeId` on a `Download`. Its 4 KB buffer is too large to copy.
 //! - Build three `Event`s: a tick, a resize and the `Download`'s `AnyParent`.
@@ -14,6 +20,14 @@
 //! - Handle each event.
 //! - Get the `Download` back with `fromAny`.
 //! - Check that it is the same `Download`, not a copy.
+//!
+//! ### What to notice
+//!
+//! The union field is an `AnyParent`: the address and the type id. Two words.
+//!
+//! Each `Event` stays small.
+//!
+//! The `Download` MUST stay alive while its event is in use.
 
 /// It is too large to copy. Events carry its address and type id.
 const Download: type = struct {

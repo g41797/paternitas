@@ -1,30 +1,73 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! For you, if you write your own container: a queue, a stack, a pool.
+//! Tools for writing your own container: a queue, a stack, a pool.
 //!
-//! Your container keeps `*Anchor`s of many Parent types.
+//! Most application code does not need this part.
 //!
-//! You do not need to know their types.
+//! - A std list with `Typed(P)` covers one list of many struct types.
+//! - An `AnyParent` in a std container covers queues and maps.
 //!
-//! For any of them, this part gives you three things:
+//! ## When you need it
 //!
-//! - A pointer-sized word to chain through. Your container needs no extra
-//!   memory per item.
-//! - The std Node, as its own type.
-//! - The Parent's address.
+//! - Your container keeps Parents of many types, and does not know them.
+//! - It needs no extra memory per item.
+//! - Or you pass a Parent to code that knows nothing of Paternitas, such as a
+//!   C callback's `void*`.
+//!
+//! Your container keeps `*Anchor`s.
+//!
+//! The Anchor is a one-word handle to a Parent. See `Anchor`.
+//!
+//! ## What you get
 //!
 //! Start from `anchor.info()`.
 //!
-//! It gives you the `TypeInfo` of that Parent.
+//! It gives you the `TypeInfo` of that Parent, or null when `setTypeId` was
+//! never called.
 //!
-//! Application code does not need this part.
+//! - `nextField` gives you a pointer-sized word to chain through.
+//! - `node` gives you the std Node, as its own type.
+//! - `parent` gives you the Parent's address, with no type.
+//! - `toAny` gives you an `AnyParent`.
 //!
-//! `Typed(P)` covers it.
+//! ## Typical use
+//!
+//! A stack of mixed struct types. It allocates nothing.
+//!
+//! ```zig
+//! fn push(s: *Stack, a: *paternitas.Anchor) !void {
+//!     const ti = a.info() orelse return error.NoTypeId;
+//!     const word: *?*paternitas.Anchor = @ptrCast(ti.nextField(a));
+//!     word.* = s.top;
+//!     s.top = a;
+//! }
+//! ```
+//!
+//! Push with `TypedJob.anchor(&job)`.
+//!
+//! After a pop, get the struct back with `TypedJob.parentFromAnchor(a)`.
+//!
+//! You get null for another type.
+//!
+//! The full program is example 006, "Your own stack".
+//!
+//! ## Rules
+//!
+//! - Call `setTypeId` on each Parent before it enters your container.
+//! - A std list uses the same `next` word. A Parent MUST NOT be in your
+//!   container and in a std list at the same time.
+//! - Paternitas never reads or writes that word. What you put in it is up to
+//!   your container.
+//! - The Parent MUST stay alive while your container keeps its Anchor.
+//! - Paternitas locks nothing. Guard a shared container yourself.
 
 const _doc_stub = void;
 
 /// What Paternitas knows about one Parent type.
+///
+/// Use it to reach a Parent's `next` word, Node and address, without
+/// knowing its type.
 ///
 /// Get it with `anchor.info()`.
 ///
@@ -66,6 +109,8 @@ pub const TypeInfo = struct {
 
     /// Returns the std Node of the Parent, as type `N`.
     ///
+    /// Use it when your container links Nodes, not Anchors.
+    ///
     /// It panics in every build mode when `N` is the wrong Node type for this
     /// Parent.
     ///
@@ -89,6 +134,9 @@ pub const TypeInfo = struct {
     }
 
     /// Returns an `AnyParent` for the Parent: its address and its type id.
+    ///
+    /// Use it to pass an item from your container to a queue, a map or a
+    /// handler picked by type id.
     pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) AnyParent {
         return .{ .ptr = ti.parent(a), .type_id = a.typeId() };
     }
@@ -97,7 +145,9 @@ pub const TypeInfo = struct {
 /// Not null when the `next` field sits at the same distance from the Anchor
 /// in every Parent.
 ///
-/// You do not need it to use `nextField`.
+/// You do not need it.
+///
+/// `nextField` uses it already.
 pub const uniform_next_offset: ?isize =
     if (SinglyTypedNode.node_next_offset == DoublyTypedNode.node_next_offset) SinglyTypedNode.node_next_offset else null;
 
