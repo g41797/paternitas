@@ -10,6 +10,9 @@
 
 Paternitas makes Zig's intrusive, type-erased lists safer.
 
+---
+
+
 You probably do not need it for your first linked list.
 
 You may want it when the list becomes part of a real system.
@@ -28,6 +31,8 @@ And you have a small problem:
 
 The std list does not know.
 
+---
+
 Paternitas gives you a cheap answer.
 
 ---
@@ -36,23 +41,19 @@ Paternitas gives you a cheap answer.
 
 **Intrusive.**
 
-The link lives inside your struct.
-
-The list keeps a pointer to that link.
-
-It never copies your struct.
+- The link lives inside your struct.
+- The list keeps a pointer to that link.
+- It never copies your struct.
 
 **Type-erased.**
 
-The list sees only the link, a `Node`.
-
-It does not know the struct type around it.
+- The list sees only the link, a `Node`.
+- It does not know the struct type around it.
 
 **Parent.**
 
-The struct that contains the Node.
-
-Getting the Parent back from a Node is `@fieldParentPtr`.
+- The struct that contains the Node.
+- Getting the Parent back from a Node is `@fieldParentPtr`.
 
 ---
 
