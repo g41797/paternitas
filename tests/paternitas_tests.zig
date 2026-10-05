@@ -220,7 +220,7 @@ test "TypeInfo.node for a DoublyTypedNode Parent" {
     try testing.expect(i.node(a, std.DoublyLinkedList.Node) == TypedJob.node(&j));
 }
 
-test "AnyParent dispatch through a map, no Typed call at dispatch" {
+test "Any dispatch through a map, no Typed call at dispatch" {
     std.testing.log_level = .debug;
 
     var m: Msg = .{ .text = "hi" };
@@ -252,7 +252,7 @@ test "AnyParent dispatch through a map, no Typed call at dispatch" {
     q.append(TypedMsg.anchor(&m));
     q.append(TypedJob.anchor(&j));
     while (q.popFirst()) |a| {
-        const any: AnyParent = a.toAny().?;
+        const any: Any = a.toAny().?;
         const h: Handler = map.get(any.type_id).?;
         h(any.ptr);
     }
@@ -265,21 +265,95 @@ test "toAny and fromAny" {
 
     var m: Msg = .{ .text = "x" };
     TypedMsg.setTypeId(&m);
-    const any: AnyParent = TypedMsg.toAny(&m);
+    const any: Any = TypedMsg.toAny(&m);
     try testing.expect(TypedMsg.fromAny(any).? == &m);
     try testing.expect(TypedJob.fromAny(any) == null);
 
-    const from_anchor: AnyParent = TypedMsg.anchor(&m).toAny().?;
+    const from_anchor: Any = TypedMsg.anchor(&m).toAny().?;
     try testing.expect(from_anchor.ptr == any.ptr and from_anchor.type_id == any.type_id);
 
     var no_type: Msg = .{ .text = "y" };
     try testing.expect(TypedMsg.anchor(&no_type).toAny() == null);
 }
 
-test "*Anchor and AnyParent in a tagged union" {
+// Structs with no TypedNode. They get only the id calls.
+const Point: type = struct { x: i32, y: i32 };
+const OtherPoint: type = struct { x: i32, y: i32 };
+const Empty: type = struct {};
+const OtherEmpty: type = struct {};
+const BareNode: type = struct { node: std.DoublyLinkedList.Node = .{} };
+
+fn Box(comptime T: type) type {
+    return struct { value: T };
+}
+
+test "every struct gets its own id, in every build mode" {
     std.testing.log_level = .debug;
 
-    const Event: type = union(enum) { tick: u64, anchor: *Anchor, view: AnyParent };
+    // A `var`, so the compiler cannot fold the compares.
+    var ids = [_]TypeId{
+        paternitas.Typed(Point).typeId(),
+        paternitas.Typed(OtherPoint).typeId(),
+        paternitas.Typed(Empty).typeId(),
+        paternitas.Typed(OtherEmpty).typeId(),
+        paternitas.Typed(Box(u8)).typeId(),
+        paternitas.Typed(Box(u16)).typeId(),
+        paternitas.Typed(BareNode).typeId(),
+        TypedMsg.typeId(),
+        TypedJob.typeId(),
+    };
+    std.mem.doNotOptimizeAway(&ids);
+
+    for (ids, 0..) |a, i| {
+        try testing.expect(a != null);
+        for (ids[i + 1 ..]) |b| try testing.expect(a != b);
+    }
+
+    // The same, where the ids never leave this function.
+    try testing.expect(paternitas.Typed(Point).typeId() != paternitas.Typed(OtherPoint).typeId());
+    try testing.expect(paternitas.Typed(Empty).typeId() != paternitas.Typed(OtherEmpty).typeId());
+    try testing.expect(paternitas.Typed(Box(u8)).typeId() != paternitas.Typed(Box(u16)).typeId());
+
+    // One type, one id.
+    try testing.expect(paternitas.Typed(Point).typeId() == paternitas.Typed(Point).typeId());
+}
+
+test "toAny and fromAny for a struct with no TypedNode" {
+    std.testing.log_level = .debug;
+
+    const TypedPoint = paternitas.Typed(Point);
+    const TypedOtherPoint = paternitas.Typed(OtherPoint);
+
+    var pt: Point = .{ .x = 1, .y = 2 };
+    const any: Any = TypedPoint.toAny(&pt);
+    try testing.expect(any.type_id == TypedPoint.typeId());
+    try testing.expect(TypedPoint.fromAny(any).? == &pt);
+    try testing.expectEqual(@as(i32, 2), TypedPoint.fromAny(any).?.*.y);
+
+    try testing.expect(TypedOtherPoint.fromAny(any) == null);
+    try testing.expect(TypedMsg.fromAny(any) == null);
+
+    var m: Msg = .{ .text = "x" };
+    TypedMsg.setTypeId(&m);
+    try testing.expect(TypedPoint.fromAny(TypedMsg.toAny(&m)) == null);
+}
+
+test "isId for a struct with no TypedNode" {
+    std.testing.log_level = .debug;
+
+    const TypedPoint = paternitas.Typed(Point);
+
+    try testing.expect(TypedPoint.isId(TypedPoint.typeId()));
+    try testing.expect(!TypedPoint.isId(paternitas.Typed(OtherPoint).typeId()));
+    try testing.expect(!TypedPoint.isId(TypedMsg.typeId()));
+    try testing.expect(!TypedPoint.isId(null));
+    try testing.expect(!TypedMsg.isId(TypedPoint.typeId()));
+}
+
+test "*Anchor and Any in a tagged union" {
+    std.testing.log_level = .debug;
+
+    const Event: type = union(enum) { tick: u64, anchor: *Anchor, view: Any };
 
     var m: Msg = .{ .text = "x" };
     TypedMsg.setTypeId(&m);
@@ -320,7 +394,7 @@ test "the stored offset finds next for both kinds, and so does nextField" {
 const paternitas = @import("paternitas");
 const container = paternitas.container;
 const Anchor = paternitas.Anchor;
-const AnyParent = paternitas.AnyParent;
+const Any = paternitas.Any;
 const TypeId = paternitas.TypeId;
 const TypeInfo = container.TypeInfo;
 const msg_one = @import("msg_one");

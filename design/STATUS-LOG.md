@@ -4,6 +4,116 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-05 — TYID 02: type id without a node
+
+The owner named it. Claude showed the intent first, and the owner said go.
+
+- Example 007, `examples/007-type_id_without_node.zig`.
+  - Three structs with no TypedNode: `Point`, `Tick`, `Empty`.
+  - A handler map keyed by `typeId()`. No list. `isId` and `fromAny` checked.
+  - Example 004 is the TypedNode version. 007 is the one without.
+- Wired: `examples.zig`, a `"07 -"` wrapper in `tests/examples_tests.zig`,
+  and the nav in `kitchen/mkdocs.yml`. The site page is generated.
+- Six gates green. 26 tests in all four modes on both backends.
+  `mkdocs build --strict` passes.
+- Not touched: `src/`, the README, the plan. The plan still says TYID 02 is
+  open. Its status is in STATUS.md.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: ZTK, when you name it
+Model: Opus 5.5. Compact first.
+
+---
+
+## 2026-10-05 — TYID 01: Typed(P) for every struct
+
+The owner named it. Claude showed the intent first.
+
+- `Typed(P)` takes every struct.
+  - With a TypedNode: every call, as before. The id is `&desc`.
+  - Without one: `typeId`, `isId`, `toAny`, `fromAny`. The id is `&tag`.
+  - A list call without a TypedNode:
+    `X: no TypedNode, so it has only typeId, isId, toAny and fromAny`.
+  - `fromAny` checks `setTypeId` only with a TypedNode.
+  - `NodeKind` gets no `.none`. Owner's question: no `TypeInfo` exists
+    without a TypedNode, so nothing reads one.
+- `AnyParent` is `Any`, no alias. In `src/`, the tests, examples 003 to
+  006, the two `from_any` negatives. The site pages are made from the
+  examples. Not the README.
+- The owner asked: do the bare `u8` tags always get distinct addresses?
+  - Claude checked in a scratch test, then in the repo tests.
+  - A finding: a struct inside a generic fn that does not use `P` is one
+    type for every `P`. All tags were then one. `Typed(P)` uses `P`, so it
+    is safe. A `//` next to `tag` says so.
+  - Distinct in all four modes, on LLVM and on Zig's own backend. Also
+    with a plain `==` that never escapes.
+- The tests had `use_llvm = true` fixed, so Zig's own backend was never
+  tested. Owner's ruling: a `-Duse_llvm` option, default true. g2 runs the
+  four modes on both backends.
+- New tests: 9 distinct ids, round trip, `isId`. 25 pass, 8 runs.
+- `bare_node.zig` now makes a list call and expects the new error.
+- Six gates pass. `mkdocs build --strict` passes.
+
+---
+
+## 2026-10-05 — Plan 015: TYID before ZTK
+
+The owner had a second outside review, of 002. Claude checked it.
+
+- It agrees with 002 and the rulings.
+- Three fixes, all for TYID 01:
+  - the third compile error names `isId` too. 002 left it out, and it is
+    `pub`. Claude found this one; the review did not;
+  - `isId` in a test and in the example;
+  - the `///` says `TypeId` is pointer-sized on purpose, and states the
+    limits next to `typeId`.
+- Rulings: the fixes go into the plan, no 003. TYID before ZTK.
+- [implementation-plan-015.md](implementation-plan-015.md): TYID 01, code;
+  TYID 02, example; then ZTK. 014 is in `design/backup/`.
+- No code.
+
+---
+
+## 2026-10-05 — Proposal 002: Typed(P) for every struct
+
+The owner reviewed 001, outside the repo. Claude checked the review
+against the code.
+
+- Claude's 001 was wrong: way B costs no load on `parentFromNode`. Only
+  `Anchor.typeId()` pays one. The review's case for way A rested on it.
+- The owner's idea: `Typed(P)` for every struct. List calls only with a
+  TypedNode. The id calls already exist: `typeId`, `toAny`, `fromAny`.
+- A scratch test, outside the repo, in all four build modes: unique ids at
+  run time, round trips, three compile errors. All pass.
+- Rulings: `Any` replaces `AnyParent`, no alias. Structs only. `TypeId`
+  stays `?*const anyopaque`. No `typeName` on `Any`. The README is a
+  separate stage, later.
+- C3 is not a source. The owner built the idea in Odin and Zig first, and
+  found C3's `typeid` and `any` later. 002 says so.
+- [typeid-split-proposal-002.md](typeid-split-proposal-002.md). 001 is in
+  `design/backup/`.
+- Open: TYID before ZTK. No code. No plan change.
+
+---
+
+## 2026-10-05 — Proposal: type ids on their own
+
+The owner said Paternitas has two uses: a runtime type id, as C3 has, and
+the intrusive, type-erased containers. The owner asked for a proposal
+under `design/`, before any plan.
+
+- [typeid-split-proposal-001.md](backup/typeid-split-proposal-001.md). The owner
+  suggested `typeid-parent-separation-001.md`. Claude chose a shorter name
+  that says what it is: a proposal.
+- It proposes `typeId(T)` for any type, `typeName`, and `Any` with `as(T)`.
+  The lists are built on top. One rule: `Typed(P).typeId() == typeId(P)`.
+- Two ways to make the ids one, A and B. Six open questions. Three stages,
+  a first cut.
+- No code. No plan change.
+
+---
+
 ## 2026-10-05 — LOOK 02, the belt logo
 
 Round 2, same day. The owner removed both "Paternitas" titles from the

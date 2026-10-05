@@ -41,6 +41,7 @@ nav:
       - examples/004-handler_map.md
       - examples/005-large_struct_in_union.md
       - examples/006-anchor_chain.md
+      - examples/007-type_id_without_node.md
 
 hooks:
   - hooks/count_lines.py

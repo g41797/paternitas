@@ -1,12 +1,13 @@
-//! A bare std Node is not a TypedNode. A Parent without a TypedNode does not
-//! compile.
+//! A bare std Node is not a TypedNode. A struct without a TypedNode gets only
+//! the id calls. A list call does not compile.
 
 const BareNode = struct {
     node: std.DoublyLinkedList.Node = .{},
 };
 
-comptime {
-    _ = p.Typed(BareNode).typeId();
+export fn listCall() void {
+    var b: BareNode = .{};
+    _ = p.Typed(BareNode).node(&b);
 }
 
 const p = @import("paternitas");

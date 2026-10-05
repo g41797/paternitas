@@ -72,5 +72,17 @@ test "06 - anchor chain" {
     };
 }
 
+test "07 - type id without node" {
+    std.testing.log_level = .debug;
+
+    var threaded: std.Io.Threaded = .init(std.testing.allocator, .{});
+    defer threaded.deinit();
+
+    examples.type_id_without_node.type_id_without_node(std.testing.allocator, threaded.io()) catch |err| {
+        std.log.err("type_id_without_node failed: {s}", .{@errorName(err)});
+        return err;
+    };
+}
+
 const examples = @import("examples");
 const std = @import("std");

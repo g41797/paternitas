@@ -6,7 +6,7 @@
 //! Most application code does not need this part.
 //!
 //! - A std list with `Typed(P)` covers one list of many struct types.
-//! - An `AnyParent` in a std container covers queues and maps.
+//! - An `Any` in a std container covers queues and maps.
 //!
 //! ## When you need it
 //!
@@ -29,7 +29,7 @@
 //! - `nextField` gives you a pointer-sized word to chain through.
 //! - `node` gives you the std Node, as its own type.
 //! - `parent` gives you the Parent's address, with no type.
-//! - `toAny` gives you an `AnyParent`.
+//! - `toAny` gives you an `Any`.
 //!
 //! ## Typical use
 //!
@@ -133,11 +133,11 @@ pub const TypeInfo = struct {
         return addOffset(a, -@as(isize, @intCast(ti.*.anchor_offset)));
     }
 
-    /// Returns an `AnyParent` for the Parent: its address and its type id.
+    /// Returns an `Any` for the Parent: its address and its type id.
     ///
     /// Use it to pass an item from your container to a queue, a map or a
     /// handler picked by type id.
-    pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) AnyParent {
+    pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) Any {
         return .{ .ptr = ti.parent(a), .type_id = a.typeId() };
     }
 };
@@ -170,7 +170,7 @@ inline fn addOffset(a: *Anchor, off: isize) *anyopaque {
 
 const root = @import("paternitas.zig");
 const Anchor = root.Anchor;
-const AnyParent = root.AnyParent;
+const Any = root.Any;
 const TypedNode = root.TypedNode;
 const SinglyTypedNode = root.SinglyTypedNode;
 const DoublyTypedNode = root.DoublyTypedNode;

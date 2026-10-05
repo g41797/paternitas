@@ -10,7 +10,7 @@
 //!
 //! It keeps items of several types, and does not know them.
 //!
-//! Most application code does not need this. A std list, or an `AnyParent`, is enough.
+//! Most application code does not need this. A std list, or an `Any`, is enough.
 //!
 //! ### What it does
 //!

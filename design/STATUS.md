@@ -7,7 +7,7 @@ Current state only. Updated in place. The narrative is in
 
 1. Read this file in full.
 2. Read Part 0 of [rules-013.md](rules-013.md).
-3. Read the plan, [implementation-plan-014.md](implementation-plan-014.md), for
+3. Read the plan, [implementation-plan-015.md](implementation-plan-015.md), for
    the stage the owner names. Not before they name it.
 4. Read the design, [paternitas-design-013.md](paternitas-design-013.md), for
    a stage that writes code or docs.
@@ -24,17 +24,29 @@ Current state only. Updated in place. The narrative is in
 |---|---|
 | rules | [rules-013.md](rules-013.md) |
 | design decisions, and what paternitas keeps from ztk | [paternitas-design-013.md](paternitas-design-013.md) |
-| the plan | [implementation-plan-014.md](implementation-plan-014.md) |
+| the plan | [implementation-plan-015.md](implementation-plan-015.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
 | NAME 01: the new names and what they touch | [name-01-intent-002.md](name-01-intent-002.md) |
+| type ids on their own: the proposal and the owner's rulings | [typeid-split-proposal-002.md](typeid-split-proposal-002.md) |
 | the narrative | [STATUS-LOG.md](STATUS-LOG.md) |
 | the advice collected by the owner, read in AUDT 01 | `paternitas-001.md` |
 | superseded versions | `design/backup/` |
 
 ## Current state
 
+- TYID 01 is done, 2026-10-05. The owner named it.
+  - `Typed(P)` takes every struct. Without a TypedNode it has only
+    `typeId`, `isId`, `toAny` and `fromAny`. A list call is a compile
+    error that says so.
+  - `AnyParent` is `Any`, with no alias, in `src/`, the tests, examples 003
+    to 006 and the negatives. Not in the README.
+  - `-Duse_llvm=false` builds the tests with Zig's own backend. g2 runs the
+    four modes on both backends.
+- TYID 02 is done, 2026-10-05. The owner named it.
+  - Example 007: a handler map keyed by `typeId()` for three structs with no
+    TypedNode. `isId` and `fromAny` in it. No list.
 - LOOK 02 is done, 2026-10-05. The owner named it.
   - A new logo from the owner's prototype: the belt, the Anchor and the
     exits. A new favicon: the Anchor alone.
@@ -57,11 +69,12 @@ Current state only. Updated in place. The narrative is in
   - `setTypeId` writes the type. `typeId()` reads it.
   - The field in the examples is `tnode`.
 - Every `pub` declaration has a `///`. The root `//!` has a usage block.
-- Six examples in `examples/`, each with a test wrapper and a site page.
+- Seven examples in `examples/`, each with a test wrapper and a site page.
 - The ztk copy in `design/source/` has the new names in its code and text.
 - Gates: all six pass.
-- Tests: 22 pass, in all four optimization modes. 16 unit, 6 examples.
-- Negatives: 9 programs, 5 compile, 4 run, in all four modes.
+- Tests: 26 pass, in all four optimization modes, on LLVM and on Zig's own
+  backend. 19 unit, 7 examples.
+- Negatives: 10 programs, 5 compile, 5 run, in all four modes.
 - The site builds. `mkdocs build --strict` passes.
 - The landing, API and example pages load in headless Chrome, with no
   console errors.
@@ -79,11 +92,14 @@ Current state only. Updated in place. The narrative is in
 5. `kitchen/tools/__pycache__/` was deleted by Claude in LOOK 02, against
    the no-deletion rule. It was Python's cache, made by the LOOK 01 script.
    Nothing else was deleted.
+6. The README still names `AnyParent`. It is fixed in the README stage,
+   named by the owner, later.
 
 ## Next
 
 **ZTK — ztk on paternitas**, in the matryoshka-ztk repo. The charter is in
-[implementation-plan-014.md](implementation-plan-014.md). Claude proposes
+[implementation-plan-015.md](implementation-plan-015.md). Claude proposes
 Opus 5.5, since it writes code and design in another repo.
 
 It starts when the owner names it.
+

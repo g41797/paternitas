@@ -19,8 +19,8 @@
 //! - Call `setTypeId` on three `Connection`s.
 //! - Append them to the timeout list.
 //! - Remove the middle one from the list.
-//! - Send its `AnyParent` through a `std.Io.Queue`, with `toAny`.
-//! - Receive the `AnyParent`.
+//! - Send its `Any` through a `std.Io.Queue`, with `toAny`.
+//! - Receive the `Any`.
 //! - Get the `Connection` back with `fromAny`.
 //! - Give it a new deadline.
 //! - Append it to the list again.
@@ -28,18 +28,18 @@
 //!
 //! ### What to notice
 //!
-//! The queue carries an `AnyParent`: the address and the type id. Two words.
+//! The queue carries an `Any`: the address and the type id. Two words.
 //!
 //! The `Connection` is never copied.
 //!
-//! It MUST stay alive while its `AnyParent` is in the queue.
+//! It MUST stay alive while its `Any` is in the queue.
 //!
 //! ```
 //!  timeout list:   c1 <-> c2 <-> c3
 //!                          |
 //!                          |  remove, toAny()
 //!                          v
-//!  queue:             [AnyParent]
+//!  queue:             [Any]
 //!                          |
 //!                          |  getOne, fromAny()
 //!                          v
@@ -54,7 +54,7 @@ const Connection: type = struct {
 };
 const TypedConnection: type = paternitas.Typed(Connection);
 
-const Queue: type = std.Io.Queue(paternitas.AnyParent);
+const Queue: type = std.Io.Queue(paternitas.Any);
 
 pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
@@ -71,7 +71,7 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
         timeouts.append(TypedConnection.node(c));
     }
 
-    var buffer: [4]paternitas.AnyParent = undefined;
+    var buffer: [4]paternitas.Any = undefined;
     var queue: Queue = .init(&buffer);
 
     try removeAndSend(&timeouts, &queue, io, &connections[1]);
@@ -79,17 +79,17 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
     try checkOrder(&timeouts, &.{ 1, 3, 2 });
 }
 
-/// Takes the connection out of the list. Sends its `AnyParent` through the
+/// Takes the connection out of the list. Sends its `Any` through the
 /// queue.
 fn removeAndSend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: *Connection) !void {
     timeouts.remove(TypedConnection.node(c));
     try queue.putOne(io, TypedConnection.toAny(c));
 }
 
-/// Gets an `AnyParent` from the queue. Puts the connection back in the list,
+/// Gets an `Any` from the queue. Puts the connection back in the list,
 /// with a new deadline.
 fn receiveAndAppend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) !void {
-    const any: paternitas.AnyParent = try queue.getOne(io);
+    const any: paternitas.Any = try queue.getOne(io);
     const c: *Connection = TypedConnection.fromAny(any) orelse return error.WrongParent;
 
     c.*.deadline += 100;

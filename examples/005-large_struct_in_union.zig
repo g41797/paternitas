@@ -15,7 +15,7 @@
 //! ### What it does
 //!
 //! - Call `setTypeId` on a `Download`. Its 4 KB buffer is too large to copy.
-//! - Build three `Event`s: a tick, a resize and the `Download`'s `AnyParent`.
+//! - Build three `Event`s: a tick, a resize and the `Download`'s `Any`.
 //! - Copy the events into a second array, as a queue would.
 //! - Handle each event.
 //! - Get the `Download` back with `fromAny`.
@@ -23,7 +23,7 @@
 //!
 //! ### What to notice
 //!
-//! The union field is an `AnyParent`: the address and the type id. Two words.
+//! The union field is an `Any`: the address and the type id. Two words.
 //!
 //! Each `Event` stays small.
 //!
@@ -40,7 +40,7 @@ const TypedDownload: type = paternitas.Typed(Download);
 const Event: type = union(enum) {
     tick: u64,
     resize: Size,
-    parent: paternitas.AnyParent,
+    parent: paternitas.Any,
 };
 
 const Size: type = struct {

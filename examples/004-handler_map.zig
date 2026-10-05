@@ -4,7 +4,7 @@
 //!
 //! ### When you need it
 //!
-//! The loop gets items of many types, as `AnyParent`s.
+//! The loop gets items of many types, as `Any`s.
 //!
 //! It should not name every type.
 //!
@@ -13,11 +13,11 @@
 //! ### What it does
 //!
 //! - Register one handler per type, under its `typeId`.
-//! - Receive a `Message`, a `Job` and a `Ping` as `AnyParent`s.
+//! - Receive a `Message`, a `Job` and a `Ping` as `Any`s.
 //! - Find the handler by `type_id`.
 //! - Call it with `ptr`.
 //! - Count the `Ping` as unhandled. It has no handler.
-//! - Get a `Message` back from an `AnyParent` with `fromAny`.
+//! - Get a `Message` back from an `Any` with `fromAny`.
 //!
 //! ### What to notice
 //!
@@ -69,7 +69,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     var ping: Ping = .{};
     TypedPing.setTypeId(&ping);
 
-    const received: [3]paternitas.AnyParent = .{
+    const received: [3]paternitas.Any = .{
         TypedMessage.toAny(&message),
         TypedJob.toAny(&job),
         TypedPing.toAny(&ping),
@@ -84,7 +84,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
 }
 
 /// Picks the handler by type id. No struct type appears here.
-fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), any: paternitas.AnyParent, counts: *Counts) void {
+fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), any: paternitas.Any, counts: *Counts) void {
     const h: Handler = handlers.get(any.type_id) orelse {
         std.log.info("no handler for this type", .{});
         counts.*.unhandled += 1;
@@ -95,7 +95,7 @@ fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), any: p
 
 /// `fromAny` checks the type id first. Asking for another type gives null.
 fn checkFromAny(message: *Message) !void {
-    const any: paternitas.AnyParent = TypedMessage.toAny(message);
+    const any: paternitas.Any = TypedMessage.toAny(message);
     if (TypedMessage.fromAny(any) != message) return error.WrongParent;
     if (TypedJob.fromAny(any) != null) return error.WrongParent;
 }

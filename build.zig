@@ -6,6 +6,9 @@ pub fn build(b: *std.Build) void {
     const target: std.Build.ResolvedTarget = b.standardTargetOptions(.{});
     const optimize: std.builtin.OptimizeMode = b.standardOptimizeOption(.{});
 
+    // The tests use LLVM unless -Duse_llvm=false picks Zig's own backend.
+    const use_llvm: bool = b.option(bool, "use_llvm", "Build the tests with LLVM (default true)") orelse true;
+
     const use_lld = target.result.os.tag != .macos and
         target.result.os.tag != .freebsd and
         target.result.os.tag != .openbsd and
@@ -75,8 +78,8 @@ pub fn build(b: *std.Build) void {
 
         const tests: *std.Build.Step.Compile = b.addTest(.{
             .root_module = tmod,
-            .use_llvm = true,
-            .use_lld = use_lld,
+            .use_llvm = use_llvm,
+            .use_lld = use_lld and use_llvm,
         });
 
         const run_tests: *std.Build.Step.Run = b.addRunArtifact(tests);
@@ -122,7 +125,7 @@ fn addNegative(
     // Each of these must fail to compile, with that message.
     const refused_at_compile_time = [_]struct { file: []const u8, says: []const u8 }{
         .{ .file = "negative/compile/not_struct.zig", .says = "not a struct, so it cannot be a Paternitas Parent" },
-        .{ .file = "negative/compile/bare_node.zig", .says = "no TypedNode, so it cannot be a Paternitas Parent" },
+        .{ .file = "negative/compile/bare_node.zig", .says = "bare_node.BareNode: no TypedNode, so it has only typeId, isId, toAny and fromAny" },
         .{ .file = "negative/compile/two_typed_nodes.zig", .says = "more than one TypedNode, and exactly one is allowed" },
         .{ .file = "negative/compile/wrong_node.zig", .says = "found '*DoublyLinkedList.Node'" },
         .{ .file = "negative/compile/typed_node_other_node.zig", .says = "TypedNode(typed_node_other_node.OtherNode): not a std Node, so it cannot be a Paternitas TypedNode" },

@@ -1,15 +1,20 @@
-# paternitas — Implementation plan (013)
+# paternitas — Implementation plan (015)
 
 Forward-looking work, plus one line per completed stage.
 
 - Current state: [STATUS.md](STATUS.md).
 - The narrative: [STATUS-LOG.md](STATUS-LOG.md).
 - Rules: [rules-013.md](rules-013.md).
-- Design: [paternitas-design-012.md](paternitas-design-012.md).
+- Design: [paternitas-design-013.md](paternitas-design-013.md).
 - The audit and the owner's rulings:
   [audit-01-report-003.md](audit-01-report-003.md).
 - The outside work: [paternitas-intake-001.md](paternitas-intake-001.md).
-- Change from 012: LOOK 01 is closed, and its section is gone. Its account
+- Type ids on their own: [typeid-split-proposal-002.md](typeid-split-proposal-002.md).
+- Change from 014: TYID 01 and TYID 02 come before ZTK. Owner's ruling,
+  2026-10-05. Three fixes from the owner's second review go into TYID 01.
+- Change from 013, kept: LOOK 02 is done. It gets one line under
+  "Completed stages".
+- Change from 012, kept: LOOK 01 is closed, and its section is gone. Its account
   is in [STATUS-LOG.md](STATUS-LOG.md). The four user-first passes of
   2026-10-04 get one line under "Completed stages".
 - Change from 011, kept: EXPL 02 is closed. Its account is in
@@ -59,9 +64,13 @@ Forward-looking work, plus one line per completed stage.
   named stage. Six gates green.
 - LOOK 01 (2026-10-04, Opus 5.5) — the logo, the mask picture and the
   favicon, from Zero and Ziggy, with
-  [ATTRIBUTION.md](../kitchen/docs/assets/logo/ATTRIBUTION.md). The README
+  [ATTRIBUTION.md](../kitchen/tools/logo/mascots/ATTRIBUTION.md). The README
   and the landing page show them. Run by Claude alone, at the owner's request.
   Design 012. Six gates green.
+- LOOK 02 (2026-10-05, Opus 5.5) — a new logo from the owner's prototype:
+  the belt, the Anchor and the exits. `kitchen/tools/logo/gen_logo.py`
+  draws it, and the favicon. The mascot images are kept as a record.
+  Design 013. Six gates green.
 
 ---
 
@@ -71,8 +80,55 @@ paternitas first, until it is done. Then ztk, built on it. The ztk stage may
 need paternitas fixes; the work then goes in rounds. Intake, D1.
 
 ```text
-PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  ZTK ...  <->  PTRN fixes
+PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  LOOK 02  ->  TYID 01  ->  TYID 02  ->  ZTK ...  <->  PTRN fixes
 ```
+
+---
+
+## TYID 01 — code
+
+The owner names it. Opus 5.5: it changes `src/`.
+
+- Read [typeid-split-proposal-002.md](typeid-split-proposal-002.md) in
+  full. Its rulings hold.
+- Show the intent before code: the diff of `Typed(P)`, in words.
+- `Typed(P)` accepts every struct.
+  - One TypedNode: every call, as today.
+  - None: `typeId`, `isId`, `toAny`, `fromAny`. The id is the address of
+    a per-type `var tag: u8`.
+  - The other calls raise a `@compileError`.
+- The three compile errors, word for word:
+  - `X: not a struct, so it cannot be a Paternitas Parent`
+  - `X: more than one TypedNode, and exactly one is allowed`
+  - `X: no TypedNode, so it has only typeId, isId, toAny and fromAny`
+  - Fix from the review: 002 left out `isId`. It is `pub`.
+- `AnyParent` becomes `Any`. No alias. In `src/`, the tests and examples
+  003 to 006. Not the README.
+- Tests, in all four modes:
+  - unique ids, read at run time: same fields, empty structs, `List(u8)`
+    and `List(u16)`, structs with a TypedNode;
+  - `toAny` then `fromAny`, and the wrong type gives null;
+  - `isId`, for a struct with no TypedNode. Fix from the review;
+  - the three compile errors, as negatives.
+- The `///` of `Typed`, `TypeId` and `Any`:
+  - every struct gets the id calls; a TypedNode adds the list calls;
+  - `TypeId` is one pointer, so it works as a map key. Fix from the review;
+  - the limits, next to `typeId`: one running program; a shared library
+    has its own ids; do not save or send an id. Fix from the review.
+- Done when: six gates green; tests and negatives pass in all four modes;
+  `mkdocs build --strict` passes.
+
+---
+
+## TYID 02 — example
+
+The owner names it.
+
+- One new example: a handler map keyed by `TypeId`, without a list.
+  `isId` in it.
+- A test wrapper and a site page, like the six.
+- The README is not touched. It is a separate stage, named by the owner,
+  later.
 
 ---
 
