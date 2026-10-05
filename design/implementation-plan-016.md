@@ -1,4 +1,4 @@
-# paternitas — Implementation plan (014)
+# paternitas — Implementation plan (016)
 
 Forward-looking work, plus one line per completed stage.
 
@@ -9,8 +9,14 @@ Forward-looking work, plus one line per completed stage.
 - The audit and the owner's rulings:
   [audit-01-report-003.md](audit-01-report-003.md).
 - The outside work: [paternitas-intake-001.md](paternitas-intake-001.md).
-- Change from 013: LOOK 02 is done. It gets one line under "Completed
-  stages".
+- Type ids on their own: [typeid-split-proposal-002.md](typeid-split-proposal-002.md).
+- Change from 015: TYID 01 and TYID 02 are done. README and docs come
+  before ZTK. Owner's ruling, 2026-10-05. New stages: README 01, DOCS 01
+  PLAN, DOCS 01. The README stage was "later" in 015.
+- Change from 014, kept: TYID 01 and TYID 02 come before ZTK. Owner's ruling,
+  2026-10-05. Three fixes from the owner's second review go into TYID 01.
+- Change from 013, kept: LOOK 02 is done. It gets one line under
+  "Completed stages".
 - Change from 012, kept: LOOK 01 is closed, and its section is gone. Its account
   is in [STATUS-LOG.md](STATUS-LOG.md). The four user-first passes of
   2026-10-04 get one line under "Completed stages".
@@ -69,6 +75,12 @@ Forward-looking work, plus one line per completed stage.
   draws it, and the favicon. The mascot images are kept as a record.
   Design 013. Six gates green.
 
+- TYID 01 (2026-10-05, Opus 5.5) — `Typed(P)` for every struct. Without a
+  TypedNode: `typeId`, `isId`, `toAny`, `fromAny`. `AnyParent` is `Any`.
+  `-Duse_llvm=false` in g2. Six gates green.
+- TYID 02 (2026-10-05, Sonnet 5) — example 007: a handler map for structs
+  with no TypedNode. Six gates green.
+
 ---
 
 ## Order
@@ -77,8 +89,67 @@ paternitas first, until it is done. Then ztk, built on it. The ztk stage may
 need paternitas fixes; the work then goes in rounds. Intake, D1.
 
 ```text
-PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  LOOK 02  ->  ZTK ...  <->  PTRN fixes
+PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  LOOK 02  ->  TYID 01  ->  TYID 02  ->  README 01  ->  DOCS 01 PLAN  ->  DOCS 01  ->  ZTK ...  <->  PTRN fixes
 ```
+
+---
+
+## README 01 — the README
+
+The owner named it, 2026-10-05. Opus 5.5. The old README is
+`design/backup/README-002.md`.
+
+The owner's rulings:
+
+- The reader: someone browsing GitHub. The README stands alone.
+- The code is the only source of truth. README and site both describe it.
+  Repetition is fine.
+- Few or no links in the README text.
+- Keep the voice and the structure. New md files use the same voice.
+- The logo does not change. No subtitle.
+- Lists stay the main story. Type ids are a bonus, "for the curious and
+  the brave". They do not depend on lists, Nodes or type erasure.
+- The bonus is at the end, before Install, with a one-line mention at the
+  top.
+
+Done, as a draft for the owner:
+
+- the one-line mention at the top;
+- `AnyParent` is `Any`;
+- "Passing structs…" points to the bonus;
+- a comparison row, "type id without a list";
+- the section "Bonus: for the curious and the brave". Its snippets were
+  compiled and run against `src/`.
+
+Open:
+
+- The owner reviews the draft.
+- Trimming waits for DOCS 01: a section shrinks only when a site page
+  holds its text.
+
+---
+
+## DOCS 01 PLAN — plan the site pages
+
+The owner names it. Planning only, no pages written.
+
+- Which hand-written pages go into `kitchen/docs/` (names below, without
+  `.md`, since the pages do not exist yet), and their nav place in
+  `kitchen/mkdocs.yml`. A first cut, from the discussion:
+  - lists — move your code, the four calls, singly or doubly, the
+    `setTypeId` rule, several types in one list;
+  - why — a tagged union, intrusive lists;
+  - containers — Anchor, TypeInfo, your own container;
+  - limits — what it does not do, the type-id boundary;
+  - type-ids — the bonus in full;
+  - name — the name and where it came from.
+- The landing page: the logo links to the README. More hero buttons?
+- Which README sections shrink once the pages exist.
+- How g4 and `mkdocs build --strict` check the new pages.
+
+## DOCS 01 — write the site pages
+
+The owner names it, after DOCS 01 PLAN.
 
 ---
 

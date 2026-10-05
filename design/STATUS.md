@@ -7,7 +7,7 @@ Current state only. Updated in place. The narrative is in
 
 1. Read this file in full.
 2. Read Part 0 of [rules-013.md](rules-013.md).
-3. Read the plan, [implementation-plan-015.md](implementation-plan-015.md), for
+3. Read the plan, [implementation-plan-016.md](implementation-plan-016.md), for
    the stage the owner names. Not before they name it.
 4. Read the design, [paternitas-design-013.md](paternitas-design-013.md), for
    a stage that writes code or docs.
@@ -24,7 +24,7 @@ Current state only. Updated in place. The narrative is in
 |---|---|
 | rules | [rules-013.md](rules-013.md) |
 | design decisions, and what paternitas keeps from ztk | [paternitas-design-013.md](paternitas-design-013.md) |
-| the plan | [implementation-plan-015.md](implementation-plan-015.md) |
+| the plan | [implementation-plan-016.md](implementation-plan-016.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
@@ -36,6 +36,13 @@ Current state only. Updated in place. The narrative is in
 
 ## Current state
 
+- README 01 is a draft, 2026-10-05. The owner named it.
+  - Lists stay the main story. Type ids are "Bonus: for the curious and
+    the brave", at the end, before Install. One line at the top says so.
+  - `AnyParent` is `Any`. A comparison row, "type id without a list".
+  - The old README is `design/backup/README-002.md`.
+  - Open: the owner's review. Trimming waits for the site pages.
+  - The owner's rulings are in [implementation-plan-016.md](implementation-plan-016.md), "README 01".
 - TYID 01 is done, 2026-10-05. The owner named it.
   - `Typed(P)` takes every struct. Without a TypedNode it has only
     `typeId`, `isId`, `toAny` and `fromAny`. A list call is a compile
@@ -97,14 +104,11 @@ Current state only. Updated in place. The narrative is in
 5. `kitchen/tools/__pycache__/` was deleted by Claude in LOOK 02, against
    the no-deletion rule. It was Python's cache, made by the LOOK 01 script.
    Nothing else was deleted.
-6. The README still names `AnyParent`. It is fixed in the README stage,
-   named by the owner, later.
 
 ## Next
 
-**ZTK — ztk on paternitas**, in the matryoshka-ztk repo. The charter is in
-[implementation-plan-015.md](implementation-plan-015.md). Claude proposes
-Opus 5.5, since it writes code and design in another repo.
+**DOCS 01 PLAN — plan the site pages.** Planning only. The first cut is
+in [implementation-plan-016.md](implementation-plan-016.md). Then DOCS 01
+writes them. ZTK waits.
 
 It starts when the owner names it.
-

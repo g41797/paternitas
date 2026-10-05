@@ -35,8 +35,9 @@ A Link is the std Node with a type check added. The name says so.
 
 ## Error and panic text
 
-- `"no TypedNode, so it cannot be a Paternitas Parent"`
-- `"more than one TypedNode, and exactly one is allowed"`
+- `"not a struct, and Typed takes structs only"`
+- `"no TypedNode, so it has only typeId, isId, toAny and fromAny"`
+- `"more than one TypedNode, and at most one is allowed"`
 - `"TypedNode(X): not a std Node, so it cannot be a Paternitas TypedNode"`
 - `"fromAny: setTypeId was never called on the Parent"`
 - `typeName` gives `<no type>`, not `<unstamped>`.

@@ -4,6 +4,36 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-05 — README 01: the bonus, and the error texts
+
+The owner put ZTK aside: the README and the docs first.
+
+- Error texts fixed, at the owner's word. A struct with no TypedNode is
+  allowed now, so the old reasons were wrong.
+  - `X: not a struct, and Typed takes structs only`.
+  - `X: more than one TypedNode, and at most one is allowed`.
+  - `src/`, `build.zig`, two negatives' comments, two `///`.
+  - The design docs updated in place, at the owner's word: plan, proposal
+    002, design 013 ("Required Parent shape" said zero TypedNodes do not
+    compile), name-01 intent 002.
+  - Six gates green.
+- The owner brought another AI's advice: a full README, or a short one with
+  the depth on the site. Talked through. The rulings are in plan 016,
+  "README 01".
+- README draft: the top line, `Any`, a comparison row, and "Bonus: for the
+  curious and the brave". Its snippets were compiled and run. 687 to 776
+  lines. Not trimmed: that waits for the site pages.
+- Plan 016. 015 is in `design/backup/`. Links to it now point to 016.
+- Six gates green on the draft. g4 first failed: plan 016 named the
+  future pages as `.md` files, read as dead links. Now plain names.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01 PLAN
+Model: Opus 5.5.
+
+---
+
 ## 2026-10-05 — TYID 02: type id without a node
 
 The owner named it. Claude showed the intent first, and the owner said go.

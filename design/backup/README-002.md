@@ -10,8 +10,6 @@
 
 Paternitas makes Zig's intrusive, type-erased lists safer.
 
-And a bonus at the end: a runtime type id for any struct. No list, no Node.
-
 ---
 
 
@@ -468,7 +466,7 @@ Maybe a map stores callbacks and contexts.
 
 Maybe a union field needs to carry a struct without copying it.
 
-Use `Any`.
+Use `AnyParent`.
 
 ```zig
 const any = TypedMessage.toAny(&message);
@@ -511,10 +509,6 @@ The handler casts `ptr` to its own type.
 The map matched the type id, so the type is right.
 
 The struct itself must still be alive.
-
-This works for a struct without a TypedNode too.
-
-That is the bonus at the end.
 
 ---
 
@@ -600,7 +594,6 @@ So a type marked in one shared library does not automatically match the same typ
 | type erased               | yes                       | yes                                 |
 | wrong type                | a bad pointer             | null, or a panic naming both types  |
 | several types in one list | possible                  | possible, with checks               |
-| type id without a list    | no                        | yes, the bonus below                |
 | lifetime checking         | no                        | no                                  |
 | locking                   | no                        | no                                  |
 
@@ -609,88 +602,6 @@ The important row is the bad one:
 **wrong type.**
 
 That is what Paternitas is here to fix.
-
----
-
-## Bonus: for the curious and the brave
-
-No list here.
-
-No Node.
-
-Just your struct.
-
-Zig's `type` lives only at compile time.
-
-At run time, a value of unknown type is just an address.
-
-Paternitas gives any struct a runtime type id.
-
-```zig
-const Point = struct { x: i32, y: i32 }; // no TypedNode
-const TypedPoint = paternitas.Typed(Point);
-
-var point: Point = .{ .x = 3, .y = 4 };
-const any = TypedPoint.toAny(&point);
-
-if (TypedPoint.fromAny(any)) |p| {
-    // It really is a Point.
-}
-```
-
-`any` holds the address and the type id.
-
-It does not hold a copy of `Point`.
-
-Ask about the type without turning it back:
-
-```zig
-if (TypedPoint.isId(any.type_id)) {
-    // It is a Point.
-}
-```
-
-Use the type id as a map key:
-
-```zig
-try handlers.put(TypedPoint.typeId(), onPoint);
-try handlers.put(TypedTick.typeId(), onTick);
-
-// The dispatch never names a type.
-if (handlers.get(any.type_id)) |h| h(any.ptr);
-```
-
-The four calls:
-
-| Call                       | What it does                                      |
-| -------------------------- | ------------------------------------------------- |
-| `TypedPoint.typeId()`      | gives the type id of `Point`                      |
-| `TypedPoint.isId(id)`      | tells if `id` is the type id of `Point`           |
-| `TypedPoint.toAny(&point)` | packs the address and the type id                 |
-| `TypedPoint.fromAny(any)`  | checks the type id and gives you `*Point` or null |
-
-Good for handler maps, queues, callbacks and `*anyopaque` contexts.
-
-No allocation.
-
-No registry.
-
-No init call.
-
-The rules:
-
-- Structs only. Wrap any other value in a struct.
-- The struct has no room for the type id. It travels next to the pointer, in `Any`.
-- A bare pointer carries no type id.
-- The type id is for one running program. Do not save it or send it.
-
-The list calls still need a TypedNode.
-
-Call one on `Point`, and the compiler stops you:
-
-```text
-main.Point: no TypedNode, so it has only typeId, isId, toAny and fromAny
-```
 
 ---
 
