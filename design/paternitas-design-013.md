@@ -1,9 +1,36 @@
-# paternitas — Design (010)
+# paternitas — Design (013)
 
 This is the versioned design document. It says what paternitas is, records
 the decisions and their reasons, and keeps the owner's rulings.
 
-Change from 009: NAME 01, 2026-10-03.
+Change from 012: LOOK 02, 2026-10-05. The owner named it.
+
+- A new logo: the belt, the Anchor and the exits. From the owner's
+  prototype.
+- The mascot images are retired, and kept as a record in
+  `kitchen/tools/logo/mascots/`.
+- "Decisions of LOOK 02" has the details.
+
+Change from 011, kept: LOOK 01, 2026-10-04. The owner asked for it to run on
+its own, while they were away.
+
+- Paternitas had a logo, a mask picture and a favicon. LOOK 02 retired
+  them. They are in `kitchen/tools/logo/mascots/`, with [ATTRIBUTION.md](../kitchen/tools/logo/mascots/ATTRIBUTION.md).
+- "Decisions of LOOK 01" has the details.
+
+Change from 010, kept: EXPL 02, 2026-10-03. The owner's ruling.
+
+- paternitas has two uses, and the README names them first: "One list,
+  many types" and "Pass it on, handle by type".
+- The second use passes an `AnyParent`, not a `*Anchor`. `AnyParent` is
+  for the application. `*Anchor` is for container authors, and for a C
+  callback's `void*` context.
+- Examples 003, 004 and 005 carry `AnyParent`. 005 is now
+  `005-large_struct_in_union`. 006 keeps `*Anchor`.
+- The Archimedes quote moved from the README to the `Anchor` `///`.
+- No behaviour changed.
+
+Change from 009, kept: NAME 01, 2026-10-03.
 
 - `Link(N)` is now `TypedNode(N)`. `SLink` and `DLink` are now
   `SinglyTypedNode` and `DoublyTypedNode`, with the short names `STNode`
@@ -65,8 +92,8 @@ The rest of the project state lives in other files.
 
 - The current state is in [STATUS.md](STATUS.md).
 - The narrative is in [STATUS-LOG.md](STATUS-LOG.md).
-- The rules are in [rules-008.md](rules-008.md).
-- The work still to do is in [implementation-plan-011.md](implementation-plan-011.md).
+- The rules are in [rules-013.md](rules-013.md).
+- The work still to do is in [implementation-plan-014.md](implementation-plan-014.md).
 - A big task gets its own versioned `.md` under `design/`, linked from here.
 
 ---
@@ -1151,9 +1178,9 @@ The examples live in `examples/`, one pattern each. See rules Part 2,
 001-set_type_id_and_recover   one Parent, a std list, back
 002-mixed_list                two Parent types in one std list
 003-timeout_list              a DoublyTypedNode Parent in a timeout list,
-                              through a std.Io.Queue(*Anchor), and back
+                              through a std.Io.Queue(AnyParent), and back
 004-handler_map               a TypeId -> handler map; toAny, fromAny
-005-anchor_in_union           *Anchor as one variant of a tagged union
+005-large_struct_in_union     AnyParent as one variant of a tagged union
 006-anchor_chain              a stack chained through TypeInfo.nextField
 ```
 
@@ -1308,15 +1335,16 @@ After the close, the owner ruled on the Anchor, 2026-10-03.
   in your struct. Everything else is reached from it: the struct's type,
   the struct itself, its Node.
   - The owner's image: Archimedes, "Give me a place to stand, and I will
-    move the Earth". The README quotes it, in Latin and English. The API
-    doc states the idea plainly.
+    move the Earth". The `Anchor` `///` quotes it, in Latin and English.
+    EXPL 02 moved it there from the README.
 - `*Anchor` carries the struct. `AnyParent` is for picking a handler by type
   id. The module header and the `AnyParent` doc say so.
 - A queue can also carry `*Node`, when every struct in it has the same Node
   kind, and the receiver uses `parentFromNode`. `*Anchor` works for any
-  struct. The README and the module header give both, and say: when in
-  doubt, `*Anchor`.
-- The README shows a queue of `*Anchor` from two struct types, in ASCII.
+  struct.
+- EXPL 02 changed what the user is shown. The README and the module header
+  show `AnyParent` for a queue, a map or a union field. `*Anchor` is for
+  container authors.
 - ztk's own `ParentHelper.fromAnchor` keeps its name. Only its call into
   paternitas changed.
 
@@ -1330,7 +1358,8 @@ is in [ptrn-02-intent-001.md](ptrn-02-intent-001.md).
 - There are six examples. The set is in "Examples" above. 003 and 004 are the
   two the design described.
 - The layout is flat, because there are fewer examples than in ztk.
-- 003 uses `std.Io.Queue(*Anchor)` as its container of pointers.
+- 003 uses `std.Io.Queue(*Anchor)` as its container of pointers. EXPL 02
+  changed it to `std.Io.Queue(AnyParent)`.
 - The README has no install section. It comes later.
 - On the landing page only the Examples button target changed. The rest is
   LOOK 01.
@@ -1622,3 +1651,164 @@ new version of this document.
 - The old tree's design folder is `ZTK/design/`.
   - The index is `ZTK/design/context.md`.
   - The concepts are in `ZTK/design/matryoshka-concepts-003.md`.
+
+---
+
+## Decisions of EXPL 02
+
+The owner ruled on 2026-10-03.
+
+- paternitas has two uses. The README names them first, in plain English.
+  - One list, many types: several struct types share one std list.
+    `parentFromNode`.
+  - Pass it on, handle by type: the struct goes through a queue, a map or a
+    union field as an `AnyParent`. The receiver calls `fromAny`, or picks a
+    handler by `type_id`.
+- `AnyParent` is two words, and it is a plain value. A non-intrusive
+  container copies the two words and never the struct.
+- The README section "Beyond the std list" is gone. Its `*Node` / `*Anchor`
+  choice is advanced material for container authors, so it lives in the
+  comments now.
+- The `Anchor` `///` says it is for container authors, and for a C
+  callback's single `void*` context. It quotes Archimedes.
+- Examples 003, 004 and 005 carry `AnyParent`. The README's snippets are
+  taken from them. 005 was renamed, because its name said Anchor.
+- 004 no longer logs the type name of an unhandled item. An `AnyParent` has
+  no `typeName()`.
+
+## Decisions of LOOK 01
+
+The owner asked for LOOK 01a and LOOK 01b to run without them, on
+2026-10-04. Claude made the small choices below. The owner can undo any of
+them.
+
+The images.
+
+- The logo shows Zero and Ziggy, the two official Zig mascots.
+  - Both come from Wikimedia Commons, under CC BY 4.0.
+  - Zero is by Andrew Kelley. Ziggy is by Luke Holder.
+  - The mascots are not redrawn. Each holds up a blue mask on a stick, in
+    front of its eye. A thin orange thread joins the two sticks.
+  - The mask is held, not worn, because the Node is not the struct. The
+    struct carries its Node, the way a guest at a masquerade carries a
+    stick mask.
+  - The two masks are the same. Every struct in a list carries the same
+    kind of Node.
+  - The owner asked for the stick masks on 2026-10-05. The first version
+    had masks tied on, and a thick thread from mask to mask that read as a
+    hose.
+- The mask picture shows three structs on one list: Message, Job, Message.
+  - The list sees three equal masks. A thread joins their sticks.
+  - Paternitas sees the type behind each one.
+- The favicon is the mask and its stick, seen from the front, on Zig
+  orange.
+  - A mascot at 16 pixels cannot be read. The mask can.
+- The new images are under CC BY 4.0, like their sources.
+- `kitchen/tools/gen_logo.py` draws all of them from the two unchanged
+  copies of the mascots. The SVGs carry a width and a height. Without them
+  the landing page shrank the logo to nothing.
+
+Where they go.
+
+- The README shows the logo under its title.
+- A new README section, "The mask", sits after "The problem in one
+  example". It has six short lines and the picture.
+  - The picture says what the text says. It does not replace the code.
+  - There is no ASCII copy of it. The README has an ASCII layout diagram
+    already, in "Why intrusive lists at all?".
+- The README credits the two authors and links [ATTRIBUTION.md](../kitchen/tools/logo/mascots/ATTRIBUTION.md).
+- The landing page shows the logo above the name. The logo links to the
+  README on GitHub.
+  - In dark mode the logo sits on a light card, because the mascots have
+    dark outlines.
+- The site's header logo and favicon are the new mask.
+- The old ztk favicon, `kitchen/docs/assets/images/favicon.ico`, is no
+  longer used. It is not deleted. The owner deletes it.
+
+The Archimedes quote stays in the `Anchor` `///`.
+
+- EXPL 02 put it there. LOOK 01 does not move it.
+- An Anchor picture, a lever or an anchor, was not drawn. The README's
+  Anchor text is for container authors, and most readers stop before it.
+
+A bug on the landing page was fixed on the way.
+
+- Its hidden `<h1>` showed, because the hiding rule used `:first-child`
+  and a `<style>` element came first. The rule now uses `:first-of-type`.
+
+## Decisions of LOOK 02
+
+The owner named LOOK 02 on 2026-10-05. The owner brought a prototype and
+asked Claude to make it again with its own tools.
+
+The prototype.
+
+- Drafted with Grok Imagine, then an SVG and a Pillow script.
+- Its Grok Imagine prompts are copied into [LOGO.md](../kitchen/tools/logo/LOGO.md), "History". The owner
+  then deleted the prototype folder. It was never committed.
+
+The picture.
+
+- A belt: one list.
+- Gray boxes ride it, all alike: structs that are only Nodes on the
+  list.
+- A gold diamond where the belt ends: the `Anchor`, where Paternitas reads
+  the type id.
+- Three colored lanes leave the diamond: PARENT_A, PARENT_B, PARENT_C.
+  Each struct comes back as its own type.
+- On the belt every package is the same gray box: the list cannot tell
+  them apart. After the Anchor each parent has its own color and shape:
+  an amber circle, a teal triangle, a coral hexagon. The owner's ruling,
+  round 4.
+- Under it: the name, a gold rule, the subtitle, and the motto
+  *Agnitio paternitatis*, recognition of the parent. It matches
+  `setTypeId`, which you call yourself.
+- The motto is AGNITIO · PATERNITATIS, in Cinzel, Roman capitals after
+  Trajan's Column. It is drawn as paths, so it looks the same everywhere.
+  The middle dot is the inscription mark. The owner's choice, round 6.
+  Cinzel is under the SIL Open Font License 1.1. The font and its license
+  are in `kitchen/tools/logo/fonts/`.
+- The name, the subtitle and the exit labels are in Inter, drawn as paths
+  too. So all text looks the same everywhere. Inter is under the SIL Open
+  Font License 1.1. The owner's choice, round 7.
+- Navy card, rounded corners. It reads on light and dark pages, so the
+  landing page's light card for dark mode is gone.
+
+The favicon.
+
+- The logo's Anchor: the same diamond, ring and dot, on navy. The owner's
+  ruling, round 8. At 16 pixels the ring and the dot merge into one gold
+  spot. At 32 and 48 they read.
+- The site header uses the same.
+
+Changes from the prototype.
+
+- The canvas is 800 by 540, not 800 by 1000. The prototype was mostly
+  empty navy.
+- The diamond sits where the belt ends. In the prototype the SVG and the
+  PNG put it in different places.
+- The "P" over each PARENT label is gone. It was left from TYPE_A.
+- The labels sit to the right of the packages, so the lanes stay short.
+
+The tools.
+
+- `kitchen/tools/logo/gen_logo.py` is the only source. It writes the SVGs,
+  then ImageMagick makes the PNG and the .ico from them. The raster cannot
+  drift from the vector.
+- Every setting is a named constant at its top, for tuning.
+- `kitchen/tools/logo/LOGO.md` says what the picture means and how to tune it.
+- Only the images are under `kitchen/docs/assets/logo/`. The prompts and
+  the script are not published.
+
+Where it goes.
+
+- The README shows the logo at its top. The owner placed it there.
+- The README no longer credits the mascot authors. No mascot is shown.
+- The README section "The mask" is gone. The owner removed it.
+- The landing page shows the logo, up to 800 pixels wide, with no title
+  under it. The owner removed the title.
+
+Open for the owner.
+
+- Kerning is not applied to the text paths. Spacing is set by hand.
+- The subtitle says "safer". The README tagline says the same.

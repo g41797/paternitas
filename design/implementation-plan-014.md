@@ -1,15 +1,20 @@
-# paternitas — Implementation plan (012)
+# paternitas — Implementation plan (014)
 
 Forward-looking work, plus one line per completed stage.
 
 - Current state: [STATUS.md](STATUS.md).
 - The narrative: [STATUS-LOG.md](STATUS-LOG.md).
 - Rules: [rules-013.md](rules-013.md).
-- Design: [paternitas-design-011.md](paternitas-design-011.md).
+- Design: [paternitas-design-013.md](paternitas-design-013.md).
 - The audit and the owner's rulings:
   [audit-01-report-003.md](audit-01-report-003.md).
 - The outside work: [paternitas-intake-001.md](paternitas-intake-001.md).
-- Change from 011: EXPL 02 is closed. Its account is in
+- Change from 013: LOOK 02 is done. It gets one line under "Completed
+  stages".
+- Change from 012, kept: LOOK 01 is closed, and its section is gone. Its account
+  is in [STATUS-LOG.md](STATUS-LOG.md). The four user-first passes of
+  2026-10-04 get one line under "Completed stages".
+- Change from 011, kept: EXPL 02 is closed. Its account is in
   [STATUS-LOG.md](STATUS-LOG.md).
 - Change from 010, kept: EXPL 01 is closed. Its account is in
   [STATUS-LOG.md](STATUS-LOG.md).
@@ -50,6 +55,19 @@ Forward-looking work, plus one line per completed stage.
 - EXPL 02 (2026-10-03, Opus 5.5) — the README names the two uses. The
   second one passes an `AnyParent`. `*Anchor` goes to container authors.
   003, 004 and 005 carry `AnyParent`. Design 011. Six gates green.
+- User-first text (2026-10-04, Opus 5.5) — a new README from the owner's
+  draft. The comments in `src/paternitas.zig` and `src/container.zig`, and
+  the headers of examples 001 to 006, were rewritten for the user. Not a
+  named stage. Six gates green.
+- LOOK 01 (2026-10-04, Opus 5.5) — the logo, the mask picture and the
+  favicon, from Zero and Ziggy, with
+  [ATTRIBUTION.md](../kitchen/tools/logo/mascots/ATTRIBUTION.md). The README
+  and the landing page show them. Run by Claude alone, at the owner's request.
+  Design 012. Six gates green.
+- LOOK 02 (2026-10-05, Opus 5.5) — a new logo from the owner's prototype:
+  the belt, the Anchor and the exits. `kitchen/tools/logo/gen_logo.py`
+  draws it, and the favicon. The mascot images are kept as a record.
+  Design 013. Six gates green.
 
 ---
 
@@ -59,23 +77,10 @@ paternitas first, until it is done. Then ztk, built on it. The ztk stage may
 need paternitas fixes; the work then goes in rounds. Intake, D1.
 
 ```text
-PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  ZTK ...  <->  PTRN fixes
+PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  LOOK 02  ->  ZTK ...  <->  PTRN fixes
 ```
 
 ---
-
-## LOOK 01 — the picture and the logo
-
-Model: to be named by the owner. AUDT 01, T7. The stage name is a proposal.
-
-- The mask picture from `paternitas-001.md`: the list sees the mask, the
-  helper recognizes who is behind it.
-- The logo idea: two masked Zig mascots and a thin thread.
-- The Anchor idea, from the owner at the end of NAME 01: Archimedes, "Give
-  me a place to stand, and I will move the Earth". The Anchor is the one
-  fixed point in your struct, and everything is reached from it. Images: a
-  lever on a fixed point, or an anchor. The `Anchor` `///` quotes it.
-- The README, the site, the favicon.
 
 ## ZTK — later
 

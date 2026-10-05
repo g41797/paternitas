@@ -1,3 +1,5 @@
+![](kitchen/docs/assets/logo/paternitas-logo.svg)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Linux](https://github.com/g41797/paternitas/actions/workflows/linux.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/linux.yml)
 [![Windows](https://github.com/g41797/paternitas/actions/workflows/windows.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/windows.yml)
@@ -5,8 +7,6 @@
 [![Deploy Documentation](https://github.com/g41797/paternitas/actions/workflows/docs.yml/badge.svg)](https://github.com/g41797/paternitas/actions/workflows/docs.yml)
 
 ---
-
-# Paternitas
 
 Paternitas makes Zig's intrusive, type-erased lists safer.
 

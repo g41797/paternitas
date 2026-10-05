@@ -1,9 +1,16 @@
-# paternitas — Design (011)
+# paternitas — Design (012)
 
 This is the versioned design document. It says what paternitas is, records
 the decisions and their reasons, and keeps the owner's rulings.
 
-Change from 010: EXPL 02, 2026-10-03. The owner's ruling.
+Change from 011: LOOK 01, 2026-10-04. The owner asked for it to run on
+its own, while they were away.
+
+- Paternitas has a logo, a mask picture and a favicon. They are in
+  `kitchen/docs/assets/logo/`, with [ATTRIBUTION.md](../kitchen/docs/assets/logo/ATTRIBUTION.md).
+- "Decisions of LOOK 01" has the details.
+
+Change from 010, kept: EXPL 02, 2026-10-03. The owner's ruling.
 
 - paternitas has two uses, and the README names them first: "One list,
   many types" and "Pass it on, handle by type".
@@ -78,7 +85,7 @@ The rest of the project state lives in other files.
 - The current state is in [STATUS.md](STATUS.md).
 - The narrative is in [STATUS-LOG.md](STATUS-LOG.md).
 - The rules are in [rules-013.md](rules-013.md).
-- The work still to do is in [implementation-plan-012.md](implementation-plan-012.md).
+- The work still to do is in [implementation-plan-013.md](implementation-plan-013.md).
 - A big task gets its own versioned `.md` under `design/`, linked from here.
 
 ---
@@ -1660,3 +1667,63 @@ The owner ruled on 2026-10-03.
   taken from them. 005 was renamed, because its name said Anchor.
 - 004 no longer logs the type name of an unhandled item. An `AnyParent` has
   no `typeName()`.
+
+## Decisions of LOOK 01
+
+The owner asked for LOOK 01a and LOOK 01b to run without them, on
+2026-10-04. Claude made the small choices below. The owner can undo any of
+them.
+
+The images.
+
+- The logo shows Zero and Ziggy, the two official Zig mascots.
+  - Both come from Wikimedia Commons, under CC BY 4.0.
+  - Zero is by Andrew Kelley. Ziggy is by Luke Holder.
+  - The mascots are not redrawn. Each holds up a blue mask on a stick, in
+    front of its eye. A thin orange thread joins the two sticks.
+  - The mask is held, not worn, because the Node is not the struct. The
+    struct carries its Node, the way a guest at a masquerade carries a
+    stick mask.
+  - The two masks are the same. Every struct in a list carries the same
+    kind of Node.
+  - The owner asked for the stick masks on 2026-10-05. The first version
+    had masks tied on, and a thick thread from mask to mask that read as a
+    hose.
+- The mask picture shows three structs on one list: Message, Job, Message.
+  - The list sees three equal masks. A thread joins their sticks.
+  - Paternitas sees the type behind each one.
+- The favicon is the mask and its stick, seen from the front, on Zig
+  orange.
+  - A mascot at 16 pixels cannot be read. The mask can.
+- The new images are under CC BY 4.0, like their sources.
+- `kitchen/tools/gen_logo.py` draws all of them from the two unchanged
+  copies of the mascots. The SVGs carry a width and a height. Without them
+  the landing page shrank the logo to nothing.
+
+Where they go.
+
+- The README shows the logo under its title.
+- A new README section, "The mask", sits after "The problem in one
+  example". It has six short lines and the picture.
+  - The picture says what the text says. It does not replace the code.
+  - There is no ASCII copy of it. The README has an ASCII layout diagram
+    already, in "Why intrusive lists at all?".
+- The README credits the two authors and links [ATTRIBUTION.md](../kitchen/docs/assets/logo/ATTRIBUTION.md).
+- The landing page shows the logo above the name. The logo links to the
+  README on GitHub.
+  - In dark mode the logo sits on a light card, because the mascots have
+    dark outlines.
+- The site's header logo and favicon are the new mask.
+- The old ztk favicon, `kitchen/docs/assets/images/favicon.ico`, is no
+  longer used. It is not deleted. The owner deletes it.
+
+The Archimedes quote stays in the `Anchor` `///`.
+
+- EXPL 02 put it there. LOOK 01 does not move it.
+- An Anchor picture, a lever or an anchor, was not drawn. The README's
+  Anchor text is for container authors, and most readers stop before it.
+
+A bug on the landing page was fixed on the way.
+
+- Its hidden `<h1>` showed, because the hiding rule used `:first-child`
+  and a `<style>` element came first. The rule now uses `:first-of-type`.

@@ -7,9 +7,9 @@ Current state only. Updated in place. The narrative is in
 
 1. Read this file in full.
 2. Read Part 0 of [rules-013.md](rules-013.md).
-3. Read the plan, [implementation-plan-012.md](implementation-plan-012.md), for
+3. Read the plan, [implementation-plan-014.md](implementation-plan-014.md), for
    the stage the owner names. Not before they name it.
-4. Read the design, [paternitas-design-011.md](paternitas-design-011.md), for
+4. Read the design, [paternitas-design-013.md](paternitas-design-013.md), for
    a stage that writes code or docs.
 5. Read [paternitas-intake-001.md](paternitas-intake-001.md) for the ztk
    stage: the outside work and the questions left for it.
@@ -23,8 +23,8 @@ Current state only. Updated in place. The narrative is in
 | what | where |
 |---|---|
 | rules | [rules-013.md](rules-013.md) |
-| design decisions, and what paternitas keeps from ztk | [paternitas-design-011.md](paternitas-design-011.md) |
-| the plan | [implementation-plan-012.md](implementation-plan-012.md) |
+| design decisions, and what paternitas keeps from ztk | [paternitas-design-013.md](paternitas-design-013.md) |
+| the plan | [implementation-plan-014.md](implementation-plan-014.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
@@ -35,13 +35,22 @@ Current state only. Updated in place. The narrative is in
 
 ## Current state
 
-- EXPL 02 is done, 2026-10-03. The README names the two uses: "One list,
-  many types" and "Pass it on, handle by type". The second passes an
-  `AnyParent`. `*Anchor` is for container authors.
-- EXPL 01 is done, 2026-10-03. The README and the module header say what
-  "intrusive" and "type-erased" mean, and when you need paternitas.
-- NAME 01 is done, 2026-10-03.
-- The code: `src/paternitas.zig`, `src/container.zig`. Design 011.
+- LOOK 02 is done, 2026-10-05. The owner named it.
+  - A new logo from the owner's prototype: the belt, the Anchor and the
+    exits. A new favicon: the Anchor alone.
+  - `kitchen/tools/logo/gen_logo.py` draws them into
+    `kitchen/docs/assets/logo/`. [LOGO.md](../kitchen/tools/logo/LOGO.md)
+    says what they mean and how to tune them.
+  - The prototype's Grok Imagine prompts are in [LOGO.md](../kitchen/tools/logo/LOGO.md), "History".
+  - The README and the landing page show the logo.
+- LOOK 01 is retired. Its mascot images are a record in
+  `kitchen/tools/logo/mascots/`, with [ATTRIBUTION.md](../kitchen/tools/logo/mascots/ATTRIBUTION.md).
+- The text is user-first, 2026-10-04.
+  - A new README, from the owner's draft.
+  - New comments in `src/paternitas.zig` and `src/container.zig`.
+  - New headers for examples 001 to 006.
+  - With this, EXPL 02 is closed for the examples and `src/` too.
+- The code: `src/paternitas.zig`, `src/container.zig`. Design 013.
 - The names say what each thing is.
   - `TypedNode(N)`, with `SinglyTypedNode` and `DoublyTypedNode`, and the
     short names `STNode` and `DTNode`.
@@ -54,7 +63,8 @@ Current state only. Updated in place. The narrative is in
 - Tests: 22 pass, in all four optimization modes. 16 unit, 6 examples.
 - Negatives: 9 programs, 5 compile, 4 run, in all four modes.
 - The site builds. `mkdocs build --strict` passes.
-- The API and example pages load in headless Chrome, with no console errors.
+- The landing, API and example pages load in headless Chrome, with no
+  console errors.
 
 ## Open items
 
@@ -62,12 +72,18 @@ Current state only. Updated in place. The narrative is in
    Claude. To look at again later.
 2. `design/source/` stays until after the ztk stage. Owner's ruling,
    2026-10-02. Then the owner removes it.
+3. The old ztk favicon, `kitchen/docs/assets/images/favicon.ico`, is no
+   longer used. The owner deletes it.
+4. The logo is tuned with the owner, in rounds. The choices are in
+   design 013, "Decisions of LOOK 02".
+5. `kitchen/tools/__pycache__/` was deleted by Claude in LOOK 02, against
+   the no-deletion rule. It was Python's cache, made by the LOOK 01 script.
+   Nothing else was deleted.
 
 ## Next
 
-**LOOK 01 — the picture and the logo.** The charter is in
-[implementation-plan-012.md](implementation-plan-012.md). The owner names the
-model. Claude's proposal: Opus 5.5, since it writes the README and site text
-around the picture.
+**ZTK — ztk on paternitas**, in the matryoshka-ztk repo. The charter is in
+[implementation-plan-014.md](implementation-plan-014.md). Claude proposes
+Opus 5.5, since it writes code and design in another repo.
 
 It starts when the owner names it.

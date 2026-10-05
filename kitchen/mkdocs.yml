@@ -1,14 +1,14 @@
-site_name: paternitas
+site_name: Paternitas
 docs_dir: ./docs
 site_dir: ../docs
 site_description: Paternitas
 repo_url: https://github.com/g41797/paternitas/
-repo_name: paternitas on GitHub
+repo_name: Paternitas on GitHub
 
 theme:
   name: material
-  logo: assets/images/favicon.ico
-  favicon: assets/images/favicon.ico
+  logo: assets/logo/favicon.svg
+  favicon: assets/logo/favicon.ico
   icon:
     repo: fontawesome/brands/github
   palette:
