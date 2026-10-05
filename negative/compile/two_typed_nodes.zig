@@ -1,4 +1,4 @@
-//! Two TypedNodes in one Parent do not compile.
+//! Two TypedNodes in one struct do not compile.
 
 const TwoTypedNodes = struct {
     a: p.SinglyTypedNode = .{},

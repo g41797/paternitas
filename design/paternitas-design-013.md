@@ -533,10 +533,10 @@ A Parent is a struct with exactly one `SinglyTypedNode` or
 - `Typed` finds the TypedNode by its type, among the top-level fields.
 
 ```text
-not a struct      -> compile error
-zero TypedNodes   -> compile error
-one TypedNode     -> accepted
-more than one     -> compile error
+not a struct      -> compile error: X: not a struct, and Typed takes structs only
+zero TypedNodes   -> accepted, not a Parent: typeId, isId, toAny, fromAny only
+one TypedNode     -> accepted, a Parent: every call
+more than one     -> compile error: X: more than one TypedNode, and at most one is allowed
 ```
 
 - Each compile error names the Parent type.
@@ -970,7 +970,7 @@ paternitas does not decide who frees a Parent.
   list, a free list.
 - They are different relationships. If paternitas guessed one, the API would
   be ambiguous.
-- The core allows exactly one TypedNode.
+- The core allows at most one TypedNode per struct.
 - Other plain std Nodes are allowed, and paternitas does not recognize them.
 - Named multi-TypedNode relationships are outside the core.
 
@@ -1138,9 +1138,9 @@ separate programs.
 
 These programs must not compile, and must fail with the given message.
 
-- A Parent that is not a struct.
-- A Parent with a bare std Node and no TypedNode.
-- A Parent with two TypedNodes.
+- `Typed` of a type that is not a struct.
+- A list call on a struct with a bare std Node and no TypedNode.
+- A struct with two TypedNodes.
 - The std doubly Node passed where the std singly Node is expected. The
   message is Zig's, so only its tail is matched: "found '*DoublyLinkedList.Node'". A9.
 - A TypedNode of a Node that is not a std Node. The message is

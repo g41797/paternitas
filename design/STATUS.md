@@ -40,6 +40,11 @@ Current state only. Updated in place. The narrative is in
   - `Typed(P)` takes every struct. Without a TypedNode it has only
     `typeId`, `isId`, `toAny` and `fromAny`. A list call is a compile
     error that says so.
+  - `Typed(u32)` says `u32: not a struct, and Typed takes structs only`.
+    It no longer says "Paternitas Parent", since not every struct it takes
+    is a Parent.
+  - Two TypedNodes say `P: more than one TypedNode, and at most one is
+    allowed`. Zero is allowed now, so the message no longer says "exactly one".
   - `AnyParent` is `Any`, with no alias, in `src/`, the tests, examples 003
     to 006 and the negatives. Not in the README.
   - `-Duse_llvm=false` builds the tests with Zig's own backend. g2 runs the

@@ -98,8 +98,8 @@ The owner names it. Opus 5.5: it changes `src/`.
     a per-type `var tag: u8`.
   - The other calls raise a `@compileError`.
 - The three compile errors, word for word:
-  - `X: not a struct, so it cannot be a Paternitas Parent`
-  - `X: more than one TypedNode, and exactly one is allowed`
+  - `X: not a struct, and Typed takes structs only`
+  - `X: more than one TypedNode, and at most one is allowed`
   - `X: no TypedNode, so it has only typeId, isId, toAny and fromAny`
   - Fix from the review: 002 left out `isId`. It is `pub`.
 - `AnyParent` becomes `Any`. No alias. In `src/`, the tests and examples

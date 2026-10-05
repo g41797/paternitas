@@ -210,7 +210,7 @@ pub const DTNode = DoublyTypedNode;
 /// - It is the field you put in your struct, where the std Node was.
 /// - Use `SinglyTypedNode` or `DoublyTypedNode`.
 /// - You do not call `TypedNode` yourself.
-/// - A Parent has exactly one.
+/// - A struct has at most one. With one, it is a Parent.
 /// - It holds the std Node and the struct's type id.
 /// - Any `N` other than the two std Node types is a compile error.
 pub fn TypedNode(comptime N: type) type {
@@ -260,8 +260,8 @@ pub fn TypedNode(comptime N: type) type {
 /// The rules:
 ///
 /// - `P` MUST be a struct.
-/// - A Parent has exactly one `SinglyTypedNode` or `DoublyTypedNode` field,
-///   under any name.
+/// - `P` has at most one `SinglyTypedNode` or `DoublyTypedNode` field,
+///   under any name. With one, `P` is a Parent.
 /// - A list call on a struct without a TypedNode is a compile error.
 /// - Each error names the type.
 pub fn Typed(comptime P: type) type {
@@ -628,12 +628,12 @@ fn findTypedNode(comptime P: type) ?[]const u8 {
     comptime {
         const ti: std.builtin.Type = @typeInfo(P);
         if (ti != .@"struct")
-            @compileError(@typeName(P) ++ ": not a struct, so it cannot be a Paternitas Parent");
+            @compileError(@typeName(P) ++ ": not a struct, and Typed takes structs only");
         var found: ?[]const u8 = null;
         for (ti.@"struct".fields) |f| {
             if (f.type == SinglyTypedNode or f.type == DoublyTypedNode) {
                 if (found != null)
-                    @compileError(@typeName(P) ++ ": more than one TypedNode, and exactly one is allowed");
+                    @compileError(@typeName(P) ++ ": more than one TypedNode, and at most one is allowed");
                 found = f.name;
             }
         }

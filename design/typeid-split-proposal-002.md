@@ -147,9 +147,9 @@ map.get(any.type_id);                      // a handler map, no list
 
 | you write | you get |
 |---|---|
-| `Typed(u32)` | `u32: not a struct, so it cannot be a Paternitas Parent` |
-| two TypedNodes in `P` | `P: more than one TypedNode, and exactly one is allowed` |
-| a list call, `P` has no TypedNode | `P: no TypedNode, so it has only typeId, toAny and fromAny` |
+| `Typed(u32)` | `u32: not a struct, and Typed takes structs only` |
+| two TypedNodes in `P` | `P: more than one TypedNode, and at most one is allowed` |
+| a list call, `P` has no TypedNode | `P: no TypedNode, so it has only typeId, isId, toAny and fromAny` |
 
 The last row matters most. A struct with a plain std Node, not a
 TypedNode, gets only the id calls. The first list call says why.
