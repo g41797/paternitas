@@ -3,7 +3,27 @@
 
 //! Paternitas adds a runtime type check to Zig's intrusive, type-erased lists.
 //!
-//! Three words first.
+//! An intrusive list gives you a Node, not your struct.
+//!
+//! Plain `@fieldParentPtr` trusts that you guessed the type correctly.
+//!
+//! Paternitas adds a type id to the Node. Now the guess is checked.
+//!
+//! ## Do you need it?
+//!
+//! One list, one struct type? No. Plain `@fieldParentPtr` is fine.
+//!
+//! Paternitas is for lists that carry several struct types.
+//!
+//! Typical places:
+//!
+//! - a mailbox with different message types,
+//! - a scheduler with different job types,
+//! - a dispatcher,
+//! - a generic intrusive container,
+//! - a queue or a map that passes different structs around.
+//!
+//! ## Three words first
 //!
 //! - Intrusive: the Node lives in your struct.
 //!   - The list copies nothing.
@@ -45,20 +65,6 @@
 //! `mustParentFromNode` panics instead of returning null.
 //!
 //! Use it when another type is a bug.
-//!
-//! ## When you probably do not need Paternitas
-//!
-//! One list, one struct type? Plain `@fieldParentPtr` is fine.
-//!
-//! Paternitas is for lists that carry several struct types.
-//!
-//! Typical places:
-//!
-//! - a mailbox with different message types,
-//! - a scheduler with different job types,
-//! - a dispatcher,
-//! - a generic intrusive container,
-//! - a queue or a map that passes different structs around.
 //!
 //! ## Typical use
 //!
@@ -271,7 +277,9 @@ pub fn Typed(comptime P: type) type {
     const TN: type = if (has_node) @FieldType(P, field) else NoTypedNode;
 
     return struct {
-        /// Writes the type id of `p` into its TypedNode.
+        /// Marks `p` as a value of type `P`.
+        ///
+        /// It writes the type id of `p` into its TypedNode.
         ///
         /// Call it right after you create `p`.
         ///
@@ -312,7 +320,7 @@ pub fn Typed(comptime P: type) type {
             return &@field(p.*, field).node;
         }
 
-        /// Returns the `P` that contains the Node, or null.
+        /// Returns the `P` that contains the Node, or null for another type.
         ///
         /// Use it when the Node may be in several struct types.
         ///
@@ -379,7 +387,7 @@ pub fn Typed(comptime P: type) type {
             return &@field(p.*, field).anchor;
         }
 
-        /// Returns the `P` behind the `*Anchor`, or null.
+        /// Returns the `P` behind the `*Anchor`, or null for another type.
         ///
         /// - Returns null when the Anchor is in another type.
         /// - Returns null when `setTypeId` was never called.
@@ -417,7 +425,7 @@ pub fn Typed(comptime P: type) type {
             return .{ .ptr = p, .type_id = typeId() };
         }
 
-        /// Returns the `P` behind an `Any`, or null.
+        /// Returns the `P` behind an `Any`, or null for another type.
         ///
         /// - Works for every struct, with or without a TypedNode.
         /// - Returns null when the `Any` is of another type.

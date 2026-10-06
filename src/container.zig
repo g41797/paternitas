@@ -57,14 +57,14 @@
 //! - Call `setTypeId` on each Parent before it enters your container.
 //! - A std list uses the same `next` word. A Parent MUST NOT be in your
 //!   container and in a std list at the same time.
-//! - Paternitas never reads or writes that word. What you put in it is up to
-//!   your container.
+//! - Your container owns the meaning of that word. Paternitas never reads or
+//!   writes it.
 //! - The Parent MUST stay alive while your container keeps its Anchor.
 //! - Paternitas locks nothing. Guard a shared container yourself.
 
 const _doc_stub = void;
 
-/// What Paternitas knows about one Parent type.
+/// What your container needs to know about one Parent type.
 ///
 /// Use it to reach a Parent's `next` word, Node and address, without
 /// knowing its type.
@@ -94,8 +94,8 @@ pub const TypeInfo = struct {
     /// Chain your items through it.
     ///
     /// - It works for both Node kinds.
-    /// - Paternitas never reads or writes this word. What you put in it is
-    ///   up to your container.
+    /// - Your container owns the meaning of this word. Paternitas never reads
+    ///   or writes it.
     /// - A std list uses the same word. A Parent MUST NOT be in your
     ///   container and in a std list at the same time.
     ///
