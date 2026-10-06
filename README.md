@@ -17,13 +17,11 @@ And a bonus at the end: a runtime type id for any struct. No list, no Node.
 
 You probably do not need it for your first linked list.
 
-You may want it when the list becomes part of a real system.
+You may want it when the list becomes part of a real system:
 
-A mailbox grows.
-
-A scheduler gets more job types.
-
-A dispatcher starts passing different structs through the same list.
+- A mailbox grows.
+- A scheduler gets more job types.
+- A dispatcher starts passing different structs through the same list.
 
 Then you pop a `Node`.
 
@@ -35,7 +33,7 @@ The std list does not know.
 
 ---
 
-Paternitas gives you a cheap answer.
+_Paternitas_ gives you an **answer**.
 
 ---
 
