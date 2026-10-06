@@ -517,7 +517,7 @@ pub fn Typed(comptime P: type) type {
 ///
 /// A `*Anchor` is one word.
 ///
-/// Use it in your own container, or as a C callback's `void*` context.
+/// Use it in your own container.
 ///
 /// - Every struct with a TypedNode has one Anchor, inside the TypedNode.
 /// - `setTypeId` writes the struct's type id into it.

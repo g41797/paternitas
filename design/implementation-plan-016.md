@@ -5,11 +5,11 @@ Forward-looking work, plus one line per completed stage.
 - Current state: [STATUS.md](STATUS.md).
 - The narrative: [STATUS-LOG.md](STATUS-LOG.md).
 - Rules: [rules-013.md](rules-013.md).
-- Design: [paternitas-design-013.md](paternitas-design-013.md).
+- Design: [paternitas-design-014.md](paternitas-design-014.md).
 - The audit and the owner's rulings:
   [audit-01-report-003.md](audit-01-report-003.md).
 - The outside work: [paternitas-intake-001.md](paternitas-intake-001.md).
-- Type ids on their own: [typeid-split-proposal-002.md](typeid-split-proposal-002.md).
+- Type ids on their own: [paternitas-design-014.md](paternitas-design-014.md), "Type ids on their own".
 - Change from 015: TYID 01 and TYID 02 are done. README and docs come
   before ZTK. Owner's ruling, 2026-10-05. New stages: README 01, DOCS 01
   PLAN, DOCS 01. The README stage was "later" in 015.

@@ -69,7 +69,7 @@ Source: a trimmed copy of the Matryoshka rules,
   implementation invariants, its patterns and its provenance.
 - What was added: the git rules, and the stage sequence in Part 1.
 
-Companion: [paternitas-design-013.md](paternitas-design-013.md) — the design
+Companion: [paternitas-design-014.md](paternitas-design-014.md) — the design
 decisions and what paternitas keeps from ztk.
 
 ---
@@ -442,9 +442,8 @@ Scan scope.
 
 - Skip `design/STATUS-LOG.md` and `design/backup/`. Both record what is gone.
 - Skip `design/paternitas-001.md`. It is kept untouched.
-- Skip `design/intrusive-type-erased-best-C.md` and
-  `design/zelda-and-paternitas.md`. They are the owner's analysis reports,
-  kept as is.
+- Skip `design/intrusive-type-erased-best-C.md`. It is the owner's
+  analysis report, kept as is.
 - Skip `design/source/`. It is a copy of the owner's outside work, kept as is.
 - The gate skips this rules file, because it has to name every word. Scan it
   by hand, and read each hit: a hit outside the lists below is a real one.

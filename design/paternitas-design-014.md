@@ -1,13 +1,36 @@
-# paternitas — Design (012)
+# paternitas — Design (014)
 
 This is the versioned design document. It says what paternitas is, records
 the decisions and their reasons, and keeps the owner's rulings.
 
-Change from 011: LOOK 01, 2026-10-04. The owner asked for it to run on
+Change from 013: DSGN 014, 2026-10-06. Ongoing work, not a named stage, at
+the owner's word.
+
+- Absorbs the type-id proposal, `backup/typeid-split-proposal-002.md`. A
+  new section, "Type ids on their own", and
+  "Decisions of TYID 01/02".
+- `AnyParent` is `Any` in the design text. The history below keeps the old
+  name, as it was.
+- A TypeId is the address of a `TypeInfo`, or of a per-type tag for a
+  struct with no TypedNode.
+- A new section, "C code: findings": a record, not advice. The README and
+  the comments say nothing about C. Owner's ruling.
+- Tests, negatives and examples brought up to date: 19 unit tests, ten
+  negatives, seven examples.
+
+Change from 012, kept: LOOK 02, 2026-10-05. The owner named it.
+
+- A new logo: the belt, the Anchor and the exits. From the owner's
+  prototype.
+- The mascot images are retired, and kept as a record in
+  `kitchen/tools/logo/mascots/`.
+- "Decisions of LOOK 02" has the details.
+
+Change from 011, kept: LOOK 01, 2026-10-04. The owner asked for it to run on
 its own, while they were away.
 
-- Paternitas has a logo, a mask picture and a favicon. They are in
-  `kitchen/docs/assets/logo/`, with [ATTRIBUTION.md](../kitchen/docs/assets/logo/ATTRIBUTION.md).
+- Paternitas had a logo, a mask picture and a favicon. LOOK 02 retired
+  them. They are in `kitchen/tools/logo/mascots/`, with [ATTRIBUTION.md](../kitchen/tools/logo/mascots/ATTRIBUTION.md).
 - "Decisions of LOOK 01" has the details.
 
 Change from 010, kept: EXPL 02, 2026-10-03. The owner's ruling.
@@ -85,7 +108,7 @@ The rest of the project state lives in other files.
 - The current state is in [STATUS.md](STATUS.md).
 - The narrative is in [STATUS-LOG.md](STATUS-LOG.md).
 - The rules are in [rules-013.md](rules-013.md).
-- The work still to do is in [implementation-plan-013.md](implementation-plan-013.md).
+- The work still to do is in [implementation-plan-016.md](implementation-plan-016.md).
 - A big task gets its own versioned `.md` under `design/`, linked from here.
 
 ---
@@ -93,6 +116,15 @@ The rest of the project state lives in other files.
 ## Purpose
 
 paternitas is a small Zig package for intrusive, type-erased programming.
+
+It has two uses. Use 2 is built on use 1.
+
+1. **Type ids.** A runtime id for a struct type. Zig has none. Every struct
+   gets one, with or without a TypedNode. See "Type ids on their own".
+2. **Intrusive, type-erased containers.** The type id next to the Node, and
+   the checked way back to the Parent.
+
+For use 2:
 
 - It recovers the Parent of a std Node, after it checks the type.
 - It lets a Parent that must not move travel through containers of pointers.
@@ -149,11 +181,15 @@ paternitas answers two questions.
 - **Anchor** — one word inside every Parent, written by `setTypeId`. Its address is the
   erased reference to the Parent.
 - **TypedNode** — the std Node with a type check added: a Node and an
-  Anchor as one type. A Parent embeds exactly one.
+  Anchor as one type. A Parent embeds exactly one. A struct with none is
+  not a Parent, but still has a type id.
 - **TypeInfo** — the static description of one Parent type.
-- **TypeId** — the address of a `TypeInfo`.
+- **TypeId** — a runtime id for a struct type. For a Parent, the address
+  of its `TypeInfo`. For a struct with no TypedNode, the address of a
+  per-type tag.
 - **`Typed(P)`** — the typed helper for one Parent type, built at comptime.
-- **AnyParent** — the dispatch view: the Parent address and its TypeId.
+- **Any** — the dispatch view: a struct's address and its TypeId. Named
+  `AnyParent` before TYID 01.
 
 ---
 
@@ -242,7 +278,7 @@ pub const Anchor = struct {
     pub inline fn typeId(a: *const Anchor) TypeId;
     pub fn typeName(a: *const Anchor) []const u8;
     pub inline fn info(a: *const Anchor) ?*const container.TypeInfo;
-    pub inline fn toAny(a: *Anchor) ?AnyParent;
+    pub inline fn toAny(a: *Anchor) ?Any;
 };
 ```
 
@@ -278,8 +314,9 @@ The Anchor is not `extern`, for these reasons.
 - No code depends on the Anchor's layout.
 - A plain struct is already a distinct type. `*Anchor` is not
   `*?*const anyopaque`.
-- `extern` would add one thing: an Anchor inside a user's `extern struct`, or
-  across a C ABI. If that is ever needed, it is a one-word change.
+- `extern` would add one thing: an Anchor inside a user's `extern struct`.
+  If that is ever needed, it is a one-word change. A TypedNode cannot sit
+  in an extern struct anyway. See "C code: findings".
 
 The Anchor has no chain or location calls. Those live in `TypeInfo`, which
 knows the offsets.
@@ -303,7 +340,7 @@ paternitas.container    TypeInfo, NodeKind, uniform_next_offset
 Each audience uses its own names.
 
 - Application code uses `Typed(P)`, `SinglyTypedNode`, `DoublyTypedNode`,
-  `*Anchor` as a value, `AnyParent` and `Anchor.toAny()`. It never touches
+  `*Anchor` as a value, `Any` and `Anchor.toAny()`. It never touches
   `TypeInfo`.
 - Container authors use `Anchor.info()` and `TypeInfo`.
 - A library built on paternitas, such as ztk, wraps `Typed(P)` in its own
@@ -327,14 +364,16 @@ pub const TypeInfo = struct {
 
     pub inline fn nextField(ti: *const TypeInfo, a: *Anchor) *?*anyopaque;
     pub inline fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque;
-    pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) AnyParent;
+    pub inline fn toAny(ti: *const TypeInfo, a: *Anchor) Any;
     pub inline fn node(ti: *const TypeInfo, a: *Anchor, comptime N: type) *N;
 };
 ```
 
 - `TypeInfo` and `NodeKind` live in `paternitas.container`.
 - `Typed(P)` builds one `const TypeInfo` per Parent type.
-- The TypeId is its address. The address is the identity.
+- A Parent's TypeId is its address. The address is the identity.
+- A struct with no TypedNode has no `TypeInfo`. Its TypeId is the address
+  of its tag. See "Type ids on their own".
 
 ### The fields
 
@@ -394,12 +433,14 @@ The shared word is part of the contract.
 
 - `parent` returns the Parent address, erased, through `anchor_offset`.
 - It is for code that passes the raw Parent to something that knows nothing
-  of paternitas, such as a C callback's `void*`.
+  of paternitas.
+- Nothing checks the type when the address is cast back. See "C code:
+  findings".
 
 ### `toAny`
 
 - `toAny` returns the dispatch view of the Parent behind this Anchor. See
-  AnyParent.
+  Any.
 
 ### `node`
 
@@ -525,10 +566,10 @@ A Parent is a struct with exactly one `SinglyTypedNode` or
 - `Typed` finds the TypedNode by its type, among the top-level fields.
 
 ```text
-not a struct      -> compile error
-zero TypedNodes   -> compile error
-one TypedNode     -> accepted
-more than one     -> compile error
+not a struct      -> compile error: X: not a struct, and Typed takes structs only
+zero TypedNodes   -> accepted, not a Parent: typeId, isId, toAny, fromAny only
+one TypedNode     -> accepted, a Parent: every call
+more than one     -> compile error: X: more than one TypedNode, and at most one is allowed
 ```
 
 - Each compile error names the Parent type.
@@ -574,6 +615,10 @@ const TypedMessage = paternitas.Typed(Message);
 At comptime it finds the one TypedNode, builds the `TypeInfo`, and gives
 typed calls for this Parent.
 
+`Typed(P)` takes every struct. A struct with no TypedNode gets `typeId`,
+`isId`, `toAny` and `fromAny` only. Any other call is a compile error:
+`P: no TypedNode, so it has only typeId, isId, toAny and fromAny`.
+
 ```text
 Node                               the Node type of P's TypedNode
 typeId()                      -> TypeId
@@ -584,8 +629,8 @@ node(*P)                      -> *Node
 is(*const Node)               -> bool
 parentFromAnchor(*Anchor)     -> ?*P
 mustParentFromAnchor(*Anchor) -> *P
-toAny(*P)                     -> AnyParent
-fromAny(AnyParent)            -> ?*P
+toAny(*P)                     -> Any
+fromAny(Any)            -> ?*P
 parentFromNode(*Node)         -> ?*P
 mustParentFromNode(*Node)     -> *P
 parentFromNodeUnchecked(*Node)-> *P
@@ -595,8 +640,9 @@ parentFromNodeUnchecked(*Node)-> *P
 
 ### `typeId`, `isId`
 
-- `typeId()` is the address of this type's `TypeInfo`. It is the only source
-  of the id.
+- `typeId()` is the only source of the id.
+  - With a TypedNode: the address of this type's `TypeInfo`.
+  - Without one: the address of this type's `tag`.
 - `isId(id)` compares a bare id with it. Code that has an id and no Parent
   uses it, such as a pool asked for "a `Message`", or a count by type.
 
@@ -650,8 +696,9 @@ mustParentFromAnchor: asked for app.Message, found <no type>
 - `fromAny(any)` compares `any.type_id` with `TypeId(P)`.
   - On a match it returns `any.ptr` cast to `*P`.
   - On a mismatch it returns null.
-  - Where runtime safety is on, it also checks that the Parent's Anchor has
-    the type id of `P`.
+  - With a TypedNode, where runtime safety is on, it also checks that the
+    Parent's Anchor has the type id of `P`.
+  - With no TypedNode there is nothing more to check.
 
 ### `parentFromNode` and its forms
 
@@ -673,7 +720,7 @@ TypedNode
 - `parentFromNodeUnchecked` skips the check. The caller already knows the
   type, and the name says so.
 - There are no const recovery forms, per AUDT 01, T6. The reason is the same
-  as for `AnyParent.ptr`.
+  as for `Any.ptr`.
 
 ---
 
@@ -748,26 +795,28 @@ recovery check    exhaustive switch        runtime TypeId compare
 
 ---
 
-## AnyParent: the dispatch view
+## Any: the dispatch view
 
 ```zig
-pub const AnyParent = struct {
+pub const Any = struct {
     ptr: *anyopaque,   // the Parent
     type_id: TypeId,
 };
 ```
 
-AnyParent is for a consumer that dispatches by type.
+Any is for a consumer that dispatches by type.
 
 - The consumer keeps a map from TypeId to handler, and has no paternitas in
   its code.
+- An `Any` can carry any struct, with or without a TypedNode. Example 007
+  carries structs with none.
 - It receives a Parent and finds the handler by the id. The handler casts the
   pointer to its own type.
 - `*Anchor` serves it badly, because reaching the Parent needs `TypeInfo`.
-- `AnyParent` carries the Parent address.
+- `Any` carries the Parent address.
 
 ```text
-              *Anchor                       AnyParent
+              *Anchor                       Any
 role          transport                     dispatch
 used by       containers: chains, Slot,     the end consumer
               mailbox, pool
@@ -802,14 +851,14 @@ h(any.ptr);
 - The handler's cast is unchecked. A wrong registration gives a wrong cast,
   and nothing catches it. `Typed(P).fromAny` is the checked form.
 
-An AnyParent comes from one of two places.
+An Any comes from one of two places.
 
 ```text
-mailbox --> *Anchor --a.toAny()--------> AnyParent --> handler(ptr)
-typed code --> *P  --Typed(P).toAny(p)-----> AnyParent
+mailbox --> *Anchor --a.toAny()--------> Any --> handler(ptr)
+typed code --> *P  --Typed(P).toAny(p)-----> Any
 ```
 
-- The conversion goes one way. No call turns an `AnyParent` back into an
+- The conversion goes one way. No call turns an `Any` back into an
   `*Anchor`.
   - At the dispatch site the Anchor is still at hand.
   - A typed handler uses `Typed(P).anchor(p)`.
@@ -821,14 +870,137 @@ typed code --> *P  --Typed(P).toAny(p)-----> AnyParent
 
 `ptr` is mutable, for three reasons.
 
-- Every `AnyParent` is built from a mutable `*P` or a mutable `*Anchor`.
+- Every `Any` is built from a mutable `*P` or a mutable `*Anchor`.
 - A const field would force every handler to write `@constCast`.
 - `toAny` never accepts `*const P`.
 
-An `AnyParent` is a view.
+An `Any` is a view.
 
 - Its copies are aliases.
 - The Parent outlives every copy.
+
+---
+
+## Type ids on their own
+
+TYID 01 and 02 built this. It comes from the proposal
+`backup/typeid-split-proposal-002.md`. The rulings are in
+"Decisions of TYID 01/02".
+
+### Why
+
+Zig's `type` exists only at compile time. At run time a value of unknown
+type is only an address. You have an address, and you need to know whose
+it is.
+
+People who need a runtime type id write it by hand.
+
+- A `var` per type, and its address as the id.
+- Or `@typeName` and a string compare.
+- Or an enum they keep in sync with every type by hand.
+
+Paternitas has the right trick, and A1 showed how easy it is to get wrong.
+Before TYID 01 the trick came only with a TypedNode. Use 1 needs no Node:
+a handler map keyed by type, without lists, or a pointer and its type
+passed through code that does not know the type.
+
+### Where it came from
+
+- Odin, matryoshka-otk: `PolyTag`, the address of a static per-type
+  `{ _: u8 }`. The first version, made by hand.
+- Zig, ztk: the same idea, by hand again. Paternitas came out of it.
+
+### The same idea elsewhere
+
+- C3 has it in the language: `typeid` and `any`. C3's `any` is a pointer
+  and a `typeid`, the same pair as `Any`. The match was found later. C3 is
+  not where the idea came from.
+- C3's `typeid` covers every type. Paternitas covers structs only. On
+  purpose.
+- Zig may add its own one day. Then use 1 can step back to Zig's. The
+  lists stay.
+
+### What it is
+
+| use 1 needs | it is |
+|---|---|
+| a type id | `Typed(P).typeId()` |
+| compare a bare id | `Typed(P).isId(id)` |
+| a pointer and its id | `Typed(P).toAny(&p)` |
+| the value back, with a check | `Typed(P).fromAny(any)` |
+
+```zig
+const Point = struct { x: i32, y: i32 };   // no TypedNode
+const TypedPoint = paternitas.Typed(Point);
+
+var pt: Point = .{ .x = 1, .y = 2 };
+const any = TypedPoint.toAny(&pt);         // { ptr, type_id }
+
+if (TypedPoint.fromAny(any)) |p| { ... }   // null for another type
+map.get(any.type_id);                      // a handler map, no list
+```
+
+- Structs only. Not ints, not pointers, not unions, not `opaque`.
+  - Wrap a value in a struct to give it an id.
+  - Wider later breaks nothing. Narrower later would.
+- No allocation. No registry. No init call. No build flag.
+- The same limits as every TypeId: one running program only; a shared
+  library has its own ids; do not save or send an id.
+
+### Where the id lives
+
+- With a TypedNode, the id lives inside the struct. One word carries it:
+  `*Node` or `*Anchor`.
+- Without one, the struct has no room for it. The id rides beside the
+  pointer, in an `Any`. Two words.
+- A bare pointer to a struct with no TypedNode cannot be recognized.
+
+### The id
+
+- `TypeId` stays `?*const anyopaque`.
+- With a TypedNode: the address of `P`'s `TypeInfo`.
+- Without one: the address of the per-type `var tag: u8`. No record behind
+  it, no name.
+- Only `Anchor.info()` reads through an id. An Anchor exists only in a
+  struct with a TypedNode. So no code reads through the other kind.
+- The list path does not change. No extra load.
+- The tag is a `var`, for the reason in "Why `_tag`".
+- A struct declared inside a generic fn that does not use `P` is one type
+  for every `P`. Its tags would all be one. `Typed(P)` uses `P`, so its
+  tags are distinct. A `//` next to `tag` says so. Found in TYID 01.
+
+### No type name on `Any`
+
+- The `TypeId` is the identity: unique, a map key.
+- A name is a label for people. Two types can print alike.
+- A `typeName` on `Any` invites a compare by name: two "ids".
+- The name stays where Paternitas needs it: in `TypeInfo`, for panics.
+  `Anchor.typeName` stays.
+- Want names in a handler map? Store them next to the handler.
+
+### Compile errors
+
+| you write | you get |
+|---|---|
+| `Typed(u32)` | `u32: not a struct, and Typed takes structs only` |
+| two TypedNodes in `P` | `P: more than one TypedNode, and at most one is allowed` |
+| a list call, `P` has no TypedNode | `P: no TypedNode, so it has only typeId, isId, toAny and fromAny` |
+
+The last row matters most. A struct with a plain std Node, not a
+TypedNode, gets only the id calls. The first list call says why.
+
+### Risks
+
+- **Scope.** Paternitas grew from one job to two. Kept small: no new call,
+  one rename.
+- **Ids that merge.** The A1 bug again, for structs with no Node. Tests in
+  all four modes, on both backends, guard it.
+- **Generic types.** `List(u8)` and `List(u16)` get two ids. Tests.
+- **A plain std Node by mistake.** The struct gets only the id calls. The
+  first list call fails to compile, with the reason.
+- **Name.** "Paternitas" is about the parent. Use 1 has no parent. The
+  name still fits: the id says whose the value is. The motto, *agnitio*,
+  is recognition.
 
 ---
 
@@ -843,7 +1015,7 @@ queue --> *Anchor --Typed(P).parentFromAnchor--> *P --Typed(P).node--> std list 
 Dispatch works without `P`.
 
 ```text
-*Anchor --a.toAny()--------> AnyParent --> handler(ptr)
+*Anchor --a.toAny()--------> Any --> handler(ptr)
 ```
 
 Erased code that does not know `P`, but knows the Node kind it wants, gets
@@ -930,7 +1102,7 @@ things.
 - It does not prove that the Node address is intact.
 - It does not prove that nothing overwrote the Anchor.
 - The Parent MUST stay alive while its Node address, or any copy of its
-  `*Anchor` or `AnyParent`, is in use.
+  `*Anchor` or `Any`, is in use.
 
 paternitas knows nothing of list membership.
 
@@ -962,7 +1134,7 @@ paternitas does not decide who frees a Parent.
   list, a free list.
 - They are different relationships. If paternitas guessed one, the API would
   be ambiguous.
-- The core allows exactly one TypedNode.
+- The core allows at most one TypedNode per struct.
 - Other plain std Nodes are allowed, and paternitas does not recognize them.
 - Named multi-TypedNode relationships are outside the core.
 
@@ -977,11 +1149,12 @@ paternitas does not provide:
 - lifetime management or synchronization,
 - allocation or destruction of Parents,
 - general RTTI or a global registry,
-- type identity for types that are not Parents,
+- type identity for types that are not structs,
+- a type name on `Any`,
 - list state (`isLinked`, `unlink`) or chain conventions,
 - Node initialization, linking, unlinking, or reading,
 - a Node-to-Anchor call without a Parent type,
-- an AnyParent-to-Anchor call,
+- an Any-to-Anchor call,
 - a lookup from a bare TypeId to its `TypeInfo`,
 - a call that clears the type id, or `init` (AUDT 01, T4 and T5).
 
@@ -1009,11 +1182,11 @@ pub const Anchor = struct {
 
     pub fn typeId(a: *const Anchor) TypeId;
     pub fn typeName(a: *const Anchor) []const u8;              // or "<no type>"
-    pub fn toAny(a: *Anchor) ?AnyParent;                       // dispatch, type unknown
+    pub fn toAny(a: *Anchor) ?Any;                       // dispatch, type unknown
     pub fn info(a: *const Anchor) ?*const container.TypeInfo;  // container authors
 };
 
-pub const AnyParent = struct {     // dispatch view, one way, built by toAny only
+pub const Any = struct {     // dispatch view, one way, built by toAny only
     ptr: *anyopaque,
     type_id: TypeId,
 };
@@ -1027,7 +1200,8 @@ pub const STNode = SinglyTypedNode;
 pub const DoublyTypedNode = TypedNode(std.DoublyLinkedList.Node);
 pub const DTNode = DoublyTypedNode;
 
-pub fn Typed(comptime P: type) type;
+pub fn Typed(comptime P: type) type;   // P: any struct, at most one TypedNode
+//   with no TypedNode: typeId, isId, toAny, fromAny only
 //   Node
 //   typeId() TypeId
 //   isId(id: TypeId) bool
@@ -1037,8 +1211,8 @@ pub fn Typed(comptime P: type) type;
 //   is(n: *const Node) bool
 //   parentFromAnchor(a: *Anchor) ?*P
 //   mustParentFromAnchor(a: *Anchor) *P
-//   toAny(p: *P) AnyParent
-//   fromAny(any: AnyParent) ?*P
+//   toAny(p: *P) Any
+//   fromAny(any: Any) ?*P
 //   parentFromNode(n: *Node) ?*P
 //   mustParentFromNode(n: *Node) *P
 //   parentFromNodeUnchecked(n: *Node) *P
@@ -1056,7 +1230,7 @@ pub const TypeInfo = struct {
 
     pub fn nextField(ti: *const TypeInfo, a: *Anchor) *?*anyopaque;
     pub fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque;
-    pub fn toAny(ti: *const TypeInfo, a: *Anchor) AnyParent;
+    pub fn toAny(ti: *const TypeInfo, a: *Anchor) Any;
     pub fn node(ti: *const TypeInfo, a: *Anchor, comptime N: type) *N;
 };
 
@@ -1085,6 +1259,8 @@ The build has one module and four steps.
 - `negative/` is not in the package paths. A package that depends on
   paternitas does not need it.
 - The build uses Zig 0.16.0, in all four modes.
+- `-Duse_llvm=false` builds the tests with Zig's own backend. Gate 2 runs
+  the four modes on both backends. TYID 01.
 
 ### Tests
 
@@ -1102,7 +1278,7 @@ These tests come from the outside code.
 - Dispatch goes through a `TypeId -> handler` map, with no `Typed` call at
   dispatch.
 - `toAny` and `fromAny` work.
-- `*Anchor` and `AnyParent` work inside a tagged union.
+- `*Anchor` and `Any` work inside a tagged union.
 - The offset stored in `TypeInfo` lands on `next` for both kinds, and so does
   `nextField`.
 
@@ -1119,6 +1295,17 @@ AUDT 01 added these tests. Each names its finding.
 - The fallback step of `nextField`, with the stored offset, lands on `next`
   for both kinds. A15.
 
+TYID 01 added these tests.
+
+- Every struct gets its own id, in every build mode, read at run time:
+  two structs with the same fields, two empty structs, `List(u8)` and
+  `List(u16)`, structs with and without a TypedNode.
+- `toAny` and `fromAny` for a struct with no TypedNode. Another type gives
+  null.
+- `isId` for a struct with no TypedNode.
+
+There are 19 unit tests and 7 example tests.
+
 ### Negatives
 
 A test cannot reach a compile error or check a panic, so these cases are
@@ -1130,9 +1317,11 @@ separate programs.
 
 These programs must not compile, and must fail with the given message.
 
-- A Parent that is not a struct.
-- A Parent with a bare std Node and no TypedNode.
-- A Parent with two TypedNodes.
+- `Typed` of a type that is not a struct.
+- A list call on a struct with a bare std Node and no TypedNode. The
+  message is "no TypedNode, so it has only typeId, isId, toAny and
+  fromAny", with `P`'s name.
+- A struct with two TypedNodes.
 - The std doubly Node passed where the std singly Node is expected. The
   message is Zig's, so only its tail is matched: "found '*DoublyLinkedList.Node'". A9.
 - A TypedNode of a Node that is not a std Node. The message is
@@ -1145,15 +1334,16 @@ These programs must abort in every build mode, and say why on stderr.
 - `mustParentFromNode` on a Parent without `setTypeId` names `<no type>`.
 - `TypeInfo.node` with the wrong Node kind aborts.
 
-One program depends on the mode, per A5.
+Two programs depend on the mode, per A5.
 
-- It calls `fromAny` on a hand-built `AnyParent`, when `setTypeId` was never
-  called on the Parent.
-  - In Debug and ReleaseSafe it aborts, with "fromAny: setTypeId was never
+- Each calls `fromAny` when `setTypeId` was never called on the Parent.
+  - One builds the `Any` by hand. The other gets it from `toAny`, which
+    does not check.
+  - In Debug and ReleaseSafe they abort, with "fromAny: setTypeId was never
     called on the Parent".
-  - In ReleaseFast and ReleaseSmall it exits 0.
+  - In ReleaseFast and ReleaseSmall they exit 0.
 
-There are nine programs: five compile, four run.
+There are ten programs: five compile, five run.
 
 ### Examples
 
@@ -1170,11 +1360,73 @@ The examples live in `examples/`, one pattern each. See rules Part 2,
 001-set_type_id_and_recover   one Parent, a std list, back
 002-mixed_list                two Parent types in one std list
 003-timeout_list              a DoublyTypedNode Parent in a timeout list,
-                              through a std.Io.Queue(AnyParent), and back
+                              through a std.Io.Queue(Any), and back
 004-handler_map               a TypeId -> handler map; toAny, fromAny
-005-large_struct_in_union     AnyParent as one variant of a tagged union
+005-large_struct_in_union     Any as one variant of a tagged union
 006-anchor_chain              a stack chained through TypeInfo.nextField
+007-type_id_without_node      a TypeId -> handler map for structs with no
+                              TypedNode; isId, fromAny; no list
 ```
+
+---
+
+## C code: findings
+
+A record, not advice. The README and the comments say nothing about C.
+Owner's ruling, 2026-10-06: "We can not advise unclear functionality."
+
+The owner asked: can a Parent go to C as a `void*`? Should Paternitas
+refuse `extern` structs? Claude tested it on 2026-10-06, Zig 0.16.0, in
+scratch only.
+
+What was run.
+
+- A real C file stored a `void*` context and called a Zig `callconv(.c)`
+  callback with it. The structs were not `extern`: a slice, a TypedNode.
+  All four build modes.
+  - `TypedJob.anchor(&job)` as the context. The callback casts it to
+    `*Anchor` and calls `mustParentFromAnchor`. Works, type checked.
+  - `&any`, an `Any` of a struct with no TypedNode. The callback calls
+    `fromAny(any.*)`. Works, type checked.
+  - Built with `zig run -lc --dep paternitas c.c -Mroot=main.zig
+    -Mpaternitas=src/paternitas.zig`.
+
+What the compiler says.
+
+- A non-extern struct by value in a C signature does not compile:
+  "parameter of type 'Job' not allowed in function with calling
+  convention 'x86_64_sysv'".
+- A pointer to it does compile: `extern fn f(j: *Job) void`, and
+  `?*anyopaque`.
+- An extern struct cannot hold a TypedNode: "extern structs cannot contain
+  fields of type 'paternitas.TypedNode(DoublyLinkedList.Node)'". So an
+  extern Parent cannot exist. No Paternitas check is needed.
+- An extern struct with no TypedNode works with `toAny` and `fromAny`.
+  Nothing to refuse.
+
+What it means.
+
+- `Any` is not extern. C cannot take it by value. Only `*Any`, and the
+  `Any` must outlive the callback.
+- `*Anchor` is one word, a `void*`. The type is checked on the way back.
+- `TypeInfo.parent` gives the raw address. Nothing checks the type when it
+  is cast back.
+- C keeps the pointer after the call. The struct must outlive it.
+- C must never read through the pointer: a non-extern struct has no
+  defined layout.
+
+### The unit-test scenario
+
+Written on 2026-10-06, in [c-test/](c-test/README.md). Run by
+`kitchen/test_c_context.sh`, not by the gates. Owner's ruling.
+
+- In Zig only, no libc: a `callconv(.c)` function that takes
+  `?*anyopaque`, called through a function pointer.
+- Round-trip a `*Anchor` (`parentFromAnchor` gives the Parent; another
+  type gives null) and a `*Any` (`fromAny`).
+- All four modes, both backends, like the other tests.
+- A real C test needs libc and a C file in `build.zig`, and may trouble
+  g3 cross. Left out.
 
 ---
 
@@ -1203,7 +1455,7 @@ These are the main changes.
 
 - The ztk currency moves from `*Inner` to `*Anchor`.
 - `Inner`, `OuterId` and `OuterInfo` leave the API.
-- `AnyOuter` is removed. `AnyParent` replaces it at the dispatch edge.
+- `AnyOuter` is removed. `Any` replaces it at the dispatch edge.
 - A ztk parent may carry a `DoublyTypedNode`. It can sit in the
   application's own `std.DoublyLinkedList`, and move through mailboxes and
   pools, one place at a time.
@@ -1218,7 +1470,7 @@ AUDT 01 changed two things.
 
 The ztk vocabulary changes too.
 
-- The ztk API says Parent, TypedNode, Node, Anchor, TypeId, AnyParent.
+- The ztk API says Parent, TypedNode, Node, Anchor, TypeId, Any.
 - "outer" and "inner" stay only where the Matryoshka model is explained: the
   parent is the outer doll.
 - The rename is not mechanical. Each `Outer` and `Inner` is read in context.
@@ -1254,15 +1506,16 @@ TypeInfo.parent(anchor) == address of Parent
 - The TypedNode can be anywhere in the Parent.
 - The Anchor is one word, written by `setTypeId`. Its address is the erased reference. It is
   the transport currency.
-- AnyParent is the Parent address and its TypeId. It is the dispatch view.
-- The TypeId is the address of a static, unique TypeInfo.
+- Any is the Parent address and its TypeId. It is the dispatch view.
+- The TypeId is the address of a static, unique TypeInfo. For a struct
+  with no TypedNode, the address of its tag.
 - `TypeInfo` says where things are. Containers decide what to do there.
 
 ```text
 *Node   -- Typed(P).parentFromNode() --> checked *P
 *Anchor -- Typed(P).parentFromAnchor()     --> checked *P
 *Anchor -- TypeInfo.nextField()     --> where a container may chain
-*Anchor -- TypeInfo.toAny()         --> AnyParent for dispatch
+*Anchor -- TypeInfo.toAny()         --> Any for dispatch
 ```
 
 ---
@@ -1708,7 +1961,7 @@ Where they go.
   - The picture says what the text says. It does not replace the code.
   - There is no ASCII copy of it. The README has an ASCII layout diagram
     already, in "Why intrusive lists at all?".
-- The README credits the two authors and links [ATTRIBUTION.md](../kitchen/docs/assets/logo/ATTRIBUTION.md).
+- The README credits the two authors and links [ATTRIBUTION.md](../kitchen/tools/logo/mascots/ATTRIBUTION.md).
 - The landing page shows the logo above the name. The logo links to the
   README on GitHub.
   - In dark mode the logo sits on a light card, because the mascots have
@@ -1727,3 +1980,117 @@ A bug on the landing page was fixed on the way.
 
 - Its hidden `<h1>` showed, because the hiding rule used `:first-child`
   and a `<style>` element came first. The rule now uses `:first-of-type`.
+
+## Decisions of LOOK 02
+
+The owner named LOOK 02 on 2026-10-05. The owner brought a prototype and
+asked Claude to make it again with its own tools.
+
+The prototype.
+
+- Drafted with Grok Imagine, then an SVG and a Pillow script.
+- Its Grok Imagine prompts are copied into [LOGO.md](../kitchen/tools/logo/LOGO.md), "History". The owner
+  then deleted the prototype folder. It was never committed.
+
+The picture.
+
+- A belt: one list.
+- Gray boxes ride it, all alike: structs that are only Nodes on the
+  list.
+- A gold diamond where the belt ends: the `Anchor`, where Paternitas reads
+  the type id.
+- Three colored lanes leave the diamond: PARENT_A, PARENT_B, PARENT_C.
+  Each struct comes back as its own type.
+- On the belt every package is the same gray box: the list cannot tell
+  them apart. After the Anchor each parent has its own color and shape:
+  an amber circle, a teal triangle, a coral hexagon. The owner's ruling,
+  round 4.
+- Under it: the name, a gold rule, the subtitle, and the motto
+  *Agnitio paternitatis*, recognition of the parent. It matches
+  `setTypeId`, which you call yourself.
+- The motto is AGNITIO · PATERNITATIS, in Cinzel, Roman capitals after
+  Trajan's Column. It is drawn as paths, so it looks the same everywhere.
+  The middle dot is the inscription mark. The owner's choice, round 6.
+  Cinzel is under the SIL Open Font License 1.1. The font and its license
+  are in `kitchen/tools/logo/fonts/`.
+- The name, the subtitle and the exit labels are in Inter, drawn as paths
+  too. So all text looks the same everywhere. Inter is under the SIL Open
+  Font License 1.1. The owner's choice, round 7.
+- Navy card, rounded corners. It reads on light and dark pages, so the
+  landing page's light card for dark mode is gone.
+
+The favicon.
+
+- The logo's Anchor: the same diamond, ring and dot, on navy. The owner's
+  ruling, round 8. At 16 pixels the ring and the dot merge into one gold
+  spot. At 32 and 48 they read.
+- The site header uses the same.
+
+Changes from the prototype.
+
+- The canvas is 800 by 540, not 800 by 1000. The prototype was mostly
+  empty navy.
+- The diamond sits where the belt ends. In the prototype the SVG and the
+  PNG put it in different places.
+- The "P" over each PARENT label is gone. It was left from TYPE_A.
+- The labels sit to the right of the packages, so the lanes stay short.
+
+The tools.
+
+- `kitchen/tools/logo/gen_logo.py` is the only source. It writes the SVGs,
+  then ImageMagick makes the PNG and the .ico from them. The raster cannot
+  drift from the vector.
+- Every setting is a named constant at its top, for tuning.
+- `kitchen/tools/logo/LOGO.md` says what the picture means and how to tune it.
+- Only the images are under `kitchen/docs/assets/logo/`. The prompts and
+  the script are not published.
+
+Where it goes.
+
+- The README shows the logo at its top. The owner placed it there.
+- The README no longer credits the mascot authors. No mascot is shown.
+- The README section "The mask" is gone. The owner removed it.
+- The landing page shows the logo, up to 800 pixels wide, with no title
+  under it. The owner removed the title.
+
+Open for the owner.
+
+- Kerning is not applied to the text paths. Spacing is set by hand.
+- The subtitle says "safer". The README tagline says the same.
+
+## Decisions of TYID 01/02
+
+The owner ruled on the proposal on 2026-10-05, and named TYID 01 and
+TYID 02. The proposal is `backup/typeid-split-proposal-002.md`. Its content is in "Type ids on their own".
+
+The rulings.
+
+1. `Any` replaces `AnyParent`. No alias: there is no release yet, `0.0.1`.
+2. Structs only.
+3. `Typed(P)` for every struct. List calls only with a TypedNode.
+4. `TypeId` stays `?*const anyopaque`.
+5. No `typeName` on `Any`.
+6. The README is a separate stage. README 01 took it.
+7. TYID before ZTK.
+
+Gone from proposal 001, no longer needed: `paternitas.typeId(T)`,
+`typeName(id)`, `Any.of`, `as`, `mustAs`, a `src/typeid.zig`, and
+zero-sized types as a risk. The id is never the address of a value.
+
+TYID 01, the code.
+
+- `Typed(P)` takes every struct. With a TypedNode the id is `&desc`.
+  Without one it is `&tag`.
+- `fromAny` checks `setTypeId` only with a TypedNode.
+- `NodeKind` gets no `.none`. No `TypeInfo` exists without a TypedNode,
+  so nothing reads one. The owner's question.
+- The error texts say "structs only" and "at most one TypedNode". Zero is
+  allowed now, so "exactly one" and "Paternitas Parent" went.
+- `-Duse_llvm`, default true. Before it, Zig's own backend was never
+  tested. Gate 2 runs the four modes on both backends. The owner's ruling.
+
+TYID 02, the example.
+
+- Example 007, `007-type_id_without_node`: a handler map keyed by
+  `typeId()` for three structs with no TypedNode. `isId` and `fromAny` in
+  it. No list. Example 004 is the TypedNode version.

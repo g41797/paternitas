@@ -4,6 +4,165 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-06 — The C unit test
+
+The owner said write the test from design 014, "C code: findings". Claude
+showed the intent first. Owner's answers: folder `design/c-test/`, Zig only,
+the script in `kitchen/`.
+
+- `design/c-test/c_context_test.zig`: five tests. A fake C library keeps a
+  `callconv(.c)` callback and a `?*anyopaque` context, and calls back
+  through a function pointer held in a `var`.
+  - `*Anchor`: the Parent comes back; another type gives null; no
+    `setTypeId` gives null.
+  - `*Any` of a struct with no TypedNode: it comes back; another type
+    gives null.
+- `design/c-test/README.md` says what it is and how to run it.
+- `kitchen/test_c_context.sh`: `zig test` in four modes, LLVM and Zig's
+  own backend. 8 runs, 5 tests each, all pass. Not a gate, not in
+  `build.zig`.
+- Design 014 points to the folder, edited in place: one line in "The
+  unit-test scenario".
+- g4 then failed: `rules-013.md` named `design/zelda-and-paternitas.md`,
+  which the owner deleted. Owner's ruling: drop it from that line, edited
+  in place.
+- Six gates pass.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01 PLAN
+Model: Opus 5.5.
+
+---
+
+## 2026-10-06 — DSGN 014: no word about C, and design 014
+
+The owner said do "Next", steps 1 and 2. Ongoing work, not a named stage.
+
+Step 1, no word about C. Comments only; the code is unchanged.
+
+- `src/paternitas.zig`, the `Anchor` `///`: now "Use it in your own
+  container."
+- `src/container.zig`, the module doc and `TypeInfo.parent`: "such as a C
+  callback's `void*`" is gone. "Code that knows nothing of Paternitas"
+  stays.
+- `examples/007-type_id_without_node.zig`, the header: "`void*` contexts"
+  is now "handler maps". The site page is regenerated.
+- The README and `kitchen/docs/` had nothing else. The README's
+  "`*anyopaque` contexts" is Zig, not C, and stays.
+
+Step 2, design 014.
+
+- 013 and `typeid-split-proposal-002.md` are in `design/backup/`. Links
+  point to 014: STATUS, plan 016, rules 013, audit report 003, PTRN 01
+  intent.
+- `AnyParent` is `Any` in the design text. The "Change from" history and
+  the "Decisions of" sections keep the old name.
+- New: "Type ids on their own", from the proposal. "C code: findings", a
+  record with the unit-test scenario. "Decisions of TYID 01/02".
+- `typeId()` with `&tag`, the third compile error, `fromAny` without a
+  TypedNode, `-Duse_llvm`, the TYID tests, the tenth negative and example
+  007 are in the body now.
+- 013 still said "nine programs: five compile, four run". Now ten, five
+  and five.
+
+- Six gates pass, after one g4 fix: a backticked file name in 014 read as
+  a dead link. Now `backup/...`. The site builds.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01 PLAN
+Model: Opus 5.5.
+
+---
+
+## 2026-10-06 — C code: findings
+
+The owner asked: can a Parent go to C as a `void*`? Should Paternitas
+refuse `extern` structs? Claude tested it. Scratch only, nothing in the repo.
+
+Findings, Zig 0.16.0:
+
+- A real C file stored a `void*` context and called a Zig `callconv(.c)`
+  callback with it. The structs were not `extern`: a slice, a TypedNode.
+  All four build modes:
+  - `TypedJob.anchor(&job)` as the context; the callback casts it to
+    `*Anchor` and calls `mustParentFromAnchor`. Works, type checked.
+  - `&any`, an `Any` of a struct with no TypedNode; the callback calls
+    `fromAny(any.*)`. Works, type checked.
+  - Built with `zig run -lc --dep paternitas c.c -Mroot=main.zig
+    -Mpaternitas=src/paternitas.zig`.
+- A non-extern struct by value in a C signature does not compile:
+  "parameter of type 'Job' not allowed in function with calling
+  convention 'x86_64_sysv'".
+- A pointer to it does compile: `extern fn f(j: *Job) void`, and
+  `?*anyopaque`.
+- An extern struct cannot hold a TypedNode: "extern structs cannot contain
+  fields of type 'paternitas.TypedNode(DoublyLinkedList.Node)'". So an
+  extern Parent cannot exist. No Paternitas check is needed.
+- An extern struct with no TypedNode works with `toAny` and `fromAny`.
+  Nothing to refuse.
+- `Any` is not extern: C cannot take it by value. Only `*Any`, and the
+  `Any` must outlive the callback.
+- `*Anchor` is one word, a `void*`. The type is checked on the way back.
+- `TypeInfo.parent` gives the raw address. Nothing checks the type when it
+  is cast back.
+- C keeps the pointer after the call. The struct must outlive it.
+- C must never read through the pointer: a non-extern struct has no
+  defined layout.
+
+The unit-test scenario, for design 014. Not written yet:
+
+- In Zig only, no libc: a `callconv(.c)` function that takes
+  `?*anyopaque`, called through a function pointer.
+- Round-trip a `*Anchor` (`parentFromAnchor` gives the Parent; another
+  type gives null) and a `*Any` (`fromAny`).
+- All four modes, both backends, like the other tests.
+- A real C test needs libc and a C file in `build.zig`, and may trouble
+  g3 cross. Left out.
+
+The owner's rulings:
+
+- Remove every word about C from the README and the comments. Unclear
+  functionality is not advised.
+- Design 014 gets a C section with all of the above, and absorbs the TYID
+  proposal. Ongoing work, not a named stage. See STATUS.md, "Next".
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Do "Next": steps 1 and 2. The C findings are in the STATUS-LOG head.
+Model: Opus 5.5.
+
+---
+
+## 2026-10-06 — Comments: four items from a ChatGPT revision
+
+The owner brought ChatGPT's revision of `src/paternitas.zig` and
+`src/container.zig`. The code was the same; the comments were cut from 651
+to 351 and from 177 to 121 lines.
+
+- Taken, at the owner's word:
+  - the module doc opens with the problem, then "Do you need it?", then
+    "Three words first";
+  - plainer first lines for `setTypeId`, `parentFromNode`,
+    `parentFromAnchor`, `fromAny` and `TypeInfo`;
+  - "Your container owns the meaning of that word", in two places.
+- Not taken:
+  - the revision called every struct a Parent again, against TYID 01;
+  - it dropped the MUST warnings, the `var tag` comment (the A1 bug), the
+    shared-library limit and the Limits section;
+  - nine `pub` declarations lost their `///`.
+- The Anchor motto stays. Owner's ruling.
+- Six gates green. The site builds; `mkdocs build --strict` passes. The API
+  docs carry the new text.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01 PLAN
+Model: Opus 5.5.
+
+---
+
 ## 2026-10-05 — README 01: the bonus, and the error texts
 
 The owner put ZTK aside: the README and the docs first.

@@ -12,8 +12,7 @@
 //!
 //! - Your container keeps Parents of many types, and does not know them.
 //! - It needs no extra memory per item.
-//! - Or you pass a Parent to code that knows nothing of Paternitas, such as a
-//!   C callback's `void*`.
+//! - Or you pass a Parent to code that knows nothing of Paternitas.
 //!
 //! Your container keeps `*Anchor`s.
 //!
@@ -127,8 +126,7 @@ pub const TypeInfo = struct {
 
     /// Returns the Parent's address, with no type.
     ///
-    /// Give it to code that knows nothing of Paternitas, such as a C callback's
-    /// `void*`.
+    /// Give it to code that knows nothing of Paternitas.
     pub inline fn parent(ti: *const TypeInfo, a: *Anchor) *anyopaque {
         return addOffset(a, -@as(isize, @intCast(ti.*.anchor_offset)));
     }

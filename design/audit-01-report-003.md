@@ -319,7 +319,7 @@ Not taken.
 
 ## After the rulings
 
-- [paternitas-design-013.md](paternitas-design-013.md), in rules style.
+- [paternitas-design-014.md](paternitas-design-014.md), in rules style.
   - It absorbs the outside design, with the approved fixes.
   - It keeps what design 003 records.
   - 003 moves to `backup/`.

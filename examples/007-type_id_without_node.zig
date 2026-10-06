@@ -7,8 +7,8 @@
 //! Your struct is not on a list. It has no room for a node, or you do not
 //! want one.
 //!
-//! You still want a runtime type id for it. Callbacks, queues and `void*`
-//! contexts all need one.
+//! You still want a runtime type id for it. Callbacks, queues and handler
+//! maps all need one.
 //!
 //! ### What it does
 //!

@@ -724,10 +724,6 @@ Requirements:
 - Zig 0.16.0
 - `std` only
 
-API documentation:
-
-https://g41797.github.io/paternitas/apidocs/
-
 ---
 
 ## Why the name?
@@ -751,7 +747,7 @@ That is the idea.
 The trigger was the Ziggit post
 [New LinkedList API footgun](https://ziggit.dev/t/new-linkedlist-api-footgun/10853).
 
-Paternitas grew out of Matryoshka, a toolkit for background processes.
+Paternitas grew out of _Matryoshka_, a toolkit for background processes.
 
 The same problem appeared in each version:
 
@@ -773,4 +769,4 @@ Your project can too.
 
 - [Karl Seguin](https://github.com/karlseguin), for the article that introduced
   [Zig's new LinkedList API](https://www.openmymind.net/Zigs-New-LinkedList-API/).
-- The Zig standard library, for giving us the intrusive list in the first place.
+

@@ -9,7 +9,7 @@ Current state only. Updated in place. The narrative is in
 2. Read Part 0 of [rules-013.md](rules-013.md).
 3. Read the plan, [implementation-plan-016.md](implementation-plan-016.md), for
    the stage the owner names. Not before they name it.
-4. Read the design, [paternitas-design-013.md](paternitas-design-013.md), for
+4. Read the design, [paternitas-design-014.md](paternitas-design-014.md), for
    a stage that writes code or docs.
 5. Read [paternitas-intake-001.md](paternitas-intake-001.md) for the ztk
    stage: the outside work and the questions left for it.
@@ -23,19 +23,26 @@ Current state only. Updated in place. The narrative is in
 | what | where |
 |---|---|
 | rules | [rules-013.md](rules-013.md) |
-| design decisions, and what paternitas keeps from ztk | [paternitas-design-013.md](paternitas-design-013.md) |
+| design decisions, and what paternitas keeps from ztk | [paternitas-design-014.md](paternitas-design-014.md) |
 | the plan | [implementation-plan-016.md](implementation-plan-016.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
 | NAME 01: the new names and what they touch | [name-01-intent-002.md](name-01-intent-002.md) |
-| type ids on their own: the proposal and the owner's rulings | [typeid-split-proposal-002.md](typeid-split-proposal-002.md) |
 | the narrative | [STATUS-LOG.md](STATUS-LOG.md) |
 | the advice collected by the owner, read in AUDT 01 | `paternitas-001.md` |
 | superseded versions | `design/backup/` |
 
 ## Current state
 
+- DSGN 014 is done, 2026-10-06. Ongoing work, not a named stage.
+  - No word about C in `src/`, the examples, the README or the site.
+    Four places changed. Comments only.
+  - Design 014 absorbs the type-id proposal, and records the C findings
+    as a record, not advice. 013 and proposal 002 are in `design/backup/`.
+  - The C unit test is in `design/c-test/`, 2026-10-06. Zig only. Five
+    tests, all four modes, both backends. Run by
+    `kitchen/test_c_context.sh`. Not a gate.
 - README 01 is a draft, 2026-10-05. The owner named it.
   - Lists stay the main story. Type ids are "Bonus: for the curious and
     the brave", at the end, before Install. One line at the top says so.
@@ -43,6 +50,16 @@ Current state only. Updated in place. The narrative is in
   - The old README is `design/backup/README-002.md`.
   - Open: the owner's review. Trimming waits for the site pages.
   - The owner's rulings are in [implementation-plan-016.md](implementation-plan-016.md), "README 01".
+- Comments in `src/` took four items from a ChatGPT revision, 2026-10-06.
+  The owner said go. Comments only; the code is unchanged.
+  - The module doc opens with the problem: "An intrusive list gives you a
+    Node, not your struct." "Do you need it?" comes next.
+  - Plainer first lines: `setTypeId`, `parentFromNode`, `parentFromAnchor`,
+    `fromAny`, `TypeInfo`.
+  - `container.zig`: "Your container owns the meaning of that word."
+  - Not taken: the cuts. They dropped the TYID "every struct" text, the
+    MUST warnings, the `var tag` comment (A1), the shared-library limit and
+    nine `pub` doc comments. The Anchor motto stays.
 - TYID 01 is done, 2026-10-05. The owner named it.
   - `Typed(P)` takes every struct. Without a TypedNode it has only
     `typeId`, `isId`, `toAny` and `fromAny`. A list call is a compile
@@ -107,8 +124,4 @@ Current state only. Updated in place. The narrative is in
 
 ## Next
 
-**DOCS 01 PLAN — plan the site pages.** Planning only. The first cut is
-in [implementation-plan-016.md](implementation-plan-016.md). Then DOCS 01
-writes them. ZTK waits.
-
-It starts when the owner names it.
+1. DOCS 01 PLAN, when the owner names it.
