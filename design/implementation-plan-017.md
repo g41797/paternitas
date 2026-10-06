@@ -11,7 +11,7 @@ Forward-looking work, plus one line per completed stage.
 - The outside work: [paternitas-intake-001.md](paternitas-intake-001.md).
 - Type ids on their own: [paternitas-design-014.md](paternitas-design-014.md), "Type ids on their own".
 - Change from 016: DOCS 01 PLAN is done. The site plan is
-  [docs-01-intent-007.md](docs-01-intent-007.md). DOCS 01 points to it.
+  [docs-01-intent-008.md](docs-01-intent-008.md). DOCS 01 points to it.
 - Change from 015, kept: TYID 01 and TYID 02 are done. README and docs come
   before ZTK. Owner's ruling, 2026-10-05. New stages: README 01, DOCS 01
   PLAN, DOCS 01. The README stage was "later" in 015.
@@ -83,7 +83,7 @@ Forward-looking work, plus one line per completed stage.
 - TYID 02 (2026-10-05, Sonnet 5) — example 007: a handler map for structs
   with no TypedNode. Six gates green.
 - DOCS 01 PLAN (2026-10-06, Opus 5.5) — the site plan:
-  [docs-01-intent-007.md](docs-01-intent-007.md). Seventeen pages, the hero
+  [docs-01-intent-008.md](docs-01-intent-008.md). Seventeen pages, the hero
   logo leads in, snippets pulled from working code, an API nav entry in a new
   tab, g4 at every depth and `--strict`. No pages written. Six gates green.
 
@@ -141,7 +141,7 @@ The owner names it. Opus 5.5: it writes text in the owner's voice, and new
 example code.
 
 - The plan, page by page, with the owner's answers:
-  [docs-01-intent-007.md](docs-01-intent-007.md).
+  [docs-01-intent-008.md](docs-01-intent-008.md).
 - Its order of work is the stage's order.
 - The README trims wait for the owner's review of the README 01 draft.
 

@@ -78,7 +78,7 @@ WORDMARK_Y = 382
 
 RULE_Y = 414
 
-SUBTITLE = "ZIG LIBRARY FOR SAFER INTRUSIVE TYPE-ERASED CONTAINERS"
+SUBTITLE = "RUNTIME TYPE IDS · SAFER INTRUSIVE TYPE-ERASED CONTAINERS"
 SUBTITLE_FONT = (INTER, 500, 14)
 SUBTITLE_SIZE = 16
 SUBTITLE_SPACING = 1.5
@@ -119,7 +119,8 @@ def logo() -> str:
     parts += anchor(ANCHOR_X, BELT_Y, ANCHOR_SIZE, 6)
     parts += words()
     parts.insert(0, glyph_defs())
-    label = "Paternitas: anonymous structs ride one list, and come out recognized by type. Agnitio paternitatis."
+    label = ("Paternitas: runtime type ids, safer intrusive type-erased containers. Anonymous structs ride one list, "
+             "and come out recognized by type. Agnitio paternitatis.")
     return svg(f"0 0 {WIDTH} {HEIGHT}", label, parts)
 
 

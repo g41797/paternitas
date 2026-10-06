@@ -4,6 +4,32 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-06 — DOCS 01, the logo subtitle
+
+The owner committed the pages as `41cc1bc`.
+
+- The ruling: the logo subtitle names both things the library gives,
+  not only the containers.
+- Old: ZIG LIBRARY FOR SAFER INTRUSIVE TYPE-ERASED CONTAINERS.
+- New: RUNTIME TYPE IDS · SAFER INTRUSIVE TYPE-ERASED CONTAINERS.
+- "TYPE IDS", not "TYPEID": the site says "type id". The middle dot
+  matches the motto. "ZIG" is dropped; there is no room for it.
+- `kitchen/tools/logo/gen_logo.py`: `SUBTITLE` and the `aria-label`
+  changed. The SVG and PNG were generated again. The favicon did not
+  change.
+- The plan is now [docs-01-intent-008.md](docs-01-intent-008.md), with
+  "Change from 007". 007 is in `design/backup/`. STATUS and plan 017
+  point to 008. STATUS "Current state" has the new subtitle.
+- The owner looked at it in the preview. The preview server is stopped.
+- Six gates pass after the change. Only the logo files, the logo
+  script and design files changed.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01, the owner's review of the pages
+
+---
+
 ## 2026-10-06 — DOCS 01, before the owner's commit
 
 The owner is going to compact the session and commit.

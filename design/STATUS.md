@@ -29,7 +29,7 @@ Current state only. Updated in place. The narrative is in
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
 | NAME 01: the new names and what they touch | [name-01-intent-002.md](name-01-intent-002.md) |
-| DOCS 01: the site pages | [docs-01-intent-007.md](docs-01-intent-007.md) |
+| DOCS 01: the site pages | [docs-01-intent-008.md](docs-01-intent-008.md) |
 | the narrative | [STATUS-LOG.md](STATUS-LOG.md) |
 | the advice collected by the owner, read in AUDT 01 | `paternitas-001.md` |
 | superseded versions | `design/backup/` |
@@ -37,13 +37,15 @@ Current state only. Updated in place. The narrative is in
 ## Current state
 
 - DOCS 01: the pages are written, 2026-10-06. The owner named it. The plan
-  is [docs-01-intent-007.md](docs-01-intent-007.md). Steps 1 to 10, 12 and 13
+  is [docs-01-intent-008.md](docs-01-intent-008.md). Steps 1 to 10, 12 and 13
   are done.
   - Open: the owner reads the pages. Step 11, the README trims, waits for
     the owner's review of the README 01 draft.
   - Seventeen pages under `kitchen/docs/`: `introduction`, `background/`,
     `guides/`, `reference/`, `api`. The nav has them all.
   - The hero logo links to `introduction/`. The buttons are in a comment.
+  - The logo subtitle: RUNTIME TYPE IDS · SAFER INTRUSIVE TYPE-ERASED
+    CONTAINERS. The owner's ruling after the commit `41cc1bc`. Intent 008.
   - Every Zig block on a page is a `pymdownx.snippets` section of a file in
     `examples/` or `negative/`. Markers: `// --8<-- [start:x]` and
     `[end:x]`. The example pages drop them. A missing section stops the
@@ -73,7 +75,7 @@ Current state only. Updated in place. The narrative is in
   - The strict site build passes. Headless Chrome loads every new page,
     with no console errors.
 - DOCS 01 PLAN is done, 2026-10-06. The owner named it.
-  - The plan is [docs-01-intent-007.md](docs-01-intent-007.md): seventeen
+  - The plan is [docs-01-intent-008.md](docs-01-intent-008.md): seventeen
     pages, a source map per page, the README trims, the nav, g4 and strict.
   - The logo leads into the site. The hero buttons go in a comment.
   - Every Zig snippet comes from working code: `examples/`, `negative/`.
@@ -177,4 +179,4 @@ Current state only. Updated in place. The narrative is in
 
 1. DOCS 01 goes on: the owner's review of the pages goes on, then the
    README trims, step 11. The last state: six gates pass, 27 tests, the
-   strict site build passes, 2026-10-06. Opus 5.5. The plan: [docs-01-intent-007.md](docs-01-intent-007.md).
+   strict site build passes, 2026-10-06. Opus 5.5. The plan: [docs-01-intent-008.md](docs-01-intent-008.md).
