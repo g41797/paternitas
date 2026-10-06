@@ -108,7 +108,7 @@ The rest of the project state lives in other files.
 - The current state is in [STATUS.md](STATUS.md).
 - The narrative is in [STATUS-LOG.md](STATUS-LOG.md).
 - The rules are in [rules-013.md](rules-013.md).
-- The work still to do is in [implementation-plan-016.md](implementation-plan-016.md).
+- The work still to do is in [implementation-plan-017.md](implementation-plan-017.md).
 - A big task gets its own versioned `.md` under `design/`, linked from here.
 
 ---

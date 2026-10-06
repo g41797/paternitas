@@ -43,7 +43,7 @@ jobs:
       - name: Build MkDocs Site
         run: |
           pip install mkdocs-material
-          cd kitchen && mkdocs build -f mkdocs.yml
+          cd kitchen && mkdocs build --strict -f mkdocs.yml
 
       - name: Remove Unused Material Default Favicon
         run: rm -f docs/assets/images/favicon.png

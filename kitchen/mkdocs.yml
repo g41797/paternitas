@@ -34,6 +34,19 @@ theme:
     - navigation.footer
 nav:
   - Home: index.md
+  - Introduction: introduction.md
+  - Background:
+      - Intrusive lists: background/intrusive.md
+      - Type-erased lists: background/type-erased.md
+      - The Parent problem: background/parent-problem.md
+  - Guides:
+      - Which page you need: guides/choose.md
+      - Move your code: guides/lists.md
+      - The setTypeId rule: guides/set-type-id.md
+      - Several types in one list: guides/mixed-list.md
+      - Queues, maps, union fields: guides/any.md
+      - Type ids on their own: guides/type-ids.md
+      - Your own container: guides/containers.md
   - Examples:
       - examples/001-set_type_id_and_recover.md
       - examples/002-mixed_list.md
@@ -42,6 +55,19 @@ nav:
       - examples/005-large_struct_in_union.md
       - examples/006-anchor_chain.md
       - examples/007-type_id_without_node.md
+  - Reference:
+      - All the calls: reference/calls.md
+      - Limits: reference/limits.md
+      - Terms: reference/terms.md
+      - Install: reference/install.md
+      - Name and origin: reference/about.md
+  - API docs: api.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
 
 hooks:
   - hooks/count_lines.py
@@ -58,6 +84,11 @@ extra_css:
 markdown_extensions:
   - attr_list
   - admonition
+  - pymdownx.details
+  - pymdownx.snippets:
+      base_path: [".."]
+      check_paths: true
+      dedent_subsections: true
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences:

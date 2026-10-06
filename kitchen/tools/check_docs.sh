@@ -20,6 +20,11 @@
 # Exempt from check 2 only:
 #   - design/rules-NNN.md — it has to name every banned word. Scan it by hand.
 #
+# The site pages are read at every depth under kitchen/docs/, except
+# examples/ and apidocs/: a site build generates both, and they are in
+# .gitignore. A link from a site page into either folder is counted and
+# skipped. `mkdocs build --strict` checks those links.
+#
 # A reference into ztk is written from ZTK/ or NEXT/, as in
 # design/paternitas-design-NNN.md. It is checked only where the ztk repo is on
 # disk; elsewhere it is counted and skipped.
@@ -31,6 +36,7 @@ next_root="$ztk_root/design/secondary/lang/port/3tk-to-ztk/next"
 
 hits=0
 skipped=0
+generated=0
 
 report() {
     hits=$((hits + 1))
@@ -45,7 +51,9 @@ docs() {
             -not -name 'intrusive-type-erased-best-C.md' \
             -not -name 'zelda-and-paternitas.md'
         find "$repo_root" -maxdepth 1 -name '*.md'
-        find "$repo_root/kitchen/docs" -maxdepth 1 -name '*.md' 2>/dev/null
+        find "$repo_root/kitchen/docs" -name '*.md' \
+            -not -path "$repo_root/kitchen/docs/examples/*" \
+            -not -path "$repo_root/kitchen/docs/apidocs/*" 2>/dev/null
     } | sort
 }
 
@@ -70,8 +78,23 @@ resolve() {
     return 1
 }
 
+# 0 when a site page's link points into a generated folder.
+into_generated() {
+    local dir="$1" target="$2" full
+    case "$dir" in "$repo_root/kitchen/docs"|"$repo_root/kitchen/docs/"*) ;; *) return 1 ;; esac
+    full="$(realpath -m "$dir/$target")"
+    case "$full" in
+        "$repo_root/kitchen/docs/examples/"*|"$repo_root/kitchen/docs/apidocs/"*) return 0 ;;
+    esac
+    return 1
+}
+
 check_ref() {
     local kind="$1" rel="$2" dir="$3" t="$4" rc
+    if into_generated "$dir" "$t"; then
+        generated=$((generated + 1))
+        return
+    fi
     resolve "$dir" "$t"
     rc=$?
     case "$rc" in
@@ -112,6 +135,10 @@ done < <(docs)
 
 if [ "$skipped" -gt 0 ]; then
     echo "  $skipped ztk reference(s) not checked: no ztk repo at $ztk_root"
+fi
+
+if [ "$generated" -gt 0 ]; then
+    echo "  $generated link(s) into kitchen/docs/examples/ or apidocs/ left to the strict build"
 fi
 
 echo "== 2. banned and AI-sh words =="

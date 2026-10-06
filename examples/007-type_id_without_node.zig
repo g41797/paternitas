@@ -26,6 +26,7 @@
 //!
 //! `Empty` has no fields, and it still gets its own id.
 
+// --8<-- [start:types]
 const Point: type = struct {
     x: i32,
     y: i32,
@@ -37,6 +38,7 @@ const Tick: type = struct {
     label: []const u8,
 };
 const TypedTick: type = paternitas.Typed(Tick);
+// --8<-- [end:types]
 
 const Empty: type = struct {};
 const TypedEmpty: type = paternitas.Typed(Empty);
@@ -56,6 +58,7 @@ pub fn type_id_without_node(allocator: std.mem.Allocator, io: std.Io) !void {
     defer handlers.deinit();
 
     // Register the handlers. The dispatch below never names a type.
+    // --8<-- [start:send]
     try handlers.put(TypedPoint.typeId(), onPoint);
     try handlers.put(TypedTick.typeId(), onTick);
 
@@ -71,6 +74,7 @@ pub fn type_id_without_node(allocator: std.mem.Allocator, io: std.Io) !void {
 
     var counts: Counts = .{};
     for (items) |any| dispatch(&handlers, any, &counts);
+    // --8<-- [end:send]
     if (counts.points != 1 or counts.ticks != 1 or counts.unhandled != 1) return error.WrongCount;
 
     try checkIsId(items[0]);
@@ -87,11 +91,13 @@ fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), any: p
     h(any.ptr, counts);
 }
 
+// --8<-- [start:isid]
 /// `isId` asks about one type. It is true for that type only.
 fn checkIsId(any: paternitas.Any) !void {
     if (!TypedPoint.isId(any.type_id)) return error.WrongId;
     if (TypedTick.isId(any.type_id)) return error.WrongId;
 }
+// --8<-- [end:isid]
 
 /// `fromAny` checks the type id first. Asking for another type gives null.
 fn checkFromAny(point: *Point, any: paternitas.Any) !void {

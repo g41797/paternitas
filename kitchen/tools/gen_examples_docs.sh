@@ -8,6 +8,11 @@
 # block stripped from the embedded snippet only (both already shown above it
 # as rendered markdown; the source file itself keeps them). Regenerated on
 # every run — never hand-edited.
+#
+# A file whose //! holds the line `Page: none` gets no page: it is code the
+# site pages quote, not an example. The snippet markers, `// --8<-- [start:x]`
+# and `// --8<-- [end:x]`, are dropped from the page. The site pages use them
+# through pymdownx.snippets.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$(readlink -f "$0")")/../.." && pwd)"
@@ -67,7 +72,8 @@ gen_one() {
         # Drop the SPDX header, then the leading blank/`//!` run (the
         # description + diagram, already rendered above as markdown) from
         # the embedded snippet. Source file itself is untouched.
-        sed -e '/^\/\/ SPDX-FileCopyrightText:/d' -e '/^\/\/ SPDX-License-Identifier:/d' "$src" \
+        sed -e '/^\/\/ SPDX-FileCopyrightText:/d' -e '/^\/\/ SPDX-License-Identifier:/d' \
+            -e '/^[[:space:]]*\/\/ --8<-- \[\(start\|end\):[a-z0-9_-]*\]$/d' "$src" \
             | awk '
                 !done && ($0 == "" || $0 ~ /^\/\/!/) { next }
                 { done=1; print }
@@ -82,6 +88,7 @@ mirror_root() {
     while IFS= read -r -d '' f; do
         rel="${f#"$repo_root/$src_root/"}"
         is_barrel "$f" && continue
+        grep -q '^//! Page: none$' "$f" && continue
         out="$out_root${dest_prefix:+/$dest_prefix}/${rel%.zig}.md"
         gen_one "$f" "$out"
     done < <(find "$repo_root/$src_root" -name '*.zig' -print0)

@@ -4,6 +4,233 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-06 — DOCS 01, before the owner's commit
+
+The owner is going to compact the session and commit.
+
+- Six gates pass on the final state. 27 tests. The strict site build
+  passes. g4 is clean.
+- STATUS has three new open items: the empty `kitchen/docs/javascripts/`
+  folder, `mkdocs serve` missing edits, and the trailing spaces the site
+  build adds to the pages.
+- No git command ran in this session, except `git status`.
+- The preview server is stopped.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01, the owner's review of the pages
+
+---
+
+## 2026-10-06 — DOCS 01, the owner's fourth look
+
+- The owner found "Next: Move your code" on `reference/install`, while
+  Material's footer said "Name and origin". The ruling: no homemade
+  "Next:" anywhere. The footer, from `navigation.footer`, does the job.
+  Claude removed four such lines.
+- The NAQ "Which Zig?" on `reference/install` is gone.
+- The line "The pages that use them" on `reference/calls` is gone.
+- The "Where next" table in `introduction` stays. It is a choice by case,
+  not a next page.
+- Intent 007 records it. 006 is in `design/backup/`.
+- The strict site build passes. g4 is clean.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01, the owner's review of the pages
+
+---
+
+## 2026-10-06 — DOCS 01, the owner's third look
+
+The owner reviewed in the preview, and stopped and started it several
+times.
+
+- "The terms this site uses" sounded official. Claude retitled the page
+  "Stuck on a word?", and offered "What does that word mean?" and "Words
+  you will meet here".
+- The owner asked to move "What's NAQ?" and its two lines to the very end
+  of `introduction`, under a title that is not serious. Claude chose "One
+  more thing", and offered "Psst.", "Small print" and "Before you go".
+- `mkdocs serve` missed each edit. Claude restarted the preview after each
+  one. Its file watcher does not see changes here. Not looked into.
+- Intent 006 records it. 005 is in `design/backup/`.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01, the owner's review of the pages
+
+---
+
+## 2026-10-06 — DOCS 01, the owner's second look
+
+The owner read the `api` page in the preview, and said "continue".
+
+- The `api` page lost its text. Two buttons: "Open in a new tab", the main
+  one, and "Open here". Claude chose the wording, as the owner asked.
+- "For a short scan" sounded like AI. Claude found seven more phrases of
+  that kind on the pages, and the owner approved each plain sentence.
+- "Words" is "Terms". Claude moved `reference/words.md` to
+  `reference/terms.md` with `mv`. Its title is "The terms this site uses".
+- `mkdocs serve` did not see the nav change. Claude restarted the preview.
+- Intent 005 records it. 004 is in `design/backup/`.
+- The strict build passes.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01, the owner's review of the pages
+
+---
+
+## 2026-10-06 — DOCS 01, the owner's first site review
+
+The owner asked to review the site, not the `.md` files. Claude ran
+`preview_site.sh`. The owner gave two rulings, then said "go all", and to
+stop the web server first.
+
+- The API docs entry is the last nav item. It opens a new page, `api`: a
+  short description, a line that the Zig pages open in another tab or
+  window, and a button with `target="_blank"`.
+  - `new-tab.js` had no job left. Claude took it out of `mkdocs.yml` and
+    moved it to `design/backup/` with `mv`. `kitchen/docs/javascripts/` is
+    now an empty folder. The owner deletes it.
+- No Questions page. NAQ blocks, in the style of the owner's tofu site:
+  `??? question "NAQ: ..."`, collapsed, each right after its text.
+  - `pymdownx.details` is on.
+  - "What's NAQ?" is in `introduction`, from tofu's `naq.md`.
+  - The old questions went to their pages. New: why the word Parent, why
+    not the std Node, why `Any` and not `*anyopaque`, why no mark by
+    itself.
+  - `reference/questions.md` is `design/backup/questions-001.md`. Strict
+    fails on a page outside the nav, so it could not stay.
+- Intent 004 records the rulings. 003 is in `design/backup/`. STATUS and
+  plan 017 point to 004.
+- Six gates pass. The strict site build passes. Headless Chrome loads
+  `api`, `introduction`, `guides/lists`, `background/type-erased` and
+  `reference/limits`, with no console errors. The NAQ blocks render as
+  details. `api` is the last nav link.
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01, the owner's review of the pages
+
+---
+
+## 2026-10-06 — DOCS 01, the pages
+
+The owner named it. Opus 5.5. The plan is intent 003. The owner said "go
+all" twice, and asked for staccato.
+
+- Step 1, the checks.
+  - g4 reads `kitchen/docs/` at every depth, except `examples/` and
+    `apidocs/`. A link from a site page into either is counted and left to
+    strict.
+  - `--strict` in `build_site.sh` and in `.github/workflows/docs.yml`.
+  - The `validation` block in `kitchen/mkdocs.yml`.
+- Step 2, the hero. The logo links to `introduction/`. Alt text "Paternitas
+  — start here". The API and Examples buttons are in a comment.
+- Step 3, the tools.
+  - `pymdownx.snippets`: `base_path: [".."]`, since mkdocs runs from
+    `kitchen/`. `check_paths` and `dedent_subsections` are on.
+  - Tried: a wrong section name stops the build with `SnippetMissingError`.
+  - `gen_examples_docs.sh` drops the marker lines from the example pages,
+    and skips a file whose `//!` holds `Page: none`.
+  - `javascripts/new-tab.js`, through Material's `document$`. The "API docs"
+    nav entry under Reference.
+- Step 4, the code.
+  - `examples/before_paternitas.zig`: Message and Job with plain std Nodes,
+    a plain `@fieldParentPtr` on the right type. A test wrapper "00 - before
+    paternitas". 27 tests.
+  - 001: a whole-struct reset, `setTypeId` on the next line, and a check
+    that the Message comes back.
+  - 002: `TypedJob.is` on the last Node. No example called `is` before.
+  - Snippet markers in 001 to 007. Comments only.
+- Steps 5 to 10, the pages: seventeen, in the order of the plan.
+  `introduction` last.
+- One change against the plan, on "The Parent problem". No negative shows
+  `mustParentFromNode` on another type. The page quotes the panic of
+  `must_parent_from_anchor.zig`, which names both types, and says
+  `mustParentFromNode` prints the same kind of message.
+  `must_parent_from_node.zig` and its `<no type>` panic are on "Move your
+  code".
+- Claude caught "on purpose", a banned phrase, in `introduction`, before
+  the build.
+- Step 11 waits for the owner's review of the README 01 draft.
+- Step 13: six gates pass. The strict site build passes. Headless Chrome
+  loads the hero, the seventeen pages and example 002, with no console
+  errors. Every live link to `apidocs/` has `target="_blank"`. No marker
+  line reaches the HTML.
+
+| step | result |
+|---|---|
+| Post-stage cleanup | none. No scratch files in the repo |
+| banned-word scan | g4 clean |
+| rules audit | no finding. No git beyond `git status`. No file deleted |
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01, the owner's review of the pages
+
+---
+
+## 2026-10-06 — DOCS 01 PLAN
+
+The owner named it. Opus 5.5. Planning only, no site pages written.
+
+Input: the owner's brief (a summary of the request), the owner's collected
+advice paternitas-doc-site.md, the README 01 draft, README-001, `src/`, the
+examples.
+
+- Intent 001: a page tree from the brief's shape, Introduction,
+  Background, Guides, Examples, Reference. A source map per page, the
+  README section by section, the nav, the g4 and strict checks.
+  - The advice did not know the landing page is a hero, nor that example
+    pages are generated. Both kept as they are.
+  - Found: g4 reads `kitchen/docs/` at depth 1 only, so subfolder pages go
+    unchecked. No script runs `mkdocs build --strict`. The example and API
+    folders are in `.gitignore`.
+- The owner asked why a separate file and not plan 017. Claude: rules
+  Part 0, a big task gets its own versioned file; the plan is versioned at
+  stage close. The owner chose the name `docs-01-intent-NNN.md`.
+- Owner's answers to 001:
+  - The logo links to the first site page, as ztk's links to its
+    manifesto. The hero buttons go in a comment.
+  - An API docs nav entry, opening the Zig pages in a new tab. Tried in a
+    scratch copy: `apidocs/index.html` in the nav passes `--strict`. A nav
+    entry takes no target, so a small `new-tab.js`.
+  - Every snippet from working code. `pymdownx.snippets`, with sections
+    marked in `examples/` and `negative/`.
+  - README links: iterative. The bonus stays. Pages: add any that help.
+    Claude added `guides/choose`, `reference/words`, `reference/questions`.
+- Intent 002, with those. Three questions.
+- The owner said the wrong `@fieldParentPtr` is not Illegal Behavior.
+  Claude checked the 0.16.0 langref on disk: for a result type with
+  ill-defined layout, a plain struct, it is unchecked Illegal Behavior. The
+  owner chose to keep the wrong cast as written text. The wording of the
+  reason was fixed in 002, in place, at the owner's request.
+- Owner's answers to 002: all three checks (`--strict` in `build_site.sh`
+  and in CI, the `validation` block). The code before Paternitas: yes, but
+  off the example pages. Claude proposed `examples/before_paternitas.zig`,
+  unnumbered, with a `Page: none` line the generator skips. Agreed.
+- Intent 003 records it all. 001 and 002 are in `design/backup/`.
+- Plan 017: one line under "Completed stages"; DOCS 01 points to intent
+  003. 016 is in `design/backup/`. Live links repointed: STATUS, audit
+  report 003, design 014, intake 001, PTRN 01 and PTRN 02 intents.
+- Six gates pass.
+
+| step | result |
+|---|---|
+| Post-stage cleanup | none. The stage changed `.md` files under `design/` only |
+| banned-word scan | g4 clean on every changed file |
+| rules audit | one finding: intent 002 was edited in place for the wording fix, against "never overwrite a doc". Told the owner. 003 is a new version |
+
+Continue prompt:
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 01
+Model: Opus 5.5.
+
+---
+
 ## 2026-10-06 — The C unit test
 
 The owner said write the test from design 014, "C code: findings". Claude

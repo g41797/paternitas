@@ -16,6 +16,7 @@
 //!
 //! - Call `setTypeId` on a `Message` and a `Job`.
 //! - Append both Nodes to one `std.DoublyLinkedList`.
+//! - Ask with `is` whether the last Node is a `Job`.
 //! - Pop each Node.
 //! - Ask `Message` first, then `Job`, with `parentFromNode`.
 //! - Check that each type came back once.
@@ -28,6 +29,7 @@
 //!
 //! A Node that no type claims is an error you can see.
 
+// --8<-- [start:types]
 const Message: type = struct {
     text: []const u8,
     tnode: paternitas.DoublyTypedNode = .{},
@@ -40,6 +42,7 @@ const Job: type = struct {
     attempts: u32 = 0,
 };
 const TypedJob: type = paternitas.Typed(Job);
+// --8<-- [end:types]
 
 const Counts: type = struct {
     messages: usize = 0,
@@ -50,6 +53,7 @@ pub fn mixed_list(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
     _ = io;
 
+    // --8<-- [start:setup]
     var message: Message = .{ .text = "hello" };
     TypedMessage.setTypeId(&message);
 
@@ -60,12 +64,19 @@ pub fn mixed_list(allocator: std.mem.Allocator, io: std.Io) !void {
     list.append(TypedMessage.node(&message));
     list.append(TypedJob.node(&job));
 
+    // --8<-- [start:is]
+    const last: *std.DoublyLinkedList.Node = list.last orelse return error.ListEmpty;
+    if (!TypedJob.is(last)) return error.WrongParent;
+    // --8<-- [end:is]
+
     var counts: Counts = .{};
     while (list.popFirst()) |node| try recoverAndCount(node, &counts);
+    // --8<-- [end:setup]
 
     if (counts.messages != 1 or counts.jobs != 1) return error.WrongCount;
 }
 
+// --8<-- [start:recover]
 /// Asks each Parent type in turn. A Node that no type claims is an error.
 fn recoverAndCount(node: *std.DoublyLinkedList.Node, counts: *Counts) !void {
     if (TypedMessage.parentFromNode(node)) |m| {
@@ -80,6 +91,7 @@ fn recoverAndCount(node: *std.DoublyLinkedList.Node, counts: *Counts) !void {
     }
     return error.UnknownParent;
 }
+// --8<-- [end:recover]
 
 const paternitas = @import("paternitas");
 const std = @import("std");

@@ -46,6 +46,7 @@ const Job: type = struct {
 };
 const TypedJob: type = paternitas.Typed(Job);
 
+// --8<-- [start:stack]
 /// A last-in, first-out stack of `*Anchor`s. It allocates nothing.
 const Stack: type = struct {
     top: ?*paternitas.Anchor = null,
@@ -64,6 +65,7 @@ const Stack: type = struct {
         return a;
     }
 };
+// --8<-- [end:stack]
 
 pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = allocator;
@@ -74,6 +76,7 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
     var job: Job = .{ .id = 42 };
     TypedJob.setTypeId(&job);
 
+    // --8<-- [start:use]
     var stack: Stack = .{};
     try stack.push(TypedMessage.anchor(&message));
     try stack.push(TypedJob.anchor(&job));
@@ -83,6 +86,7 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
 
     const second: *paternitas.Anchor = try stack.pop() orelse return error.StackEmpty;
     const m: *Message = TypedMessage.parentFromAnchor(second) orelse return error.WrongOrder;
+    // --8<-- [end:use]
 
     if (try stack.pop() != null) return error.StackNotEmpty;
     if ((try chainWord(first)).* != null or (try chainWord(second)).* != null) return error.ChainWordLeft;
@@ -90,6 +94,7 @@ pub fn anchor_chain(allocator: std.mem.Allocator, io: std.Io) !void {
     std.log.info("popped job {d}, then message {s}", .{ j.*.id, m.*.text });
 }
 
+// --8<-- [start:chain]
 /// Returns the item's `next` field. This stack keeps a pointer to the next
 /// `*Anchor` in it.
 ///
@@ -98,6 +103,7 @@ fn chainWord(a: *paternitas.Anchor) !*?*paternitas.Anchor {
     const ti: *const paternitas.container.TypeInfo = a.info() orelse return error.NoTypeId;
     return @ptrCast(ti.nextField(a));
 }
+// --8<-- [end:chain]
 
 const paternitas = @import("paternitas");
 const std = @import("std");

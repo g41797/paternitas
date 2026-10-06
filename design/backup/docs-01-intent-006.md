@@ -1,0 +1,916 @@
+# DOCS 01 — intent (006)
+
+DOCS 01. 2026-10-06. The pages are written. This version adds the owner's
+rulings after the first review of the site.
+
+- Current state: [STATUS.md](STATUS.md).
+- The plan: [implementation-plan-017.md](implementation-plan-017.md), "DOCS 01". DOCS 01 PLAN is under "Completed stages".
+- The README before DOCS 01: [README.md](../README.md), the README 01 draft.
+- The long old README: [backup/README-001.md](backup/README-001.md).
+- The drafts: [backup/docs-01-intent-001.md](backup/docs-01-intent-001.md),
+  [backup/docs-01-intent-002.md](backup/docs-01-intent-002.md),
+  [backup/docs-01-intent-003.md](backup/docs-01-intent-003.md),
+  [backup/docs-01-intent-004.md](backup/docs-01-intent-004.md),
+  [backup/docs-01-intent-005.md](backup/docs-01-intent-005.md).
+
+Page names below have no `.md` ending, since the pages do not exist yet.
+
+## Change from 005
+
+The owner's third look at the site, 2026-10-06.
+
+- The Terms page title sounded official. It is now "Stuck on a word?".
+  The line under it: "Find it here. One line each, and the page that
+  explains it." The nav label stays "Terms".
+- The "What's NAQ?" block and its two lines moved to the very end of
+  `introduction`, under the heading "One more thing". The owner asked for a
+  title that is not serious. Claude chose it, and offered "Psst.", "Small
+  print" and "Before you go".
+
+## Change from 004, kept
+
+The owner's second look at the site, 2026-10-06.
+
+- The `api` page has no text. It has its title and two buttons.
+  - "Open in a new tab", the main button, with `target="_blank"`.
+  - "Open here", in the same tab. Back returns to the site.
+- "For a short scan" sounded like AI. It is gone, with the other phrases
+  of that kind: "a scan in thirty seconds", "in one place", "pays off",
+  "takes this further", "has the rest", "tells the rest", "has the
+  details". Each became a plain sentence.
+- `reference/words` is `reference/terms`. Nav "Terms". The title: "The
+  terms this site uses". Changed in 006.
+
+## Change from 003, kept
+
+The owner reviewed the site in a browser, 2026-10-06. Two rulings.
+
+- The API docs entry is the last item of the nav.
+  - It opens a site page, `api`: a short description, a line that says the
+    API docs open in another tab or window, and a button.
+  - The button opens `apidocs/index.html` in a new tab, through `attr_list`.
+  - `new-tab.js` has no job left. It is out of `mkdocs.yml`, and in
+    `design/backup/`.
+- No Questions page. NAQ blocks instead, in the style of the owner's tofu
+  site: `??? question "NAQ: ..."`, collapsed.
+  - Each NAQ sits right after the text it is about.
+  - `introduction` has one "What's NAQ?" block, from tofu's. Moved in 006.
+  - `pymdownx.details` is on.
+  - `reference/questions` is in `design/backup/`, as `design/backup/questions-001.md`.
+  - The old questions went to their pages. Three NAQs are new: why the
+    word Parent, why the type id is not in the std Node, why `Any` and not
+    `*anyopaque`. One more: why Paternitas cannot mark a new struct.
+
+The sections below are the 003 plan. Where they say `reference/questions`,
+`new-tab.js` or the API nav entry under Reference, this section wins.
+
+## Change from 002, kept
+
+The owner answered 002's three questions, 2026-10-06. Nothing is open.
+
+- The checks: all three. `--strict` in `build_site.sh`, the `validation`
+  block, `--strict` in `.github/workflows/docs.yml`.
+- The wrong cast and the install lines stay written text, marked as such.
+  The wording of the reason quotes the Zig langref.
+- The code before Paternitas: yes, as `examples/before_paternitas.zig`. No
+  number, no page, no nav entry. It was example 000 in 002.
+
+## Change from 001, kept
+
+The owner answered 001's six questions, 2026-10-06.
+
+- The hero: the logo links to the first site page, as ztk's links to its
+  manifesto. The buttons are commented out.
+- The API docs get a nav entry. It opens the Zig pages in a new tab.
+- Every Zig snippet on the site comes from working code: `examples/` and
+  `negative/`. Pulled in at build time.
+- Three new pages, for the reader: `guides/choose`, `reference/words`,
+  `reference/questions`.
+- README links: iterative, no ruling now.
+- Question 5 was explained. Answered in 003: all three checks.
+
+---
+
+## The owner's answers to 001
+
+1. The logo links to the start of the site pages, as in ztk: `ZTK/kitchen/docs/index.md`
+   links its logo to `manifesto/`. The hero buttons are commented out. They
+   may come back later. The examples and the API docs are part of the site.
+   The API entry opens the Zig pages in another tab.
+2. README links: an iterative process. No ruling now.
+3. The README bonus stays.
+4. All snippets come from working code: from the examples.
+5. Explained in the session. Open.
+6. The page count does not matter. Add a page when it helps the reader.
+
+## Inputs
+
+- The owner's brief, 2026-10-06. Its decisions are in the next section.
+- The owner's collected advice, paternitas-doc-site.md. What this plan takes
+  from it is in "The advice: taken, changed, dropped".
+- The README 01 draft, README-001, the `//!` and `///` in `src/`, the seven
+  examples, the ten negatives.
+
+## The owner's decisions
+
+From the brief:
+
+- The reader: a field specialist. Friendly, not academic.
+  - They may use the library later.
+  - Or they only want to know what it is.
+- The site is not limited by README length.
+- Lists first. Type ids on their own come second.
+- Background: solid, not deep. Taken from README-001. It comes after a short
+  announce, so the need is clear first.
+- Examples: a section of their own.
+  - Key snippets also go inside the guides.
+  - A link to a full example opens in a new tab.
+- The API reference on the site is light: tables and short snippets.
+  - Full signatures and `///` stay in the Zig API docs.
+- The shape: Introduction, Background, Guides, Examples, Reference.
+- The README sits halfway between a landing card and a medium README.
+  - The migration steps leave it. The site has them.
+
+Kept from README 01:
+
+- The code is the only source of truth. README and site both describe it.
+- Repetition is fine.
+- The same voice in new pages.
+- The logo does not change. No subtitle.
+
+## Facts the plan works around
+
+- The landing page is a hero: the logo, and buttons.
+  - It hides the navigation, the TOC, the path and the footer.
+  - It is not a prose page. It stays a hero.
+- `kitchen/docs/examples/` is generated by `gen_examples_docs.sh`.
+  - The script deletes the folder first. No hand-written page can live there.
+  - An example page changes only through its `.zig` file.
+- `kitchen/docs/examples/` and `kitchen/docs/apidocs/` are in `.gitignore`.
+  They exist after a site build.
+- `fix_md_hardbreaks.sh` adds hard breaks to staccato lines in `kitchen/docs/`.
+  New pages use the README voice: one sentence per line.
+- `check_docs.sh` (g4) reads `kitchen/docs/` at depth 1 only.
+  - A page in a subfolder is not checked for dead links.
+  - The banned-word scan already covers all of `kitchen/`, except
+    `kitchen/docs/examples/`.
+- No script runs `mkdocs build --strict`.
+  - `build_site.sh` and the CI docs job run a plain build.
+  - "Strict passes" in STATUS was a run by hand.
+- `attr_list` is on. A link in a page can carry
+  `{target="_blank" rel="noopener"}`. A nav entry cannot.
+- `navigation.instant` is on. Material loads a site link in place, without a
+  page load. The Zig API docs are not a Material page.
+- The examples follow the Zig style rules: `const Message: type = struct`,
+  `m.*.text`. A snippet taken from them looks like that, not like the
+  README's lighter snippets.
+
+---
+
+## The page tree
+
+```text
+kitchen/docs/
+  index                  the hero. Changed: logo link, buttons commented out
+  introduction           new. The logo links here
+  background/
+    intrusive            new
+    type-erased          new
+    parent-problem       new
+  guides/
+    choose               new. Which page you need
+    lists                new
+    set-type-id          new
+    mixed-list           new
+    any                  new
+    type-ids             new
+    containers           new
+  examples/              generated
+  reference/
+    calls                new
+    limits               new
+    words                new. The words, one line each
+    questions            new. Short answers
+    install              new
+    about                new
+  javascripts/
+    new-tab.js           new. The API nav entry opens a new tab
+```
+
+Seventeen new pages, one script. One page changed.
+
+Against the first cut in plan 016:
+
+| first cut | here |
+|---|---|
+| lists | `guides/lists`, `guides/set-type-id`, `guides/mixed-list` |
+| why | `background/intrusive`, `background/type-erased`, `background/parent-problem` |
+| containers | `guides/containers` |
+| limits | `reference/limits` |
+| type-ids | `guides/type-ids` |
+| name | `reference/about` |
+
+New against the first cut: `introduction`, `guides/choose`, `guides/any`,
+`reference/calls`, `reference/words`, `reference/questions`,
+`reference/install`.
+
+---
+
+## Each page
+
+Source words:
+
+- **copy**: the text goes to the site and stays in the README.
+- **move**: the text goes to the site and leaves the README, or shrinks there.
+- **from README-001**: README-001 is in `design/backup/`. Its text is taken,
+  tightened, with `AnyParent` written `Any`.
+- **new**: in neither README.
+- **snippet**: a Zig block pulled in from a file at build time. "Snippets"
+  below says how.
+
+### `index` — the hero
+
+Intent: one screen. The logo is the way in.
+
+Content:
+
+- The logo, unchanged. It links to `introduction/`.
+- The API and Examples buttons go inside an HTML comment, as the LOC badge
+  already is. They can come back later.
+- No prose. No subtitle. `hero-title` stays empty.
+- The logo's alt text says where it leads, as ztk's: "Paternitas — start
+  here".
+
+Source: the current page, and `ZTK/kitchen/docs/index.md`. No CSS change: the
+logo link already lifts on hover.
+
+### `introduction` — the announce
+
+Intent: what it is, who it is for, when you need it, when you do not.
+
+The reader leaves knowing whether to read on.
+
+Content:
+
+- One line: Paternitas makes Zig's intrusive, type-erased lists safer.
+- One line: and a runtime type id for any struct.
+- "You probably do not need it for your first linked list."
+  - The mailbox grows. The scheduler gets more job types.
+  - "What struct is this Node inside?"
+- Do you need it?
+  - No: one list, one struct type.
+  - Yes: one list mixes types, the code on the list should not know every
+    type, the Node comes from somewhere else, a bad cast would cost days.
+- "I know what this is" becomes "I hope I know what this is".
+- Where next:
+  - Intrusive and type-erased are new to you? Background.
+  - You know them? Which page you need.
+  - You only want type ids? Type ids on their own.
+
+Source:
+
+- copy: the README top, and "Do I need it?".
+- from README-001: the short yes and no of "Do you need it?". The opening,
+  "'Intrusive' and 'type-erased' sound scary? Do not leave", for the tone.
+- new: "Where next".
+
+No snippet. The page is prose.
+
+### `background/intrusive`
+
+Intent: what intrusive means. What you get, and what it costs.
+
+Content:
+
+- Non-intrusive against intrusive. The two text diagrams.
+- What you get:
+  - no allocation per item, so adding cannot fail;
+  - no copy, the struct stays at its address;
+  - a struct with a mutex, one that others point into, one too large to copy;
+  - remove from the middle in one call;
+  - move to another list without a copy.
+- What it costs:
+  - the list does not know your struct;
+  - `@fieldParentPtr` trusts you;
+  - the memory is yours. The list does not free it, and does not know when
+    it is gone.
+- From C: Linux's `list_head` with `container_of`. One line.
+
+Source:
+
+- from README-001: "Intrusive", whole. Its rows of the "Why intrusive and
+  type-erased" table: add, copy, pointer, mutex, remove, move.
+- move: README "Why intrusive lists at all?".
+- snippet: a plain std struct with its Node. From the new `examples/before_paternitas.zig`.
+
+### `background/type-erased`
+
+Intent: what type-erased gives you. The point to make: the infrastructure
+stays fixed.
+
+Content:
+
+- The list sees a Node. It never sees your Job.
+- One list serves every struct type.
+- The queue, the scheduler, the dispatcher never name your types.
+  - Add a struct type: that code does not change.
+  - Change a struct: that code does not change.
+- Against a tagged union: a new type is a new field, every `switch` handles
+  it, the container's type changes.
+- A small program does not show the difference. A large system does.
+- What it costs: the type is gone at the list.
+
+Source:
+
+- from README-001: "Type-erased", whole. Its row "the queue, scheduler,
+  dispatcher code".
+- move: README "Why not just use a tagged union?".
+- new: a few lines on stable infrastructure. Struct types change all the
+  time. The code built on the list is written once.
+- snippet: the `Event` union of example 005.
+
+### `background/parent-problem`
+
+Intent: the exact footgun, and what Paternitas changes. The bridge to the
+guides.
+
+Content:
+
+- Parent is Zig's word. `@fieldParentPtr` goes from a field to its parent.
+- Message and Job in one list. The wrong `@fieldParentPtr`.
+  - It compiles. It runs.
+  - A read gets another struct's bytes.
+  - A write breaks another struct: its mutex, its pointers, its length.
+  - The crash comes later, somewhere else. Or never.
+- The same with Paternitas: null, or a panic, "asked for Job, found Message".
+  In every build mode.
+- The side-by-side table, plain std list against Paternitas.
+- One line: the Ziggit post "New LinkedList API footgun".
+
+Source:
+
+- copy: README "The problem in one example".
+- from README-001: "Parent", "The problem", the price list under the recap
+  table, and the "Why Paternitas" table.
+- snippet: the plain list of `before_paternitas.zig`. The wrong cast is written text, one line. Owner's answer to 002, question 2.
+- snippet: `negative/panic/must_parent_from_node.zig`, and the panic text it
+  prints.
+
+### `guides/choose` — which page you need
+
+Intent: one table from the reader's case to the page and the example.
+
+Content:
+
+| your case | the calls | the page | the example |
+|---|---|---|---|
+| one std list, several struct types | `parentFromNode` | several types in one list | 002, 003 |
+| a std list where another type is a bug | `mustParentFromNode` | move your code | 001 |
+| a queue, a map or a union field | `toAny`, `fromAny` | queues, maps, union fields | 004, 005 |
+| a type id, no list at all | `typeId`, `isId` | type ids on their own | 007 |
+| your own container | `anchor`, `Anchor.info` | your own container | 006 |
+| one list, one known type | none | plain `@fieldParentPtr` is enough | none |
+
+Source: new. The cases come from README "Do I need it?" and the module
+`//!`.
+
+### `guides/lists` — move your code
+
+Intent: the day-one page. The five steps.
+
+Content:
+
+- The before and after diagram, the TypedNode box.
+- The five steps, each with before and after.
+- The five-step find and replace table.
+- What the compiler finds: steps 4 and 5.
+- What it does not: step 3. The panic says "found <no type>".
+- The four calls table, and `mustParentFromNode`.
+- Singly or doubly. The field name is free. One TypedNode per struct; a
+  second is a compile error.
+- What `Typed(P)` does for you: finds the field, does the `@fieldParentPtr`,
+  writes and checks the type id.
+- Link: example 001, new tab. `before_paternitas.zig` has no page.
+
+Source:
+
+- move: README "Move your code to Paternitas", "Singly or doubly linked?".
+- copy: README "The four calls".
+- from README-001: "Migrate your code", its table and notes. "The
+  TypedNode" and "`Typed(P)`".
+- The same diagram is in the root `//!` of `src/paternitas.zig`.
+- snippets: before from `before_paternitas.zig`, after from example 001. The second
+  TypedNode from `negative/compile/two_typed_nodes.zig`.
+
+### `guides/set-type-id` — the one rule
+
+Intent: the rule the compiler cannot check.
+
+Content:
+
+- Call it after you create the struct. Even when every field has its default.
+- Call it again after a whole-struct write: an assignment, a reset, a clear,
+  a zero-fill.
+- A field write keeps the type id.
+- Forgot it?
+  - `parentFromNode` gives null.
+  - `mustParentFromNode` panics: "found <no type>".
+  - `anchor.info()` gives null.
+- Your own container: before the Parent enters it.
+
+Source:
+
+- copy: README "One important rule".
+- from README-001: the `setTypeId` bullets, "Reset?".
+- The `///` on `setTypeId` and `Anchor.info`.
+- new: the Anchor and container lines.
+- snippets: create and mark from example 001. The reset: a few lines added
+  to example 001, which checks the type id before and after.
+
+### `guides/mixed-list` — several types in one list
+
+Intent: the main use.
+
+Content:
+
+- The program, and what it prints.
+- Ask each type in turn.
+- A Node that no type claims is an error you can see: `error.UnknownParent`.
+- `is(node)` when you only need to know.
+- The loop knows the types. The list does not.
+- Links: examples 002 and 003, new tab.
+
+Source:
+
+- copy: README "Several types in one list", for the text.
+- from README-001: the one-Node handler with `return error.UnknownParent`.
+- snippets: example 002, `recoverAndCount` and the setup. `is(node)` from
+  003 or a line added to 002.
+
+### `guides/any` — queues, maps, union fields
+
+Intent: carry a struct through other type-erased code, without a copy.
+
+Content:
+
+- `Any` is the address and the type id. No copy of the struct.
+- `toAny` and `fromAny`.
+- A handler map keyed by `TypeId`. The dispatch never names a type.
+- A large struct in a union field.
+- The struct must stay alive.
+- It works for a struct without a TypedNode too. Next page.
+- Links: examples 004 and 005, new tab.
+
+Source:
+
+- move: README "Passing structs through other type-erased code".
+- The `///` on `Any`, `toAny`, `fromAny`.
+- snippets: examples 004 and 005.
+
+### `guides/type-ids` — type ids on their own
+
+Intent: the second use, in full. No list, no Node.
+
+Content:
+
+- Zig's `type` lives only at compile time. At run time, an address.
+- `Typed(P)` takes any struct.
+- The four calls table. `toAny`, `fromAny`, `isId`. The handler map.
+- No allocation. No registry. No init call.
+- The rules:
+  - structs only, wrap any other value in a struct;
+  - the type id travels next to the pointer, in `Any`;
+  - a bare pointer carries no type id;
+  - one running program. Do not save it or send it.
+- What the compiler stops:
+  - a list call on a struct without a TypedNode;
+  - `Typed(u32)`.
+- Link: example 007, new tab.
+
+Source:
+
+- copy: README "Bonus: for the curious and the brave", for the text.
+- Design 014, "Type ids on their own".
+- snippets: example 007. `negative/compile/bare_node.zig` and
+  `negative/compile/not_struct.zig`, with the messages from `src/paternitas.zig`.
+  DOCS 01 checks which negative gives which message.
+
+### `guides/containers` — your own container
+
+Intent: for the reader who writes a stack, a pool or a queue of mixed types.
+
+Content:
+
+- When you need it, and when a std list or an `Any` is enough.
+- `Anchor`: a one-word handle to a Parent.
+- `TypedJob.anchor(&job)` in, `TypedJob.parentFromAnchor(a)` out.
+- `anchor.info()` gives a `TypeInfo`: `nextField`, `node`, `parent`, `toAny`.
+- The stack push.
+- One container can mix `SinglyTypedNode` and `DoublyTypedNode` structs.
+- The rules:
+  - `setTypeId` before the Parent enters;
+  - not in your container and a std list at the same time;
+  - your container owns the meaning of the next word;
+  - the Parent stays alive while you keep its Anchor;
+  - no lock.
+- Link: example 006, new tab.
+
+Source:
+
+- move: README "Writing your own container?".
+- copy: the `//!` of `src/container.zig`, for the text. The `///` on
+  `Anchor` and `TypeInfo`.
+- from README-001: "Advanced topics", the mixed-node line.
+- snippets: example 006.
+
+### `reference/calls` — all the calls
+
+Intent: a scan in thirty seconds. Signatures are in the API docs.
+
+Content:
+
+- The types: `TypedNode(N)`, `SinglyTypedNode`, `DoublyTypedNode`, `STNode`,
+  `DTNode`, `Typed(P)`, `TypeId`, `Any`, `Anchor`, `TypeInfo`, `container`.
+  One line each.
+- The calls of `Typed(P)`, in two tables:
+  - every struct: `typeId`, `isId`, `toAny`, `fromAny`;
+  - a struct with a TypedNode: `setTypeId`, `node`, `parentFromNode`,
+    `mustParentFromNode`, `is`, `anchor`, `parentFromAnchor`, and the rest.
+- The calls of `Anchor` and `TypeInfo`.
+- Each table row names the example that uses the call.
+- A link to the API docs, new tab.
+
+Source:
+
+- from README-001: "All the calls, at a glance".
+- copy: the README tables.
+- The `pub` declarations in `src/`. DOCS 01 checks every name there.
+- new: the split by "every struct" and "with a TypedNode". The example
+  column.
+
+No snippet. Tables only.
+
+### `reference/limits`
+
+Intent: the hard rules in one place.
+
+Content:
+
+- What it does not do: no list, queue or pool, no allocator, no free, no
+  lock.
+- It checks the type, not the lifetime.
+- Shared access is yours to guard.
+- The type-id boundary: one running program, no save, no send. A shared
+  library has its own type ids.
+- What the compiler stops: the `@compileError` texts, each with one line on
+  when, and the negative that shows it.
+- What the program stops at run time: the five panic negatives, one line
+  each.
+- What neither can stop: a missing `setTypeId`.
+
+Source:
+
+- copy: README "What Paternitas does not do", "Type ids have a boundary".
+- from README-001: "What Paternitas does not do".
+- The `@compileError` and panic strings in `src/paternitas.zig`.
+- `negative/compile/` and `negative/panic/`.
+- new: the compile and panic lists in one place.
+
+### `reference/words` — the words
+
+Intent: one line per word, for the reader who meets a word on another page.
+
+Content: intrusive, type-erased, Node, Parent, TypedNode, `Typed(P)`, type
+id, `TypeId`, `Any`, `Anchor`, `TypeInfo`, `setTypeId`. Each with a link to
+the page that explains it.
+
+Source: README "Three words first". The first lines of the `///` in `src/`.
+New as a page.
+
+### `reference/questions` — short answers
+
+Intent: the questions a specialist asks before adopting it. One to three
+lines each, with a link.
+
+Content, the first set:
+
+- What does a check cost? One pointer compare.
+- Does it check in ReleaseFast? Yes, every build mode.
+- Does it allocate? No.
+- Is it thread-safe? It locks nothing. Guard a shared list yourself.
+- Does my std list change? No. Same type, same calls.
+- Can I use my own list? Yes, see your own container.
+- Why not a tagged union? See type-erased lists.
+- Can I save or send a type id? No.
+- Does it work across a shared library? No, each has its own type ids.
+- What about a value that is not a struct? Wrap it in a struct.
+- Which Zig? 0.16.0. `std` only.
+
+Source: from README-001: the "Why Paternitas" table, the cost row. The README
+"Type ids have a boundary". New as a page. Each answer is checked against
+`src/` in DOCS 01.
+
+### `reference/install`
+
+Intent: copy, paste, build.
+
+Content: `zig fetch --save`, the `build.zig` lines, the import. Zig 0.16.0.
+`std` only.
+
+Source: copy README "Install". From README-001 its fuller words: the fetch
+writes the dependency into `build.zig.zon`; the lines go after your `exe`.
+
+Not a snippet. It is shell and build lines, not a program. Owner's answer to 002, question 2.
+
+### `reference/about` — name and origin
+
+Intent: the name, where it came from, the credits.
+
+Content:
+
+- The name, in full: Latin for "fatherhood", affirmatio and investigatio
+  paternitatis, the joke note.
+- Where it came from: the footgun post, Matryoshka, otk, 3tk, ztk.
+- Credits.
+
+Source:
+
+- from README-001: "Why the name", whole. Its two one-line code blocks come
+  from example 001.
+- copy: README "Why the name?", "Where it came from", "Credits".
+
+---
+
+## The API entry
+
+- The nav gets "API docs" under Reference, pointing to `apidocs/index.html`.
+  - Tried in a scratch copy, 2026-10-06: `mkdocs build --strict` passes. The
+    link comes out as `apidocs/`, relative to each page.
+- A nav entry takes no `target`. So `javascripts/new-tab.js`, a few lines,
+  in `extra_javascript`.
+  - It gives every link to `apidocs/` `target="_blank"` and
+    `rel="noopener"`.
+  - It runs on each page change, through Material's `document$`, since
+    `navigation.instant` swaps pages without a load.
+  - Without it, instant loading would try to load the Zig pages in place.
+- The page links to the API docs (`reference/calls`, the guides) carry the
+  `attr_list` target too. They work without the script.
+
+## Snippets
+
+Every Zig block on the site comes from a file that builds and runs.
+
+- `pymdownx.snippets` pulls a named section of a file into a page at build
+  time.
+  - A section is marked in the `.zig` file by two comment lines, a start and
+    an end, each holding the section name.
+  - The page names the file and the section.
+  - `base_path` is the repo root. `check_paths: true`: a missing file or
+    section stops the build.
+  - `dedent_subsections: true`: a section inside a function comes out without
+    its indent.
+- `gen_examples_docs.sh` drops the marker lines from the example pages.
+  The `.zig` files keep them. `src/` gets none.
+- The marker lines are comments. They change no behaviour. g5 (`zig fmt`)
+  checks them as any comment.
+- New code, so the guides have working code to quote:
+  - `examples/before_paternitas.zig`: a plain std list, a plain Node, a
+    plain `@fieldParentPtr` on the right type. The code you start from.
+    - No number. The numbered examples are the published set.
+    - Its `//!` holds the line `Page: none`. `gen_examples_docs.sh` skips a
+      file with that line, as it skips the barrel. No page, no nav entry.
+    - It keeps the test wrapper and runs in the gates, as every example.
+    - The guides pull its sections. Strict catches a broken one.
+  - Example 001: the whole-struct reset and `setTypeId` again, checked.
+  - Example 002 or 003: an `is(node)` line, if neither has one.
+  - Each is code. It passes the gates as code.
+- The negatives give the compile errors and the panics.
+  - A negative program is quoted as a snippet.
+  - Its message is quoted from the gate's log, `zig-out/g6_negative.log`,
+    by hand. A message changes only when `src/` changes.
+- Not snippets: shell lines, `build.zig` lines, text diagrams, panic and
+  error text. Owner's answer to 002, question 2.
+
+## Links
+
+- A guide links to an example with the usual relative `.md` link, then
+  `{target="_blank" rel="noopener"}`.
+- Other links inside the site open in the same tab.
+- The API docs always open in a new tab.
+
+## The nav
+
+```yaml
+nav:
+  - Home: index.md
+  - Introduction: introduction.md
+  - Background:
+      - Intrusive lists: background/intrusive.md
+      - Type-erased lists: background/type-erased.md
+      - The Parent problem: background/parent-problem.md
+  - Guides:
+      - Which page you need: guides/choose.md
+      - Move your code: guides/lists.md
+      - The setTypeId rule: guides/set-type-id.md
+      - Several types in one list: guides/mixed-list.md
+      - Queues, maps, union fields: guides/any.md
+      - Type ids on their own: guides/type-ids.md
+      - Your own container: guides/containers.md
+  - Examples:
+      - examples/001-set_type_id_and_recover.md
+      - examples/002-mixed_list.md
+      - examples/003-timeout_list.md
+      - examples/004-handler_map.md
+      - examples/005-large_struct_in_union.md
+      - examples/006-anchor_chain.md
+      - examples/007-type_id_without_node.md
+  - Reference:
+      - All the calls: reference/calls.md
+      - API docs: apidocs/index.html
+      - Limits: reference/limits.md
+      - Words: reference/words.md
+      - Questions: reference/questions.md
+      - Install: reference/install.md
+      - Name and origin: reference/about.md
+```
+
+No new theme features. `navigation.tabs` would put tabs on the hero too. Not
+taken.
+
+---
+
+## The README after DOCS 01
+
+A section shrinks only when its page is written. The owner's review of the
+README 01 draft comes first. Links from the README to the site are worked out
+with the owner, as the pages appear.
+
+The README keeps its own snippets. They were compiled and run in README 01.
+
+| README section | fate | site page |
+|---|---|---|
+| logo, badges, the two top lines | stays | `index` |
+| "You probably do not need it…" | stays | `introduction` |
+| Three words first | stays | `background/*`, `reference/words` |
+| The problem in one example | stays | `background/parent-problem` |
+| Do I need it? | stays | `introduction`, `guides/choose` |
+| Move your code to Paternitas | leaves | `guides/lists` |
+| The four calls | stays | `guides/lists`, `reference/calls` |
+| Singly or doubly linked? | shrinks: the two field lines, one TypedNode per struct | `guides/lists` |
+| One important rule | stays | `guides/set-type-id` |
+| Why not just use a tagged union? | shrinks to a few lines | `background/type-erased` |
+| Why intrusive lists at all? | shrinks to a few lines | `background/intrusive` |
+| Several types in one list | stays | `guides/mixed-list` |
+| Passing structs through other type-erased code | shrinks to `toAny` and `fromAny`. The handler map leaves | `guides/any` |
+| Writing your own container? | shrinks to two lines | `guides/containers` |
+| What Paternitas does not do | stays | `reference/limits` |
+| Type ids have a boundary | stays | `reference/limits` |
+| A quick comparison | stays | `background/parent-problem` |
+| Bonus: for the curious and the brave | stays. Owner's answer | `guides/type-ids` |
+| Install | stays | `reference/install` |
+| Why the name? Where it came from. Credits | stay | `reference/about` |
+
+---
+
+## What is new
+
+In neither README today:
+
+- `introduction`: "Where next".
+- `guides/choose`: the table from case to page.
+- `background/type-erased`: the stable-infrastructure lines.
+- `guides/set-type-id`: the Anchor and container cases.
+- `guides/type-ids`: the `Typed(u32)` message.
+- `reference/calls`: the split by "every struct" and "with a TypedNode", and
+  the example column.
+- `reference/limits`: the compile and panic lists in one place.
+- `reference/words`, `reference/questions`: new pages.
+- `examples/before_paternitas.zig`, the code before Paternitas. No page.
+- The hero: the logo leads into the site.
+
+---
+
+## How g4 and strict check the new pages
+
+All three, owner's answer to 002, question 1.
+
+1. `check_docs.sh`: read `kitchen/docs/` at every depth, except `examples/`
+   and `apidocs/`.
+   - Then a dead link in `guides/`, `background/` or `reference/` is a hit.
+   - A relative link resolves from the page's own folder. The script tries
+     that folder first.
+   - A link into `examples/` or `apidocs/` is skipped by g4. Those folders
+     are in `.gitignore`, so on a fresh clone they do not exist before a site
+     build. Strict checks them.
+2. `build_site.sh`: `mkdocs build --strict`. A warning stops the build.
+3. `kitchen/mkdocs.yml`: a `validation` block, so a missing anchor and an
+   unknown link are warnings too:
+
+   ```yaml
+   validation:
+     omitted_files: warn
+     absolute_links: warn
+     unrecognized_links: warn
+     anchors: warn
+   ```
+
+4. The CI docs job, `.github/workflows/docs.yml`: the same `--strict`.
+5. mkdocs does not join the gates. It may not be on the path where the gates
+   run. DOCS 01 runs `build_site.sh` and the headless Chrome check, as LOOK 02
+   did.
+
+---
+
+## Order of work in DOCS 01
+
+1. The checks: g4 at every depth, `--strict` in `build_site.sh` and in CI, the
+   `validation` block. Gates and a site
+   build pass on the current site.
+2. The hero: the logo link, the buttons in a comment.
+3. `pymdownx.snippets`, the marker filter in `gen_examples_docs.sh`,
+   `new-tab.js`, the API nav entry. One test page pulls one snippet. The
+   strict build passes.
+4. `before_paternitas.zig`, its skip line, and the lines added to 001 and
+   002. The gates pass.
+5. The nav and the pages, each with only its intent line.
+6. Guides first: `lists`, `set-type-id`, `mixed-list`. They hold what leaves
+   the README.
+7. Background, from README-001.
+8. `any`, `type-ids`, `containers`, `choose`.
+9. Reference.
+10. `introduction` last. The logo points to it, and it points to every
+    section.
+11. The README trims, one section per written page, after the owner's README
+    review.
+12. One read as a newcomer: hero, introduction, background, which page you
+    need, move your code, example 002. Fix where the tone is heavy.
+13. Gates, `build_site.sh`, headless Chrome on every new page, the
+    banned-word scan.
+
+Model: Opus 5.5. The stage writes text in the owner's voice, and new example
+code.
+
+---
+
+## The advice: taken, changed, dropped
+
+Taken:
+
+- the five-part shape, the background pages, the split of the guides;
+- the examples as their own section, opened in a new tab;
+- the light reference;
+- the stable-infrastructure lines, the compiler-message examples;
+- its "do not add" list: no reflection story, no registry story, no history
+  of type ids, no new logo story.
+
+Changed:
+
+- Home. The advice wants a prose page: a snippet, links, install. The landing
+  page is a hero and stays one. The logo leads in. The prose goes to
+  `introduction`.
+- "Add 007 if not present." It is there. Example pages are generated, never
+  written by hand.
+- "When you do not need it", a page of its own. Folded into `introduction`
+  and `guides/choose`.
+- "API overview" is `reference/calls`. Its list of calls was not checked
+  against `src/`. DOCS 01 checks each name.
+- The source "proposal 002 rulings". That file is in `design/backup/`, not a
+  source of truth. Design 014, "Type ids on their own", instead.
+- The README keep-list. Replaced by the table above, section by section,
+  against the real README.
+
+Dropped:
+
+- The optional logo subtitle. The owner ruled: no subtitle.
+- Merging `any` into `type-ids`. `Any` serves structs with a TypedNode too,
+  examples 004 and 005. It comes before the type-ids page.
+
+---
+
+## The owner's answers to 002
+
+All three answered, 2026-10-06. Nothing is open.
+
+1. The checks: all three. `--strict` in `build_site.sh`, the `validation`
+   block, and `--strict` in `.github/workflows/docs.yml`.
+2. What cannot be working code stays written text, marked as such:
+   - the wrong `@fieldParentPtr`, Message read as Job, one line next to the
+     snippet of `before_paternitas.zig`;
+   - the install lines: shell, and `build.zig` of a user's project.
+
+   The reason, for the wrong cast:
+
+   - The Zig 0.16.0 langref, `@fieldParentPtr`: when the pointer is not
+     that field of an instance of the result type, and the result type has
+     ill-defined layout, it is unchecked Illegal Behavior.
+   - Message and Job are plain structs, so their layout is ill-defined.
+   - Unchecked: no build mode catches it. Illegal Behavior: the optimizer
+     may assume it never happens. So no test can assert what it does.
+   - In practice it subtracts an offset. The program runs on with wrong
+     data, or fails later. That is the footgun story.
+   - An `extern struct` would make the cast defined. Not taken: the
+     snippet would no longer match the README's plain structs.
+3. The code before Paternitas: yes. `examples/before_paternitas.zig`, with
+   no number, no page and no nav entry. The owner asked to keep it off the
+   example pages. Claude agreed: the Examples section shows how to use
+   Paternitas, and readers copy from it.

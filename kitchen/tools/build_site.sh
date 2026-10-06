@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # build_site.sh
-# Generates Zig autodocs then builds the full MkDocs static site.
+# Generates Zig autodocs then builds the full MkDocs static site, in strict
+# mode: a warning stops the build.
 # Output goes to docs/ (repo root). Run from anywhere.
 
 set -e
@@ -28,7 +29,7 @@ bash "$TOOLS_DIR/fix_md_hardbreaks.sh"
 
 echo "--- Building MkDocs site ---"
 cd "$KITCHEN_DIR"
-mkdocs build -f mkdocs.yml
+mkdocs build --strict -f mkdocs.yml
 
 echo "--- Removing unused Material default favicon ---"
 rm -f "$(dirname "$KITCHEN_DIR")/docs/assets/images/favicon.png"

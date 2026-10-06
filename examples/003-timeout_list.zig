@@ -79,6 +79,7 @@ pub fn timeout_list(allocator: std.mem.Allocator, io: std.Io) !void {
     try checkOrder(&timeouts, &.{ 1, 3, 2 });
 }
 
+// --8<-- [start:queue]
 /// Takes the connection out of the list. Sends its `Any` through the
 /// queue.
 fn removeAndSend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io, c: *Connection) !void {
@@ -97,6 +98,7 @@ fn receiveAndAppend(timeouts: *std.DoublyLinkedList, queue: *Queue, io: std.Io) 
 
     std.log.info("connection {d} is back, deadline {d}", .{ c.*.id, c.*.deadline });
 }
+// --8<-- [end:queue]
 
 fn checkOrder(timeouts: *const std.DoublyLinkedList, expected: []const u32) !void {
     var i: usize = 0;

@@ -55,12 +55,14 @@ const Handler: type = *const fn (parent: *anyopaque, counts: *Counts) void;
 pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     _ = io;
 
+    // --8<-- [start:register]
     var handlers: std.AutoHashMap(paternitas.TypeId, Handler) = .init(allocator);
     defer handlers.deinit();
 
     // Register the handlers. The dispatch below never names a type.
     try handlers.put(TypedMessage.typeId(), onMessage);
     try handlers.put(TypedJob.typeId(), onJob);
+    // --8<-- [end:register]
 
     var message: Message = .{ .text = "hello" };
     TypedMessage.setTypeId(&message);
@@ -83,6 +85,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     try checkFromAny(&message);
 }
 
+// --8<-- [start:dispatch]
 /// Picks the handler by type id. No struct type appears here.
 fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), any: paternitas.Any, counts: *Counts) void {
     const h: Handler = handlers.get(any.type_id) orelse {
@@ -92,6 +95,7 @@ fn dispatch(handlers: *const std.AutoHashMap(paternitas.TypeId, Handler), any: p
     };
     h(any.ptr, counts);
 }
+// --8<-- [end:dispatch]
 
 /// `fromAny` checks the type id first. Asking for another type gives null.
 fn checkFromAny(message: *Message) !void {
@@ -100,6 +104,7 @@ fn checkFromAny(message: *Message) !void {
     if (TypedJob.fromAny(any) != null) return error.WrongParent;
 }
 
+// --8<-- [start:handler]
 // The cast has no check. The map matched the type id, so the type is
 // right.
 fn onMessage(parent: *anyopaque, counts: *Counts) void {
@@ -107,6 +112,7 @@ fn onMessage(parent: *anyopaque, counts: *Counts) void {
     std.log.info("message: {s}", .{m.*.text});
     counts.*.messages += 1;
 }
+// --8<-- [end:handler]
 
 fn onJob(parent: *anyopaque, counts: *Counts) void {
     const j: *Job = @ptrCast(@alignCast(parent));

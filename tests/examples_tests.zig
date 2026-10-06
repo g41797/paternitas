@@ -1,5 +1,17 @@
 //! Test wrappers. Each one runs an example and checks it returned.
 
+test "00 - before paternitas" {
+    std.testing.log_level = .debug;
+
+    var threaded: std.Io.Threaded = .init(std.testing.allocator, .{});
+    defer threaded.deinit();
+
+    examples.before_paternitas.before_paternitas(std.testing.allocator, threaded.io()) catch |err| {
+        std.log.err("before_paternitas failed: {s}", .{@errorName(err)});
+        return err;
+    };
+}
+
 test "01 - set type id and recover" {
     std.testing.log_level = .debug;
 

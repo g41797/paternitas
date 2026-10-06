@@ -29,6 +29,7 @@
 //!
 //! The `Download` MUST stay alive while its event is in use.
 
+// --8<-- [start:event]
 /// It is too large to copy. Events carry its address and type id.
 const Download: type = struct {
     tnode: paternitas.SinglyTypedNode = .{},
@@ -42,6 +43,7 @@ const Event: type = union(enum) {
     resize: Size,
     parent: paternitas.Any,
 };
+// --8<-- [end:event]
 
 const Size: type = struct {
     width: u16,
@@ -77,11 +79,13 @@ fn handle(e: Event) !void {
     switch (e) {
         .tick => |t| std.log.info("tick {d}", .{t}),
         .resize => |s| std.log.info("resize {d}x{d}", .{ s.width, s.height }),
+        // --8<-- [start:handle]
         .parent => |any| {
             const d: *Download = TypedDownload.fromAny(any) orelse return error.UnknownParent;
             d.*.received += 1;
             std.log.info("download, {d} bytes of buffer", .{d.*.buffer.len});
         },
+        // --8<-- [end:handle]
     }
 }
 
