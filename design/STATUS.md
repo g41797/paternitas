@@ -72,12 +72,14 @@ Current state only. Updated in place. The narrative is in
   - Each new iteration is copied to `design/backup/`, from README-005 on.
   - A new MUST rule: text cut from the README or a site page stays on the
     site. [rules-014.md](rules-014.md), Part 0.
-  - Done: the setup, iterations 1 to 4, and a fix to "Where it came
+  - Done: the setup, iterations 1 to 5, and a fix to "Where it came
     from". Copies: `design/backup/README-005.md` to
-    `design/backup/README-009.md`.
-  - "What you get" says "The code is shorter than this README". g4 checks
-    it: it fails when the code is not shorter, and names both counts.
-  - Waits: the owner reads iteration 4.
+    `design/backup/README-010.md`.
+  - The top block says "The code is shorter than this README", as its own
+    line (iteration 5). "What you get" ends at "Tools for writing your own
+    container". g4 checks the claim: it fails when the code is not
+    shorter, and names both counts. 189 against 201.
+  - Waits: the owner reads iteration 5.
 - DOCS 01 is closed, 2026-10-07. The pages were written 2026-10-06. The plan
   was [docs-01-intent-009.md](docs-01-intent-009.md). Its step 11, the README
   trims, moved to README 02.
@@ -219,7 +221,7 @@ Current state only. Updated in place. The narrative is in
 
 1. DOCS 02: the owner's look goes on, then the stage closes.
    [docs-02-intent-005.md](docs-02-intent-005.md).
-2. README 02: the owner reads iteration 4, README-009. The plan:
+2. README 02: the owner reads iteration 5, README-010. The plan:
    [implementation-plan-021.md](implementation-plan-021.md), "README 02".
 3. The last state: six gates pass, 27 tests, the strict site build passes,
    2026-10-07. The owner commits and pushes.

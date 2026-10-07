@@ -4,6 +4,36 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-07 — README iteration 5: the size claim moves to the top
+
+The owner: move "The code is shorter than this README" to the very
+beginning. Keep the phrase.
+
+- `README.md`, the top block: a new line between "safer" and the bonus
+  line: "The code is shorter than this README."
+- "What you get": the owner found the end too much. Cut: the "Tiny"
+  bullet, "It checks the type.", "Lifetime and locking stay yours."
+  - The line count: the front page, `index.md`, the hero badge.
+  - The type, not the lifetime: `reference/limits.md`, "The type, not the
+    lifetime"; `guides/any.md`.
+  - Lifetime and locking: `background/parent-problem.md`, the "Side by
+    side" table.
+- The phrase is kept word for word, so g4 check 3 still runs.
+- The copy: `design/backup/README-010.md`.
+- Six gates pass. g4: code 189 lines, README 201 lines.
+- The preview server is stopped.
+- For the commit: add the new `design/backup/README-010.md`. The notes in
+  the entry below still hold.
+
+Continue prompt, unchanged except the iteration:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner's look goes on; README 02 waits for iteration 5
+```
+
+---
+
 ## 2026-10-07 — session end, the owner commits and pushes
 
 State:
