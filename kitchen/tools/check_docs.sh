@@ -2,11 +2,14 @@
 # Gate for paternitas' documents and code. It comes from next/ztk's
 # check_next_docs.sh.
 #
-# Two checks:
+# Three checks:
 #
 #   1. Dead cross-references, in both syntaxes — [text](target.md) and
 #      `target.md`.
 #   2. Banned and AI-sh words, from design/rules-NNN.md Part 4.
+#   3. The README's size claim. While README.md says "The code is shorter
+#      than this README", the code must be shorter: count_src_loc.sh against
+#      count_readme_loc.sh.
 #
 # Exit 0 when clean, 1 on any hit. Read-only — reports, never edits.
 #
@@ -186,6 +189,20 @@ for w in "${banned[@]}" "${banned_forms[@]}" "${banned_phrases[@]}"; do
         | grep -vF "$banned_skip" | grep -v "^$repo_root/kitchen/docs/examples/" \
         | sed "s|^$repo_root/||")
 done
+
+echo "== 3. the README's size claim =="
+
+size_claim="The code is shorter than this README"
+if grep -qF "$size_claim" "$repo_root/README.md"; then
+    code_lines=$(bash "$repo_root/kitchen/tools/count_src_loc.sh")
+    readme_lines=$(bash "$repo_root/kitchen/tools/count_readme_loc.sh" "$repo_root/README.md")
+    echo "  code $code_lines lines, README $readme_lines lines"
+    if [ "$code_lines" -ge "$readme_lines" ]; then
+        report "SIZE CLAIM README.md says \"$size_claim\", but the code has $code_lines lines and the README $readme_lines"
+    fi
+else
+    echo "  README.md makes no size claim"
+fi
 
 echo
 if [ "$hits" -eq 0 ]; then

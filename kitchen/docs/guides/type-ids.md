@@ -1,4 +1,4 @@
-# Type ids on their own
+# Type ids, listless and nodeless
 
 No list here.
 
@@ -16,10 +16,17 @@ At run time, a value of unknown type is just an address.
 
 Callbacks, queues and handler maps pass such addresses around. Each one needs to know what is behind the address.
 
-Paternitas gives any struct a runtime type id.
+*Paternitas* gives any struct a runtime type id.
 
 - `Typed(P)` takes any struct.
 - The struct needs no TypedNode.
+
+??? question "NAQ: What about a value that is not a struct?"  
+    Wrap it in a struct.
+
+    `const Count = struct { value: u64 };` is enough.
+
+    `Typed(Count)` then gives it a type id.
 
 ---
 
@@ -75,19 +82,12 @@ The full program is [example 007](../examples/007-type_id_without_node.md){targe
 - A bare pointer carries no type id.
 - The type id is for one running program. Do not save it or send it.
 
-??? question "NAQ: Can I save or send a type id?"  
-    No.
+??? question "NAQ: Why can I not save or send a type id?"  
+    A type id is an address inside your running program.
 
-    It is valid only inside one running program.
+    Another run puts it somewhere else. Another program has its own.
 
-    Another run, or another program, may give other values.
-
-??? question "NAQ: What about a value that is not a struct?"  
-    Wrap it in a struct.
-
-    `const Count = struct { value: u64 };` is enough.
-
-    `Typed(Count)` then gives it a type id.
+    So it means something only inside one run of one program.
 
 ---
 

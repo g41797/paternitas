@@ -189,7 +189,6 @@ Paternitas is for the moment when "I know what this is" becomes "I hope I know w
 - Several struct types in one list, each one checked.
 - The compiler stops the easy mistakes, like two TypedNodes in one struct.
 - Tools for writing your own container.
-- Tiny. The code is shorter than this README. The doc site's front page shows the exact line count.
 
 It checks the type.
 

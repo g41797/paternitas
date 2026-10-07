@@ -14,6 +14,29 @@ And a bonus at the end: a runtime type id for any struct. No list, no Node.
 
 ---
 
+
+You probably do not need it for your first linked list.
+
+You may want it when the list becomes part of a real system:
+
+- A mailbox grows.
+- A scheduler gets more job types.
+- A dispatcher starts passing different structs through the same list.
+
+Then you pop a `Node`.
+
+And you have a small problem:
+
+**What struct is this Node inside?**
+
+The std list does not know.
+
+---
+
+_Paternitas_ gives you an **answer**.
+
+---
+
 ## Three words first
 
 **Intrusive.**
@@ -152,17 +175,9 @@ Your std list stays your std list.
 
 ## Do I need it?
 
-You probably do not need it for your first linked list.
+Probably not for every intrusive list.
 
 If your list has only `Job`, and everybody knows it contains `Job`, use the plain std list.
-
-You may want it when the list becomes part of a real system:
-
-- a mailbox grows,
-- a scheduler gets more job types,
-- a dispatcher starts passing different structs through the same list.
-
-Then you pop a `Node`, and the std list does not know what struct it is inside.
 
 Use Paternitas when:
 
@@ -173,6 +188,14 @@ Use Paternitas when:
 - a bad cast would turn into a very long debugging session.
 
 The last one is a perfectly respectable reason.
+
+Typical examples:
+
+- a mailbox with different message types,
+- a scheduler with different job types,
+- a dispatcher,
+- a generic intrusive container,
+- infrastructure that passes application structs without knowing their concrete type.
 
 Paternitas is for the moment when "I know what this is" becomes "I hope I know what this is".
 
@@ -189,7 +212,6 @@ Paternitas is for the moment when "I know what this is" becomes "I hope I know w
 - Several struct types in one list, each one checked.
 - The compiler stops the easy mistakes, like two TypedNodes in one struct.
 - Tools for writing your own container.
-- Tiny. The code is shorter than this README. The doc site's front page shows the exact line count.
 
 It checks the type.
 
@@ -199,17 +221,7 @@ Lifetime and locking stay yours.
 
 ## Want to know more?
 
-The doc site has more:
-
-- what "intrusive" and "type-erased" really mean
-- how one wrong cast can cost you a weekend of debugging
-  - and how to save that weekend
-- how to migrate your code
-- why not just a tagged union
-- how to pass structs through queues and maps
-- how to write your own intrusive container
-- the API reference
-- working examples
+Moving your code step by step, singly or doubly linked lists, why not a tagged union, passing structs through queues and maps, the one `setTypeId` rule, writing your own container, the limits, every call, and seven examples you can run: it is all on the doc site.
 
 ---
 
@@ -266,11 +278,7 @@ That is the idea.
 The trigger was the Ziggit post
 [New LinkedList API footgun](https://ziggit.dev/t/new-linkedlist-api-footgun/10853).
 
-Paternitas grew out of _Matryoshka_, a toolkit for background processes:
-
-- [Odin](https://github.com/g41797/matryoshka-otk),
-- [C3](https://github.com/g41797/matryoshka-3tk),
-- [Zig](https://github.com/g41797/matryoshka-ztk). Work in progress.
+Paternitas grew out of _Matryoshka_, a toolkit for background processes, in Odin, C3 and Zig.
 
 The same problem showed up in each one.
 

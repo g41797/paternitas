@@ -1,9 +1,15 @@
-# paternitas — Design (014)
+# paternitas — Design (015)
 
 This is the versioned design document. It says what paternitas is, records
 the decisions and their reasons, and keeps the owner's rulings.
 
-Change from 013: DSGN 014, 2026-10-06. Ongoing work, not a named stage, at
+Change from 014: LOOK 03, 2026-10-07. The owner named it.
+
+- The logo gets its "in" side: three typed shapes on the left, in a mixed
+  order, merge into the belt. Three gray boxes on the belt, not five.
+- "Decisions of LOOK 03" has the details.
+
+Change from 013, kept: DSGN 014, 2026-10-06. Ongoing work, not a named stage, at
 the owner's word.
 
 - Absorbs the type-id proposal, `backup/typeid-split-proposal-002.md`. A
@@ -107,8 +113,8 @@ The rest of the project state lives in other files.
 
 - The current state is in [STATUS.md](STATUS.md).
 - The narrative is in [STATUS-LOG.md](STATUS-LOG.md).
-- The rules are in [rules-013.md](rules-013.md).
-- The work still to do is in [implementation-plan-017.md](implementation-plan-017.md).
+- The rules are in [rules-014.md](rules-014.md).
+- The work still to do is in [implementation-plan-021.md](implementation-plan-021.md).
 - A big task gets its own versioned `.md` under `design/`, linked from here.
 
 ---
@@ -1517,6 +1523,36 @@ TypeInfo.parent(anchor) == address of Parent
 *Anchor -- TypeInfo.nextField()     --> where a container may chain
 *Anchor -- TypeInfo.toAny()         --> Any for dispatch
 ```
+
+---
+
+## Decisions of LOOK 03
+
+The owner named it, 2026-10-07. Opus 5.5. The intent:
+[look-03-intent-001.md](look-03-intent-001.md).
+
+- The owner: three Parents on the right, nothing on the left of the belt.
+- The reason: the picture started in the middle of the story. The structs
+  had types before they entered the list. That "before" was missing.
+- Chosen: the "in" side. Not chosen: a "?" on each gray box; only
+  re-centering.
+- Three shapes on the left: the exits' circle, triangle and hexagon, in
+  their colors.
+  - No labels. The names are on the exits, once.
+  - A mixed order: triangle, circle, hexagon. The exits stay sorted. The
+    list mixes them; *Paternitas* sorts them out.
+  - A little smaller than the exits: 30 to 32, against 34 to 36.
+- Lanes in each color merge into the belt's left end. The same spread as
+  the exits, 88. Left and right mirror each other.
+- Three gray boxes on the belt, not five.
+  - Round 1 had four. The owner asked: is it confusing? Yes: three in,
+    four on the belt, three out. A viewer counts.
+  - Three in, three on the belt, three out. The count is the story.
+- The belt starts at 182, not 50. The Anchor, the exits, the words, the
+  colors and the favicon did not move.
+- `gen_logo.py`: `ENTRIES`, `ENTRY_X`, `ENTRY_BEND`, `ENTRY_SPREAD`,
+  `entries()`. The `aria-label` says the structs go in typed.
+- [LOGO.md](../kitchen/tools/logo/LOGO.md) explains the new side.
 
 ---
 

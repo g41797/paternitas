@@ -1,12 +1,12 @@
 # Limits
 
-What Paternitas does not do, and what it stops.
+What *Paternitas* does not do, and what it stops.
 
 ---
 
-## What Paternitas does not do
+## What *Paternitas* does not do
 
-Paternitas is not a list library.
+*Paternitas* is not a list library.
 
 It does not give you:
 
@@ -17,7 +17,7 @@ It does not give you:
 
 You keep using the containers you already use.
 
-Paternitas helps with one dangerous step:
+*Paternitas* helps with one dangerous step:
 
 ```text
 erased Node
@@ -33,11 +33,11 @@ It checks that answer first.
 
 ## The type, not the lifetime
 
-Paternitas checks the type.
+*Paternitas* checks the type.
 
 It does not check that the struct is still alive.
 
-- If the struct is gone, Paternitas cannot bring it back.
+- If the struct is gone, *Paternitas* cannot bring it back.
 - A Node, an Anchor or an `Any` does not keep the struct alive.
 - The struct MUST stay alive while any of them is in use.
 
@@ -45,7 +45,7 @@ It does not check that the struct is still alive.
 
 ## Shared access
 
-Paternitas locks nothing.
+*Paternitas* locks nothing.
 
 Guard a shared list yourself.
 

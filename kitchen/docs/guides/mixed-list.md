@@ -1,6 +1,6 @@
 # Several types in one list
 
-This is where Paternitas helps most.
+This is where *Paternitas* helps most.
 
 One std list carries a `Message` and a `Job`.
 

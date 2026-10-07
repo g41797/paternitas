@@ -189,7 +189,6 @@ Paternitas is for the moment when "I know what this is" becomes "I hope I know w
 - Several struct types in one list, each one checked.
 - The compiler stops the easy mistakes, like two TypedNodes in one struct.
 - Tools for writing your own container.
-- Tiny. The code is shorter than this README. The doc site's front page shows the exact line count.
 
 It checks the type.
 
@@ -199,17 +198,18 @@ Lifetime and locking stay yours.
 
 ## Want to know more?
 
-The doc site has more:
+The doc site has:
 
-- what "intrusive" and "type-erased" really mean
-- how one wrong cast can cost you a weekend of debugging
-  - and how to save that weekend
-- how to migrate your code
-- why not just a tagged union
-- how to pass structs through queues and maps
-- how to write your own intrusive container
-- the API reference
-- working examples
+- moving your code, step by step,
+- singly or doubly linked lists,
+- why not a tagged union,
+- passing structs through queues and maps,
+- the one `setTypeId` rule,
+- writing your own container,
+- the limits,
+- every call.
+
+And seven examples you can run.
 
 ---
 

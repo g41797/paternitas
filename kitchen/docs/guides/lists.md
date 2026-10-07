@@ -1,4 +1,4 @@
-# Move your code
+# Migrate your code
 
 You have a std list. You want the type check.
 
@@ -29,6 +29,13 @@ Message                      Message
                              +---------------------------+
 ```
 
+??? question "NAQ: Why not keep the type id in the std Node?"  
+    The std Node belongs to std. *Paternitas* does not change std.
+
+    So the TypedNode holds the std Node, and the type id next to it.
+
+    Your list still links plain std Nodes.
+
 Before, with the plain std list:
 
 ```zig
@@ -43,7 +50,7 @@ Before, with the plain std list:
 --8<-- "examples/before_paternitas.zig:recover"
 ```
 
-After, with Paternitas:
+After, with *Paternitas*:
 
 ```zig
 --8<-- "examples/001-set_type_id_and_recover.zig:define"
@@ -65,13 +72,6 @@ The full program is [example 001](../examples/001-set_type_id_and_recover.md){ta
     It is the same std type, with the same calls.
 
     Only the field in your struct changes.
-
-??? question "NAQ: Why not keep the type id in the std Node?"  
-    The std Node belongs to std. Paternitas does not change std.
-
-    So the TypedNode holds the std Node, and the type id next to it.
-
-    Your list still links plain std Nodes.
 
 ---
 
@@ -138,15 +138,15 @@ You use these most of the time.
 | `TypedMessage.node(&message)` | gives the Node to the std list |
 | `TypedMessage.parentFromNode(node)` | checks the Node and gives you `*Message`, or null |
 
+??? question "NAQ: What does a check cost?"  
+    One pointer compare.
+
 There is a fifth call for one case.
 
 - `TypedMessage.mustParentFromNode(node)` gives you `*Message`, or panics.
 - Use it when another type would be a bug.
 - It panics in every build mode.
 - The panic names both types.
-
-??? question "NAQ: What does a check cost?"  
-    One pointer compare.
 
 ??? question "NAQ: Does it check in ReleaseFast?"  
     Yes.
@@ -176,7 +176,7 @@ The field name does not matter.
 
 - `node`, `tnode`, `link`. All are fine.
 - The field can be anywhere in the struct.
-- Paternitas finds the field by its type.
+- *Paternitas* finds the field by its type.
 
 Do not touch the fields inside the TypedNode. Use the calls.
 

@@ -17,7 +17,7 @@ You need it when:
 
 - your container keeps structs of many types, and does not know them;
 - it needs no extra memory per item;
-- or you pass a struct to code that knows nothing of Paternitas.
+- or you pass a struct to code that knows nothing of *Paternitas*.
 
 ??? question "NAQ: Can I use my own list?"  
     Yes. This page is about that.
@@ -103,8 +103,8 @@ The full program is [example 006](../examples/006-anchor_chain.md){target="_blan
 
 - Call `setTypeId` on each struct before it enters your container.
 - A std list uses the same `next` word. A struct MUST NOT be in your container and in a std list at the same time.
-- Your container owns the meaning of that word. Paternitas never reads or writes it.
+- Your container owns the meaning of that word. *Paternitas* never reads or writes it.
 - The struct MUST stay alive while your container keeps its Anchor.
-- Paternitas locks nothing. Guard a shared container yourself.
+- *Paternitas* locks nothing. Guard a shared container yourself.
 
 The full set of calls is in the [API docs](../apidocs/index.html){target="_blank" rel="noopener"}, under `Anchor` and `container`.

@@ -34,18 +34,18 @@ theme:
     - navigation.footer
 nav:
   - Home: index.md
-  - Introduction: introduction.md
-  - Background:
+  - How to prevent the linked list footgun:
+      - In short: introduction.md
       - Intrusive lists: background/intrusive.md
       - Type-erased lists: background/type-erased.md
-      - The Parent problem: background/parent-problem.md
+      - Are you my Parent?: background/parent-problem.md
   - Guides:
       - Which page you need: guides/choose.md
-      - Move your code: guides/lists.md
+      - Migrate your code: guides/lists.md
       - The setTypeId rule: guides/set-type-id.md
       - Several types in one list: guides/mixed-list.md
       - Queues, maps, union fields: guides/any.md
-      - Type ids on their own: guides/type-ids.md
+      - Type ids, listless and nodeless: guides/type-ids.md
       - Your own container: guides/containers.md
   - Examples:
       - examples/001-set_type_id_and_recover.md
@@ -71,6 +71,7 @@ validation:
 
 hooks:
   - hooks/count_lines.py
+  - hooks/new_tab_links.py
 
 plugins:
   - search

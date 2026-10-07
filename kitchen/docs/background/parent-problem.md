@@ -1,4 +1,4 @@
-# The Parent problem
+# Are you my Parent?
 
 An intrusive, type-erased list gives you a Node.
 
@@ -6,9 +6,27 @@ You need the struct around it.
 
 ---
 
+## You probably do not need it for your first linked list
+
+You may want it when the list becomes part of a real system:
+
+- A mailbox grows.
+- A scheduler gets more job types.
+- A dispatcher starts passing different structs through the same list.
+
+Then you pop a Node.
+
+And you have a small problem:
+
+**What struct is this Node inside?**
+
+The std list does not know.
+
+---
+
 ## Parent is Zig's word
 
-Paternitas did not invent it.
+*Paternitas* did not invent it.
 
 - Zig calls the struct that contains a field the field's parent.
 - `@fieldParentPtr` goes from the field to its parent.
@@ -19,9 +37,7 @@ The list gives you a Node. You need its Parent.
 ??? question "NAQ: Why the word Parent?"  
     Zig already uses it, in `@fieldParentPtr`.
 
-    Paternitas is Latin for "fatherhood". It finds the Parent of a Node.
-
-    [Name and origin](../reference/about.md) explains the name.
+    *Paternitas* only borrows it.
 
 ---
 
@@ -66,18 +82,20 @@ const job: *Job = @fieldParentPtr("node", first); // first is in a Message
 
 One wrong guess in a large system costs days of debugging.
 
-Why no working code shows it:
+??? question "NAQ: Why no working code shows it?"  
+    The Zig 0.16.0 langref says so, under `@fieldParentPtr`.
 
-- The Zig 0.16.0 langref says so, under `@fieldParentPtr`.
-- When the pointer is not that field of the result type, and the result type has ill-defined layout, it is unchecked Illegal Behavior.
-- A plain struct, as `Job`, has ill-defined layout.
-- Unchecked means no build mode catches it.
-- Illegal Behavior means the optimizer may assume it never happens. So no test can say what it does.
-- In practice it subtracts an offset. The program runs on with wrong data, or fails later.
+    - When the pointer is not that field of the result type, and the result type has ill-defined layout, it is unchecked Illegal Behavior.
+    - A plain struct, as `Job`, has ill-defined layout.
+    - Unchecked means no build mode catches it.
+    - Illegal Behavior means the optimizer may assume it never happens. So no test can say what it does.
+    - In practice it subtracts an offset. The program runs on with wrong data, or fails later.
 
 ---
 
-## The same with Paternitas
+## The same with *Paternitas*
+
+*Paternitas* gives you an answer.
 
 A wrong type gives null:
 
@@ -93,13 +111,24 @@ mustParentFromAnchor: asked for must_parent_from_anchor.Msg, found must_parent_f
 
 `mustParentFromNode` prints the same kind of message.
 
-Both panic in every build mode.
+- Both panic in every build mode.
+- No new container. No allocation. No lock.
+- Your std list stays your std list.
+
+??? question "NAQ: Why a Latin name?"  
+    *Paternitas* is Latin for "fatherhood".
+
+    It finds the Parent of a Node.
+
+    The motto on the logo, *Agnitio paternitatis*, is "the recognition of fatherhood".
+
+    [Name and origin](../reference/about.md) has the rest.
 
 ---
 
 ## Side by side
 
-| | plain std list | with Paternitas |
+| | plain std list | with *Paternitas* |
 |---|---|---|
 | a wrong type | compiles, runs, reads garbage | null, or a panic |
 | the panic says | nothing | "asked for Job, found Message" |
@@ -117,7 +146,27 @@ Both panic in every build mode.
 
 The important row is the first one: a wrong type.
 
-That is what Paternitas is here to fix.
+That is what *Paternitas* is here to fix.
+
+---
+
+## Do you need it?
+
+**No**, when each list carries one struct type, and you know which one.
+
+- Plain `@fieldParentPtr` is enough.
+
+**Yes**, when:
+
+- one list deliberately mixes struct types;
+- the code handling the list should not know every struct type;
+- the Node comes from somewhere else;
+- you do not want to trust every `@fieldParentPtr` call by hand;
+- a bad cast would turn into a very long debugging session.
+
+The last one is a perfectly respectable reason.
+
+*Paternitas* is for the moment when "I know what this is" becomes "I hope I know what this is".
 
 ---
 

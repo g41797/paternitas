@@ -113,7 +113,7 @@ The full program is [example 005](../examples/005-large_struct_in_union.md){targ
 An `Any` does not keep your struct alive.
 
 - The struct MUST stay alive while its `Any` is in a queue, a map or a union.
-- Paternitas checks the type. It does not check the lifetime.
+- *Paternitas* checks the type. It does not check the lifetime.
 
 ---
 
@@ -123,4 +123,4 @@ An `Any` does not keep your struct alive.
 
 The struct does not need a TypedNode.
 
-[Type ids on their own](type-ids.md) shows that case.
+[Type ids, listless and nodeless](type-ids.md) shows that case.

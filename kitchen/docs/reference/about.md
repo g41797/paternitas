@@ -6,14 +6,14 @@
 
 *Paternitas* is Latin for "fatherhood".
 
-Paternitas is about finding the Parent of an unknown Node.
+*Paternitas* is about finding the Parent of an unknown Node.
 
 Latin law has two terms for it:
 
 - *Affirmatio paternitatis*: the affirmation of paternity.
 - *Investigatio paternitatis*: the investigation of paternity.
 
-Paternitas does both.
+*Paternitas* does both.
 
 *Affirmatio paternitatis*: a Parent gets its type.
 
@@ -31,7 +31,7 @@ The name is a small joke. The idea is literal.
 
 > The Node may be unknown.
 >
-> Paternitas establishes its parentage.
+> *Paternitas* establishes its parentage.
 
 **A note.** Both Latin terms were made up while the README was written.
 
@@ -45,7 +45,7 @@ The name is a small joke. The idea is literal.
 
 The trigger was the Ziggit post [New LinkedList API footgun](https://ziggit.dev/t/new-linkedlist-api-footgun/10853).
 
-Paternitas grew out of *Matryoshka*, a toolkit for background processes.
+*Paternitas* grew out of *Matryoshka*, a toolkit for background processes.
 
 The same problem appeared in each version:
 
@@ -55,7 +55,7 @@ The same problem appeared in each version:
 
 The useful part turned out to be small enough to use by itself.
 
-So Paternitas was extracted from matryoshka-ztk.
+So *Paternitas* was extracted from matryoshka-ztk.
 
 Matryoshka can use it as a package.
 

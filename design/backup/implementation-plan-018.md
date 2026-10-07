@@ -1,16 +1,24 @@
-# paternitas — Implementation plan (015)
+# paternitas — Implementation plan (018)
 
 Forward-looking work, plus one line per completed stage.
 
 - Current state: [STATUS.md](STATUS.md).
 - The narrative: [STATUS-LOG.md](STATUS-LOG.md).
-- Rules: [rules-013.md](rules-013.md).
-- Design: [paternitas-design-013.md](paternitas-design-013.md).
+- Rules: [rules-014.md](rules-014.md).
+- Design: [paternitas-design-014.md](paternitas-design-014.md).
 - The audit and the owner's rulings:
   [audit-01-report-003.md](audit-01-report-003.md).
 - The outside work: [paternitas-intake-001.md](paternitas-intake-001.md).
-- Type ids on their own: [typeid-split-proposal-002.md](typeid-split-proposal-002.md).
-- Change from 014: TYID 01 and TYID 02 come before ZTK. Owner's ruling,
+- Type ids on their own: [paternitas-design-014.md](paternitas-design-014.md), "Type ids on their own".
+- Change from 017: DOCS 01 is closed. README 01 is closed. Their open work,
+  the README trims, is a new stage: README 02. The owner named it,
+  2026-10-07.
+- Change from 016, kept: DOCS 01 PLAN is done. The site plan is
+  [docs-01-intent-008.md](docs-01-intent-008.md). DOCS 01 points to it.
+- Change from 015, kept: TYID 01 and TYID 02 are done. README and docs come
+  before ZTK. Owner's ruling, 2026-10-05. New stages: README 01, DOCS 01
+  PLAN, DOCS 01. The README stage was "later" in 015.
+- Change from 014, kept: TYID 01 and TYID 02 come before ZTK. Owner's ruling,
   2026-10-05. Three fixes from the owner's second review go into TYID 01.
 - Change from 013, kept: LOOK 02 is done. It gets one line under
   "Completed stages".
@@ -72,6 +80,22 @@ Forward-looking work, plus one line per completed stage.
   draws it, and the favicon. The mascot images are kept as a record.
   Design 013. Six gates green.
 
+- TYID 01 (2026-10-05, Opus 5.5) — `Typed(P)` for every struct. Without a
+  TypedNode: `typeId`, `isId`, `toAny`, `fromAny`. `AnyParent` is `Any`.
+  `-Duse_llvm=false` in g2. Six gates green.
+- TYID 02 (2026-10-05, Sonnet 5) — example 007: a handler map for structs
+  with no TypedNode. Six gates green.
+- DOCS 01 PLAN (2026-10-06, Opus 5.5) — the site plan:
+  [docs-01-intent-008.md](docs-01-intent-008.md). Seventeen pages, the hero
+  logo leads in, snippets pulled from working code, an API nav entry in a new
+  tab, g4 at every depth and `--strict`. No pages written. Six gates green.
+- README 01 (2026-10-05, Opus 5.5) — a draft: type ids are a bonus at the
+  end, `AnyParent` is `Any`. The trims moved to README 02.
+- DOCS 01 (2026-10-06, Opus 5.5) — seventeen site pages, snippets from
+  working code, the logo subtitle. Plan:
+  [docs-01-intent-008.md](docs-01-intent-008.md). Its step 11, the README
+  trims, moved to README 02. Six gates green.
+
 ---
 
 ## Order
@@ -80,55 +104,59 @@ paternitas first, until it is done. Then ztk, built on it. The ztk stage may
 need paternitas fixes; the work then goes in rounds. Intake, D1.
 
 ```text
-PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  LOOK 02  ->  TYID 01  ->  TYID 02  ->  ZTK ...  <->  PTRN fixes
+PTRN 01  ->  PTRN 02  ->  NAME 01  ->  EXPL 01  ->  EXPL 02  ->  LOOK 01  ->  LOOK 02  ->  TYID 01  ->  TYID 02  ->  README 01  ->  DOCS 01 PLAN  ->  DOCS 01  ->  README 02  ->  ZTK ...  <->  PTRN fixes
 ```
 
 ---
 
-## TYID 01 — code
+## README 02 — a smaller README
 
-The owner names it. Opus 5.5: it changes `src/`.
+The owner named it, 2026-10-07. Opus 5.5. The README before it is
+`design/backup/README-004.md`, 770 lines.
 
-- Read [typeid-split-proposal-002.md](typeid-split-proposal-002.md) in
-  full. Its rulings hold.
-- Show the intent before code: the diff of `Typed(P)`, in words.
-- `Typed(P)` accepts every struct.
-  - One TypedNode: every call, as today.
-  - None: `typeId`, `isId`, `toAny`, `fromAny`. The id is the address of
-    a per-type `var tag: u8`.
-  - The other calls raise a `@compileError`.
-- The three compile errors, word for word:
-  - `X: not a struct, and Typed takes structs only`
-  - `X: more than one TypedNode, and at most one is allowed`
-  - `X: no TypedNode, so it has only typeId, isId, toAny and fromAny`
-  - Fix from the review: 002 left out `isId`. It is `pub`.
-- `AnyParent` becomes `Any`. No alias. In `src/`, the tests and examples
-  003 to 006. Not the README.
-- Tests, in all four modes:
-  - unique ids, read at run time: same fields, empty structs, `List(u8)`
-    and `List(u16)`, structs with a TypedNode;
-  - `toAny` then `fromAny`, and the wrong type gives null;
-  - `isId`, for a struct with no TypedNode. Fix from the review;
-  - the three compile errors, as negatives.
-- The `///` of `Typed`, `TypeId` and `Any`:
-  - every struct gets the id calls; a TypedNode adds the list calls;
-  - `TypeId` is one pointer, so it works as a map key. Fix from the review;
-  - the limits, next to `typeId`: one running program; a shared library
-    has its own ids; do not save or send an id. Fix from the review.
-- Done when: six gates green; tests and negatives pass in all four modes;
-  `mkdocs build --strict` passes.
+The README is a taste and a door to the site. It is not the manual.
 
----
+The owner's rulings:
 
-## TYID 02 — example
+- Appeal, not scare. A reason to want it, not all the details.
+- Human style, as usual. Less technical.
+- Most of the README text is already on the site pages.
+- Iterations. Each rewritten README is copied to
+  `design/backup/README-NNN.md`, with the next number. README-005 is the
+  first. Later they are compared, and some text may come back.
+- MUST: text removed from the README is already on a site page, or is added
+  there in the same step. [rules-014.md](rules-014.md), Part 0.
+- "The problem in one example" becomes "The problem and solution in one
+  example".
+  - The wrong cast.
+  - Then the fix: the struct with its TypedNode, the `Typed` line,
+    `setTypeId`, `parentFromNode`.
+  - Then "No new container. No allocation. No lock."
+- The cost is "one additional pointer per struct".
+- The door: one plain sentence. The doc site has the rest. No links.
+- Leave for the site:
+  - Move your code to Paternitas (migration);
+  - Singly or doubly linked?;
+  - Why not just use a tagged union?;
+  - Passing structs through other type-erased code;
+  - Writing your own container?.
+- The bonus stays.
+- The logic of each trim is talked over with the owner, section by section.
 
-The owner names it.
+Kept from README 01:
 
-- One new example: a handler map keyed by `TypeId`, without a list.
-  `isId` in it.
-- A test wrapper and a site page, like the six.
-- The README is not touched. It is a separate stage, named by the owner,
-  later.
+- The reader: someone browsing GitHub.
+- The code is the only source of truth. README and site both describe it.
+- The README snippets are compiled and run against `src/`.
+- The logo does not change.
+
+Order of work:
+
+1. Talk over the trims with the owner.
+2. Write one iteration. Copy it to `design/backup/` with the next number.
+3. For each cut, name the site page that holds the text. Add it there if
+   it is missing.
+4. The owner reads it. Back to 1, or close.
 
 ---
 

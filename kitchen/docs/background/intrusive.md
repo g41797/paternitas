@@ -2,7 +2,7 @@
 
 Zig's std lists are intrusive.
 
-This page says what that means, what you get, and what it costs.
+Do not be afraid. Go ahead.
 
 ---
 
@@ -37,7 +37,7 @@ your struct
 +--------------------+
 ```
 
-In Zig, before Paternitas:
+In Zig, with a plain std list:
 
 ```zig
 --8<-- "examples/before_paternitas.zig:structs"
@@ -64,13 +64,6 @@ Some structs must not be copied.
 
 Such a struct can still be in an intrusive list.
 
-??? question "NAQ: Does Paternitas allocate?"  
-    No.
-
-    The type id lives in the TypedNode, inside your struct.
-
-    Nothing is allocated. Nothing is freed.
-
 ---
 
 ## What it costs
@@ -87,4 +80,6 @@ The memory is yours.
 
 If you come from C, this is Linux's `list_head` with `container_of`.
 
-Paternitas does not change any of this. It only checks the guess.
+*Paternitas* does not change any of this.
+
+It adds one thing: before you get your struct back, it checks the type.

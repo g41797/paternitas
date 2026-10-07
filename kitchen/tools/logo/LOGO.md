@@ -1,11 +1,12 @@
 # The Paternitas logo
 
-The logo shows one list, the Anchor, and the types coming out.
+The logo shows typed structs going in, one list, the Anchor, and the types coming out.
 
 ## What the picture says
 
 | in the picture | in the library |
 |---|---|
+| The colored shapes on the left, in a mixed order | Your structs, each typed with `setTypeId`, before they enter the list. The list mixes them. |
 | The belt | One list: `std.DoublyLinkedList`, `std.SinglyLinkedList`, or your own. |
 | Gray boxes on the belt, all the same | Your structs. On the list, each is only a Node. The list cannot tell them apart. |
 | The gold diamond | The `Anchor`. Paternitas reads the type id there. |
@@ -13,9 +14,13 @@ The logo shows one list, the Anchor, and the types coming out.
 | PARENT_A, PARENT_B, PARENT_C | The types you gave with `setTypeId`. |
 | The motto | AGNITIO · PATERNITATIS: recognition of the parent. In Roman capitals. |
 
-On the belt every package is the same gray box. After the Anchor each
-parent has its own color and shape: an amber circle, a teal triangle, a
-coral hexagon.
+Before the belt each parent has its own color and shape, in a mixed
+order. On the belt every package is the same gray box. After the Anchor
+each parent has its color and shape back, sorted: an amber circle, a teal
+triangle, a coral hexagon.
+
+Three go in, three ride the belt, three come out. The count is the story:
+each one comes back as itself.
 
 ## The motto
 
@@ -78,8 +83,9 @@ Every setting is a constant at the top of `gen_logo.py`.
 
 | to change | edit |
 |---|---|
-| colors | `NAVY`, `RAIL`, `GRAY`, `GOLD`, `WHITE`, `MUTED`, and the colors in `EXITS` |
+| colors | `NAVY`, `RAIL`, `GRAY`, `GOLD`, `WHITE`, `MUTED`, and the colors in `ENTRIES` and `EXITS` |
 | canvas size, corners | `WIDTH`, `HEIGHT`, `CORNER` |
+| the entries | `ENTRIES`, `ENTRY_X`, `ENTRY_BEND`, `ENTRY_SPREAD` |
 | the belt | `BELT_LEFT`, `BELT_RIGHT`, `BELT_Y`, `BELT_HEIGHT`, `RAIL_WIDTH` |
 | the packages on the belt | `ON_BELT_COUNT`, `ON_BELT_SIZE`, `PACKAGE_START`, `PACKAGE_GAP` |
 | the Anchor | `ANCHOR_X`, `ANCHOR_SIZE` |
@@ -120,7 +126,8 @@ Kerning is not applied. Spacing does the same job by hand.
 
 The owner drafted the concept with Grok Imagine, an image generator. Then
 came an SVG and a Pillow script. LOOK 02 made the logo again with
-`gen_logo.py`. The prototype folder was removed after these prompts were
+`gen_logo.py`. LOOK 03 gave it the "in" side: the typed shapes on the
+left, and three boxes on the belt, not five. The prototype folder was removed after these prompts were
 copied here.
 
 The motto in prompt 4 replaced an earlier Latin line, and the Archimedes

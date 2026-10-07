@@ -1,21 +1,22 @@
-# DOCS 01 — intent (008)
+# DOCS 01 — intent (009)
 
 DOCS 01. 2026-10-06. The pages are written. This version adds the owner's
 rulings after the first review of the site, and the new logo subtitle.
 
 - Current state: [STATUS.md](STATUS.md).
-- The plan: [implementation-plan-017.md](implementation-plan-017.md), "DOCS 01". DOCS 01 PLAN is under "Completed stages".
+- The plan: [implementation-plan-021.md](implementation-plan-021.md), "DOCS 01". DOCS 01 PLAN is under "Completed stages".
 - The README before DOCS 01: [README.md](../README.md), the README 01 draft.
 - The long old README: [backup/README-001.md](backup/README-001.md).
-- The drafts: [backup/docs-01-intent-001.md](backup/docs-01-intent-001.md),
-  [backup/docs-01-intent-002.md](backup/docs-01-intent-002.md),
-  [backup/docs-01-intent-003.md](backup/docs-01-intent-003.md),
-  [backup/docs-01-intent-004.md](backup/docs-01-intent-004.md),
-  [backup/docs-01-intent-005.md](backup/docs-01-intent-005.md),
-  [backup/docs-01-intent-006.md](backup/docs-01-intent-006.md),
-  [backup/docs-01-intent-007.md](backup/docs-01-intent-007.md).
+- The drafts: 001 to 006 were removed by the owner, 2026-10-07.
+  [backup/docs-01-intent-007.md](backup/docs-01-intent-007.md),
+  [backup/docs-01-intent-008.md](backup/docs-01-intent-008.md).
 
 Page names below have no `.md` ending, since the pages do not exist yet.
+
+## Change from 008
+
+- Links only. The owner removed drafts 001 to 006 from `design/backup/`.
+  Their links are gone. 2026-10-07.
 
 ## Change from 007
 

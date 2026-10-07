@@ -1,4 +1,4 @@
-"""Draws the Paternitas logo and favicon: the belt, the Anchor and the exits.
+"""Draws the Paternitas logo and favicon: the entries, the belt, the Anchor and the exits.
 
 The SVG is the only source. The PNG and the .ico are converted from it.
 Writes into kitchen/docs/assets/logo/. LOGO.md next to this file explains
@@ -32,16 +32,28 @@ MUTED = "#94a3b8"
 WIDTH, HEIGHT = 800, 540
 CORNER = 24
 
+# The entries: (color, shape, size). Each parent goes in with its own color
+# and shape, before the list makes it anonymous. A mixed order: the list
+# mixes them, the exits sort them. No labels: the names are on the exits.
+ENTRIES = [
+    ("#0d9488", "triangle", 32),
+    ("#d97706", "circle", 30),
+    ("#dc2626", "hexagon", 32),
+]
+ENTRY_X = 44       # The middle of the entry packages.
+ENTRY_BEND = 100   # Where the lanes stop being level.
+ENTRY_SPREAD = 88  # The distance between lanes.
+
 # The belt: a closed track, with the struct packages riding inside.
-BELT_LEFT, BELT_RIGHT = 50, 450
+BELT_LEFT, BELT_RIGHT = 182, 450
 BELT_Y, BELT_HEIGHT = 170, 84  # BELT_Y is the middle line.
 RAIL_WIDTH = 8
 
 # The packages on the belt. On the list they all look the same: one gray box.
-ON_BELT_COUNT = 5
+ON_BELT_COUNT = 3
 ON_BELT_SIZE = 36
 PACKAGE_GAP = 30
-PACKAGE_START = 76
+PACKAGE_START = 208
 
 # The Anchor at the end of the belt.
 ANCHOR_X = 450
@@ -114,13 +126,14 @@ def main() -> None:
 
 def logo() -> str:
     parts = [f'<rect width="{WIDTH}" height="{HEIGHT}" rx="{CORNER}" fill="{NAVY}"/>']
+    parts += entries()
     parts += belt()
     parts += exits()
     parts += anchor(ANCHOR_X, BELT_Y, ANCHOR_SIZE, 6)
     parts += words()
     parts.insert(0, glyph_defs())
-    label = ("Paternitas: runtime type ids, safer intrusive type-erased containers. Anonymous structs ride one list, "
-             "and come out recognized by type. Agnitio paternitatis.")
+    label = ("Paternitas: runtime type ids, safer intrusive type-erased containers. Typed structs go in, ride one list "
+             "as anonymous boxes, and come out recognized by type. Agnitio paternitatis.")
     return svg(f"0 0 {WIDTH} {HEIGHT}", label, parts)
 
 
@@ -138,6 +151,21 @@ def belt() -> list:
     for i in range(ON_BELT_COUNT):
         x = PACKAGE_START + i * (size + PACKAGE_GAP)
         parts.append(package("box", x + size / 2, BELT_Y, size, GRAY))
+    return parts
+
+
+def entries() -> list:
+    parts = []
+    middle = (len(ENTRIES) - 1) / 2
+    slot = max(size for _, _, size in ENTRIES)
+    merge = BELT_LEFT - RAIL_WIDTH / 2 - 6  # The lanes meet just outside the belt's left end.
+    pull = (merge - ENTRY_BEND) / 2
+    for i, (color, shape, size) in enumerate(ENTRIES):
+        y = BELT_Y + (i - middle) * ENTRY_SPREAD
+        start = ENTRY_X + slot / 2 + 12
+        lane = f"M{start},{y} L{ENTRY_BEND},{y} C{ENTRY_BEND + pull},{y} {merge - pull},{BELT_Y} {merge},{BELT_Y}"
+        parts.append(f'<path d="{lane}" fill="none" stroke="{color}" stroke-width="{LANE_WIDTH}" stroke-linecap="round"/>')
+        parts.append(package(shape, ENTRY_X, y, size, color))
     return parts
 
 

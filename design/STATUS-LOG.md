@@ -4,6 +4,687 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-07 — session end, the owner commits and pushes
+
+State:
+
+- LOOK 03 is done.
+- DOCS 02: the pages changed, the owner's look goes on. Intent 005.
+- README 02: iteration 4 is in `README.md`, copy `README-009`. It waits
+  for the owner's read.
+- Six gates pass, 27 tests, the strict site build passes. The preview
+  server is stopped.
+
+For the commit, seen in `git status`:
+
+- New files, not yet added: `design/rules-014.md`,
+  `design/implementation-plan-021.md`, `design/paternitas-design-015.md`,
+  `design/docs-01-intent-009.md`, `design/docs-02-intent-005.md`,
+  `design/look-03-intent-001.md`, `kitchen/hooks/new_tab_links.py`, and the
+  new files in `design/backup/`.
+- Moved to `design/backup/` with `mv`, so deleted at their old place:
+  rules 013, plan 017, design 014, docs-01 intent 008.
+- Old drafts the owner removed from `design/backup/`: docs-01 intent 001 to
+  006, plans 015 and 016. Plan 017 to 020 and docs-02 intent 001 to 004:
+  some are new in `design/backup/`, some were removed.
+- Still staged but deleted in the working tree ("AD"), from before:
+  `design/implementation-plan-001.md`, `design/rules-001.md`,
+  `kitchen/docs/.gitkeep`, `kitchen/tools/.gitkeep`. Unstage them if they
+  are not wanted.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner's look goes on; README 02 waits for iteration 4
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — "Why can I not save or send a type id?"
+
+The owner: "Can I save or send a type id?" becomes "Why I can not…".
+
+- `guides/type-ids`: "NAQ: Why can I not save or send a type id?".
+- The answer gives the reason, not "No.": a type id is an address inside
+  the running program; another run puts it elsewhere, another program has
+  its own; so it means something only inside one run of one program.
+- The old answer's point, "valid only inside one running program", is kept
+  in the last line.
+
+---
+
+## 2026-10-07 — NAQs apart
+
+The owner: in several places one NAQ follows another. A NAQ need not sit
+at the end of a section or a paragraph. Place each by its content.
+
+Three pairs were back to back. Each moved NAQ now sits right after the
+text it is about:
+
+- `guides/lists`: "Why not keep the type id in the std Node?" moved up,
+  after the before/after diagram. "Does my std list change?" stays after
+  the "after" code.
+- `guides/lists`: "What does a check cost?" moved up, after the table of
+  the four calls. "Does it check in ReleaseFast?" stays after the fifth
+  call's bullets.
+- `guides/type-ids`: "What about a value that is not a struct?" moved up
+  to "Why a type id", after "`Typed(P)` takes any struct". "Can I save or
+  send a type id?" stays after "The rules".
+
+No NAQ text changed. No other page had a pair.
+
+Checks: `mkdocs build --strict` passes. Headless Chrome: both pages, no
+console errors; 4 and 2 NAQs rendered. Six gates pass. The preview runs.
+
+---
+
+## 2026-10-07 — the first real NAQ, shorter
+
+The owner, in the preview:
+
+- "The tests, the examples and this site live outside `src/`. They do not
+  count either." is gone.
+- "The site counts again at every build." stays. "The number on the front
+  page is never out of date." is gone.
+
+Six gates pass. The preview runs.
+
+---
+
+## 2026-10-07 — the first real NAQ
+
+The owner: at the very end of the first site page, after "What's NAQ?",
+the first real NAQ: how the lines of code are counted.
+
+- `kitchen/docs/introduction.md`, at the end: "Here is the first one.",
+  then "NAQ: How do you count the lines of code?".
+- The answer: only the files under `src/`. A blank line, a comment, an
+  `@import` line do not count. Every other line does. The tests, the
+  examples and the site are outside `src/`. The site counts again at
+  every build.
+- The owner's edits to Claude's draft: "Only the files under `src/`." as
+  the first line. "`///` and `//!` too" removed.
+- It matches `kitchen/tools/src_loc.py`. `src/` has no test blocks.
+
+Checks: `mkdocs build --strict` passes. Headless Chrome: "In short", no
+console errors. Six gates pass.
+
+---
+
+## 2026-10-07 — the line count: hero badge, README claim, g4 check
+
+The owner: the hero had a lines-of-code button. Bring it back, button
+shaped, not clickable, just text.
+
+- `kitchen/docs/index.md`: `<span class="hero-loc-badge hero-loc-static">`
+  with "{{ src_loc() }} lines of code". It was a commented-out `<a>`.
+- `kitchen/docs/stylesheets/extra.css`: `.hero-loc-static`. A normal
+  cursor, no hover change.
+- The number comes from the `count_lines.py` hook, at build time: 189.
+  Blank lines, comments and imports in `src/*.zig` do not count.
+
+The owner: say in the README that the package is tiny; the exact count is
+on the landing page.
+
+- Two counters: `kitchen/tools/count_src_loc.sh` (189, the same function as
+  the hook) and `kitchen/tools/count_readme_loc.sh` (202 for README-008,
+  467 for README-004).
+- The code is shorter than the README. The owner chose to say so.
+- "What you get", last bullet: "Tiny. The code is shorter than this
+  README. The doc site's front page shows the exact line count." No
+  number, no link.
+- README iteration 4. The copy: `design/backup/README-009.md`.
+
+The owner: check it locally, and notify.
+
+- g4, `kitchen/tools/check_docs.sh`, check 3: "the README's size claim".
+- While the README says "The code is shorter than this README", it runs
+  both counters. Code lines not fewer than README lines: a hit, g4 fails,
+  and the log names both counts.
+- Today: code 189, README 203. Clean.
+- The failure was tested in a scratch copy: code 10, README 2, exit 1.
+
+Checks: `mkdocs build --strict` passes. Headless Chrome: the home page, no
+console errors, the badge under the logo. Six gates pass.
+
+---
+
+## 2026-10-07 — LOOK 03 done, the logo's "in" side
+
+The owner said "go" on [look-03-intent-001.md](look-03-intent-001.md).
+
+Round 1:
+
+- Three shapes on the left: triangle, circle, hexagon, in their colors, a
+  mixed order, no labels. Lanes merge into the belt's left end.
+- The belt started at 134. Four gray boxes.
+- The owner asked: four boxes in the belt, is it confusing? Claude: yes.
+  Three in, four on the belt, three out. A viewer counts.
+
+Round 2, kept:
+
+- Three gray boxes. The belt starts at 182. The gap is 30 again.
+- The entry shapes 30 to 32. The entry spread 88, as the exits. Left and
+  right mirror.
+- The owner: "keep it".
+
+Files:
+
+- `kitchen/tools/logo/gen_logo.py`: `ENTRIES`, `ENTRY_X`, `ENTRY_BEND`,
+  `ENTRY_SPREAD`, `entries()`. `BELT_LEFT` 182, `ON_BELT_COUNT` 3,
+  `PACKAGE_START` 208. The `aria-label`: "Typed structs go in…".
+- The SVG and the PNG made again. The favicon did not change.
+- [LOGO.md](../kitchen/tools/logo/LOGO.md): a first row for the shapes on
+  the left, the count, the entry settings, a History line.
+- [paternitas-design-015.md](paternitas-design-015.md): "Decisions of LOOK
+  03". 014 is in `design/backup/`.
+- [implementation-plan-021.md](implementation-plan-021.md): LOOK 03 under
+  "Completed stages". 020 is in `design/backup/`.
+- Live links point to 015 and 021.
+
+Checks: `mkdocs build --strict` passes. Headless Chrome: the home page, no
+console errors. Six gates pass. The preview server is stopped.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner's look goes on
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — "listless and nodeless", LOOK 03 named
+
+DOCS 02: "Type ids on their own" did not sound human.
+
+- The owner offered "Type ids freestyle", then "Type ids, listless and
+  nodeless". Claude: "listless" also means "lazy", a quiet pun; the literal
+  reading still works.
+- Now "Type ids, listless and nodeless": the nav, the page title of
+  `guides/type-ids`, the links on `guides/any` and `reference/terms`. The
+  path stays.
+- The strict site build passes. Six gates pass. The preview runs.
+
+The logo: three Parents on the right, nothing on the left of the belt.
+
+- Claude: the picture starts in the middle of the story. The "before" is
+  missing: the structs had types before they entered the list.
+- Three options: the "in" side; a "?" on each box; only re-centering.
+- The owner chose the "in" side, as a new stage: LOOK 03.
+
+Files:
+
+- [look-03-intent-001.md](look-03-intent-001.md) is new: three typed
+  shapes on the left, in a mixed order, no labels, lanes merging into the
+  belt. The belt starts further right, with four boxes.
+- [implementation-plan-020.md](implementation-plan-020.md) is new, with
+  "LOOK 03". 019 is in `design/backup/`.
+- No code changed.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: LOOK 03, the owner approves the intent
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — README 02, iteration 3
+
+The owner: "Want to know more?" looked artificial, not human. The site
+pages had changed too.
+
+- Not wanted: page titles copied, the full story, "every call", clever
+  phrasing.
+- Wanted: a plain list of what the reader can learn. Just raise attention.
+
+The section now:
+
+- "The doc site has more:", then eight plain items: what / why / how.
+- "how one wrong cast can cost you a weekend of debugging", with a second
+  layer: "and how to save that weekend".
+- "the API reference", not "every call". "working examples" last.
+- No commas or full stops at line ends. No links.
+
+The owner put the text into `README.md`. Claude's replace found it there
+and changed nothing.
+
+MUST: every item points to a site page that exists. Nothing was cut from
+the site.
+
+The copy: `design/backup/README-008.md`. Six gates pass.
+
+---
+
+## 2026-10-07 — DOCS 02, links in a new tab
+
+The owner's notes:
+
+- "In short": "No list, no Node." is gone.
+- "NAQ: Does Paternitas allocate?" is gone.
+  - Its facts stay: "No allocation" and the table rows on "Are you my
+    Parent?"; "The TypedNode holds the Node and the type id" on "Migrate
+    your code".
+- Most links open in a new tab, links between site pages too.
+  - The hook is now `kitchen/hooks/new_tab_links.py`. It was
+    `external_links.py`, renamed with `mv`.
+  - Every link in the page text gets `target="_blank" rel="noopener"`.
+  - Same tab: a link that has a target, and a link to a heading on the same
+    page (`#…`).
+  - `target="_self"` keeps two links in the same tab: "Open here" on
+    `api`, and the hero logo on `index`.
+  - The theme's own links are not page text: the nav, the TOC, the header,
+    the search, the footer.
+- The built site: 54 page links open in a new tab. Two stay: "Open here"
+  and the hero.
+
+Checks: `mkdocs build --strict` passes. Headless Chrome: five pages, no
+console errors. Six gates pass. The preview server is stopped.
+
+---
+
+## 2026-10-07 — DOCS 02, "Migrate your code"
+
+The owner chose the name. "Move your code" is "Migrate your code" in the
+nav, the page title of `guides/lists`, and the links on `guides/choose` and
+`reference/terms`. The path stays `guides/lists.md`.
+
+---
+
+## 2026-10-07 — DOCS 02, the owner's first look
+
+The owner's notes, in the preview:
+
+- "In short": the two achievement bullets and the "next pages" line are
+  gone. The page is the two lines and "What's NAQ?".
+  - The bullets are on "Are you my Parent?", "The same with *Paternitas*".
+- "NAQ blocks on many pages" is "on several pages".
+- `background/intrusive`: "This page says what that means…" is "Do not be
+  afraid. Go ahead."
+- "NAQ: Does Paternitas allocate?" moved from `background/intrusive` to
+  "Are you my Parent?", after "The same with *Paternitas*". It is about
+  the library, not about intrusive lists.
+- "It only checks the guess." was AI-sh. Now: "It adds one thing: before
+  you get your struct back, it checks the type."
+- `guides/set-type-id`: the section "Your own container" is gone.
+  `guides/containers` has `setTypeId` in "The Anchor", in "What
+  `anchor.info()` gives you" (null without it) and in "The rules".
+- External links open in a new tab. Links inside the site stay in the same
+  tab.
+  - A new hook, `kitchen/hooks/external_links.py`, in `kitchen/mkdocs.yml`.
+  - It adds `target="_blank" rel="noopener"` to an `http` or `https` link
+    in the page text. A link that has a target keeps it.
+  - The theme's own links are not page text, and are not touched.
+
+Checks: `mkdocs build --strict` passes. Every external link in the page
+text has a target. Headless Chrome: five changed pages, no console errors.
+Six gates pass. The preview server is stopped.
+
+Open: "Move your code", a new name. Claude's advice is in the chat.
+
+---
+
+## 2026-10-07 — dead links after the owner's backup cleanup
+
+The owner removed old drafts from `design/backup/`: docs-01 intent 001 to
+006, docs-02 intent 001 and 002, plans 015 to 017. g4 found the live links
+to them.
+
+- [docs-01-intent-009.md](docs-01-intent-009.md): the draft links are gone.
+  008 is in `design/backup/`.
+- [docs-02-intent-005.md](docs-02-intent-005.md): the same. 004 is in
+  `design/backup/`.
+- STATUS, plan 019 and the design files point to the new versions.
+- Six gates pass. The preview is running for the owner's look.
+
+---
+
+## 2026-10-07 — DOCS 02, the pages changed
+
+The owner chose the group name: "How to prevent the linked list footgun".
+"The footgun, fixed by Paternitas" sounded too official. Then "go".
+
+Intent 004, [docs-02-intent-004.md](docs-02-intent-004.md), has the name.
+003 is in `design/backup/`.
+
+What changed:
+
+- `kitchen/mkdocs.yml`: the group "How to prevent the linked list footgun",
+  with "In short", "Intrusive lists", "Type-erased lists", "Are you my
+  Parent?". No Background group. The files keep their paths.
+- `introduction.md`: "In short". The two lines, two achievements, one line
+  on the next pages, "What's NAQ?".
+- `background/parent-problem.md`: "Are you my Parent?".
+  - It opens with the hook from `introduction`.
+  - "NAQ: Why the word Parent?" answers only: Zig's word.
+  - The langref text is "NAQ: Why no working code shows it?".
+  - "The same with *Paternitas*" has "gives you an answer" and the
+    achievement bullets from `introduction`.
+  - "NAQ: Why a Latin name?": fatherhood, *Agnitio paternitatis*.
+  - "Do you need it?" from `introduction`, before "Where this came from".
+- `background/intrusive.md`: "In Zig, with a plain std list:".
+- `reference/terms.md`: the Parent row links as "Are you my Parent?".
+- Italic *Paternitas*: 24 lines on 9 pages, and the new text. Not in NAQ
+  titles: a details title is plain text. Not in code, the compile error
+  text in `limits`, the logo `alt`.
+
+Every fact kept (rules-014, MUST):
+
+| text | now on |
+|---|---|
+| `introduction`: the hook | "Are you my Parent?", its opening |
+| `introduction`: "Paternitas gives you an answer", its bullets | "Are you my Parent?", "The same with *Paternitas*" |
+| `introduction`: "Do you need it?" | "Are you my Parent?" |
+| `introduction`: "sound scary? Do not leave." | the line "The next pages explain…" on "In short" |
+| `introduction`: "Where next" | dropped, navigation only: the nav, `guides/choose`, the footer |
+| `parent-problem`: the Latin line of "Why the word Parent?" | "NAQ: Why a Latin name?" |
+| `parent-problem`: the langref bullets | "NAQ: Why no working code shows it?" |
+| README-004: every section | the table under "README 02, iteration 1". "Typical examples": the homes are enough, owner's ruling |
+
+Checks:
+
+- `mkdocs build --strict` passes.
+- Headless Chrome: the eight changed pages load, no console errors.
+- Six gates pass.
+- The README is not touched.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner looks at the preview
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — DOCS 02, intent 003
+
+The owner, on intent 002:
+
+- "In short", "Are you my Parent?": yes. "Typical examples": the homes are
+  enough. The italic scope: OK.
+- The group: the footgun, and *Paternitas* as the fix. Claude proposed
+  "The footgun, fixed by Paternitas". Not yet chosen.
+- "Where is the footgun explained?" Only on the last page of the group.
+- The problem and the fix cannot be told before intrusive and type-erased.
+
+Intent 003, [docs-02-intent-003.md](docs-02-intent-003.md):
+
+- The footgun is told once, on "Are you my Parent?", after the two word
+  pages.
+- "In short": what *Paternitas* gives, at a high level. No problem, no fix,
+  no code.
+- 002 is in `design/backup/`. STATUS and plan 019 point to 003.
+- Open: the group name, approval. No site page changed yet.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner approves intent 003
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — DOCS 02, intent 002
+
+The owner, on intent 001:
+
+- The explanation of intrusive, type-erased and Parent comes at the very
+  beginning, after a short introduction.
+- Background is removed as a group.
+- One group, named for the footgun: problem and solution. Claude proposes
+  the wording.
+  - A short page of achievements.
+  - Intrusive lists, Type-erased lists.
+  - "Is you my parent", the problem and the solution. Claude's wording:
+    "Are you my Parent?".
+- MUST, wider: every fact in the current README and in README-004 stays on
+  the site in some form. The same for every fact on the current site
+  pages.
+
+Intent 002, [docs-02-intent-002.md](docs-02-intent-002.md):
+
+- The group "The footgun and its fix": "In short", "Intrusive lists",
+  "Type-erased lists", "Are you my Parent?".
+- The section "Every fact kept": the check, two sources.
+- 001 is in `design/backup/`. STATUS and plan 019 point to 002.
+- Open: the wording, the italic scope, approval.
+- No site page changed yet.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner approves intent 002
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — DOCS 02 named, the intent
+
+README 02 first:
+
+- The owner: in "Where it came from", the language names are the links.
+  No repo names shown.
+- Now: [Odin], [C3], [Zig]. Zig: "Work in progress."
+- The copy: `design/backup/README-007.md`.
+
+The owner looked at the site in the preview, then named DOCS 02.
+
+- The reader meets "intrusive" before they know why they should care.
+- The footgun comes third, in Background.
+- *Paternitas* shows up before the reader knows what it does.
+- "NAQ: Why the word Parent?" mixes Zig's word and the name.
+
+The owner's answers:
+
+1. The footgun first.
+2. The Introduction: "How to prevent the linked list footgun". A shorter
+   nav label.
+3. The Parent problem: a joke title, with the solution in it. "A paternity
+   test for Nodes".
+4. The Introduction: two lines and the NAQ.
+5. The NAQ split: "Why the word Parent?" and "Why a Latin name?".
+6. Italic *Paternitas* when possible.
+7. A new stage: DOCS 02.
+8. The README is not touched.
+9. Background may be removed. Its pages come next.
+
+Files:
+
+- [docs-02-intent-001.md](docs-02-intent-001.md) is new: the nav, each page,
+  each cut and where it goes.
+- [implementation-plan-019.md](implementation-plan-019.md) is new, with
+  "DOCS 02". 018 is in `design/backup/`. Live links point to 019.
+- STATUS: DOCS 02 in "Current state", "Next" and the sources of truth.
+- No site page changed yet.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner approves the intent
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — README 02, iteration 2
+
+The owner's notes on iteration 1:
+
+- The hook at the top ("You probably do not need it…", "What struct is
+  this Node inside?"): remove it, or combine it with "Do I need it?".
+  - Combined. "Do I need it?" opens with it.
+  - The top keeps only the two lines.
+  - Its full text is on `introduction`, word for word.
+- "Typical examples" in "Do I need it?" is gone. The hook bullets carry
+  the mailbox, the scheduler and the dispatcher.
+  - The other two are on the site: `guides/containers`, "When you need it",
+    and `background/type-erased`, "The infrastructure stays fixed".
+- "_Paternitas_ gives you an **answer**." is gone. It is on `introduction`.
+- "Want to know more?": bullets, and "And seven examples you can run." as
+  the bottom line. Still no links.
+- "Where it came from": one bullet per language, each with a link to its
+  repo. Zig: "Work in progress."
+
+The README: 328 lines. The copy: `design/backup/README-006.md`. Six gates
+pass. No snippet changed.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: README 02, the owner reads iteration 2
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — README 02, iteration 1
+
+The owner's answers on the trims:
+
+1. Three words first: stays.
+2. One important rule: to the site.
+3. The four calls: dropped.
+4. The limits: the good parts become "What you get". The rest to the site.
+5. The comparison table: part of "What you get".
+6. The bonus: a short description and a short snippet. The rest to the
+   site.
+7. Why the name, where it came from, credits: short, before the bonus. The
+   bonus is at the very end.
+
+The README now, 336 lines, from 770:
+
+- logo, badges, the two top lines, the hook: unchanged;
+- Three words first: unchanged;
+- The problem and solution in one example: the wrong cast, then the
+  runnable Message and Job program, then `mustParentFromNode`, then "No new
+  container…";
+- Do I need it?: unchanged;
+- What you get: nine bullets, then "Lifetime and locking stay yours";
+- Want to know more?: one sentence, no links;
+- Install: unchanged;
+- Why the name?: unchanged. Where it came from: four lines. Credits:
+  unchanged;
+- Bonus: `toAny` and `fromAny` on `Point`, then the doc site.
+
+Each cut, and the page that holds it (rules-014, MUST):
+
+| cut | site page |
+|---|---|
+| Move your code, five steps | `guides/lists` |
+| The four calls | `guides/lists`, `reference/calls` |
+| Singly or doubly linked? | `guides/lists` |
+| One important rule | `guides/set-type-id` |
+| Why not just use a tagged union? | `background/type-erased` |
+| Why intrusive lists at all? | `background/intrusive` |
+| Several types in one list, its text | `guides/mixed-list`. Its program moved into the solution |
+| Passing structs through other type-erased code | `guides/any`, examples 004 and 005 |
+| Writing your own container? | `guides/containers` |
+| What Paternitas does not do | `reference/limits` |
+| Type ids have a boundary | `reference/limits` |
+| A quick comparison | `background/parent-problem`, a larger table |
+| Bonus: `isId`, the map, the table, the rules, the error | `guides/type-ids` |
+| Where it came from: the three matryoshka repos | `reference/about` |
+
+Nothing had to be added to the site.
+
+Checks:
+
+- The program and the new snippets, `mustParentFromNode` and the bonus,
+  compiled and ran against `src/`. The program prints the two lines.
+- The copy: `design/backup/README-005.md`.
+- Six gates pass.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: README 02, the owner reads iteration 1
+```
+
+Model: Opus 5.5.
+
+---
+
+## 2026-10-07 — README 02 named, the setup
+
+The owner named a new stage: README 02, a smaller README. It was DOCS 01
+step 11, never done. DOCS 01 and README 01 are closed.
+
+The owner's talk, before any plan:
+
+- The README gives a taste and a reason to want it. Not all the details.
+- Human style, less technical. Appeal, not scare.
+- Most of its text is already on the site pages.
+- Leave for the site: Move your code (migration), Singly or doubly linked?,
+  Why not just use a tagged union?, Passing structs through other
+  type-erased code, Writing your own container?.
+- "The problem in one example" becomes "The problem and solution in one
+  example".
+- The cost: "one additional pointer per struct".
+- The door to the site: one plain sentence. No links, not even the URL.
+- The bonus stays.
+- The logic of each trim is talked over during the plan talks.
+
+Iterations:
+
+- The README before README 02 is `design/backup/README-004.md`, copied by
+  the owner. It is the same text as README-003.
+- The owner first had the wrong file as README-004, an old matryoshka-ztk
+  context file from 2026-10-03. The owner replaced it.
+- Each rewritten README is copied to `design/backup/` with the next number.
+  README-005 is the first. Later they are compared.
+
+A new MUST rule, from the owner:
+
+- Text removed from the README must already be on a site page, or be added
+  there in the same step.
+- The same holds for text removed from a site page.
+- It is in [rules-014.md](rules-014.md), Part 0, "The README and the site".
+
+Files:
+
+- [rules-014.md](rules-014.md) is new. 013 is in `design/backup/`.
+- [implementation-plan-018.md](implementation-plan-018.md) is new, with
+  "README 02". DOCS 01 and README 01 are under "Completed stages". 017 is
+  in `design/backup/`.
+- Live links point to 014 and 018: STATUS, the design, the intake, the
+  audit, the DOCS 01 intent, the PTRN intents.
+- STATUS: README 02 in "Current state" and "Next".
+- No README text written yet.
+
+To continue after a clear:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: README 02, talk over the trims
+```
+
+Model: Opus 5.5.
+
+---
+
 ## 2026-10-06 — DOCS 01, the logo subtitle
 
 The owner committed the pages as `41cc1bc`.

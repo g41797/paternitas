@@ -1,6 +1,6 @@
 # The setTypeId rule
 
-One rule in Paternitas is yours to keep.
+One rule in *Paternitas* is yours to keep.
 
 The compiler cannot check it.
 
@@ -15,7 +15,7 @@ The compiler cannot check it.
 Call it even when every field has its default value.
 
 - A new struct has no type id.
-- Paternitas does not mark a new struct by itself.
+- *Paternitas* does not mark a new struct by itself.
 
 ??? question "NAQ: Why can Paternitas not mark a new struct by itself?"  
     The TypedNode is one type, shared by every struct that uses it.
@@ -83,16 +83,3 @@ When you see `<no type>`, look for the place that created the struct, or wrote a
 ```text
 fromAny: setTypeId was never called on the Parent
 ```
-
----
-
-## Your own container
-
-A container you write yourself keeps Anchors.
-
-Call `setTypeId` before the struct enters it.
-
-- Your container asks `anchor.info()` for the struct's `TypeInfo`.
-- Without `setTypeId`, it gets null.
-
-[Your own container](containers.md) shows the container side.
