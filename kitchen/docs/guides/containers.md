@@ -95,7 +95,7 @@ Push with `anchor`. Pop, and get the struct back with `parentFromAnchor`:
 
 One stack carries both.
 
-The full program is [example 006](../examples/006-anchor_chain.md){target="_blank" rel="noopener"}.
+The full program: [Your own stack](../examples/006-anchor_chain.md){target="_blank" rel="noopener"}.
 
 ---
 

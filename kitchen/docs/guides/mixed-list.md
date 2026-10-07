@@ -20,7 +20,7 @@ Each struct has a TypedNode, and its helper right after it.
 
 ## The program
 
-Mark each struct. Put both in one list. Pop them.
+Call `setTypeId` on each struct. Put both in one list. Pop them.
 
 ```zig
 --8<-- "examples/002-mixed_list.zig:setup"
@@ -33,7 +33,7 @@ message: hello
 job: 42
 ```
 
-The full program is [example 002](../examples/002-mixed_list.md){target="_blank" rel="noopener"}.
+The full program: [Two types, one list](../examples/002-mixed_list.md){target="_blank" rel="noopener"}.
 
 ---
 
@@ -77,7 +77,7 @@ The list does not.
 
 In a large system, that matters.
 
-[Example 003](../examples/003-timeout_list.md){target="_blank" rel="noopener"} does the same for a server:
+[Timeout list and a queue](../examples/003-timeout_list.md){target="_blank" rel="noopener"} does the same for a server:
 
 - A server keeps its connections in a timeout list.
 - One connection leaves the list, goes through a queue, and comes back.

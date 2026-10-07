@@ -6,17 +6,17 @@ You need the struct around it.
 
 ---
 
-## You probably do not need it for your first linked list
+## When the trouble starts
 
-You may want it when the list becomes part of a real system:
+One list, one struct type: no trouble. You know what is inside.
+
+It changes when the list becomes part of a real system:
 
 - A mailbox grows.
 - A scheduler gets more job types.
 - A dispatcher starts passing different structs through the same list.
 
 Then you pop a Node.
-
-And you have a small problem:
 
 **What struct is this Node inside?**
 
@@ -162,11 +162,15 @@ That is what *Paternitas* is here to fix.
 - the code handling the list should not know every struct type;
 - the Node comes from somewhere else;
 - you do not want to trust every `@fieldParentPtr` call by hand;
-- a bad cast would turn into a very long debugging session.
+- a bad cast would turn into a long debugging session.
 
 The last one is a perfectly respectable reason.
 
 *Paternitas* is for the moment when "I know what this is" becomes "I hope I know what this is".
+
+Intrusive is not the problem.
+
+The unknown type is the problem.
 
 ---
 

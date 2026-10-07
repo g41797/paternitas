@@ -49,13 +49,12 @@ The trigger was the Ziggit post [New LinkedList API footgun](https://ziggit.dev/
 
 The same problem appeared in each version:
 
-- [matryoshka-otk](https://github.com/g41797/matryoshka-otk), in Odin: a hand-made tag per type.
-- [matryoshka-3tk](https://github.com/g41797/matryoshka-3tk), in C3: C3's own `typeid`.
-- [matryoshka-ztk](https://github.com/g41797/matryoshka-ztk), in Zig: comptime helpers.
+- [C3](https://github.com/g41797/matryoshka-3tk): C3's own `typeid`.
+- [Zig](https://github.com/g41797/matryoshka-ztk): comptime helpers. Work in progress.
 
 The useful part turned out to be small enough to use by itself.
 
-So *Paternitas* was extracted from matryoshka-ztk.
+So *Paternitas* was extracted from the Zig version.
 
 Matryoshka can use it as a package.
 

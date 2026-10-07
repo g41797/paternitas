@@ -6,7 +6,7 @@ The change is small and boring.
 
 - You find and replace, five times.
 - There is no design to think about.
-- The list itself does not change.
+- The list itself does not change: the same std type, the same calls.
 
 ---
 
@@ -64,14 +64,7 @@ After, with *Paternitas*:
 --8<-- "examples/001-set_type_id_and_recover.zig:list"
 ```
 
-The full program is [example 001](../examples/001-set_type_id_and_recover.md){target="_blank" rel="noopener"}.
-
-??? question "NAQ: Does my std list change?"  
-    No.
-
-    It is the same std type, with the same calls.
-
-    Only the field in your struct changes.
+The full program: [One struct, one list](../examples/001-set_type_id_and_recover.md){target="_blank" rel="noopener"}.
 
 ---
 
@@ -134,7 +127,7 @@ You use these most of the time.
 | call | what it does |
 |---|---|
 | `paternitas.Typed(Message)` | makes the helper for `Message` |
-| `TypedMessage.setTypeId(&message)` | marks the value as a `Message` |
+| `TypedMessage.setTypeId(&message)` | sets the type id of `Message` |
 | `TypedMessage.node(&message)` | gives the Node to the std list |
 | `TypedMessage.parentFromNode(node)` | checks the Node and gives you `*Message`, or null |
 

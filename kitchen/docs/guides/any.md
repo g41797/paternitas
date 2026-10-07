@@ -50,7 +50,7 @@ A connection must not be copied. So the queue carries its `Any`.
 --8<-- "examples/003-timeout_list.zig:queue"
 ```
 
-The full program is [example 003](../examples/003-timeout_list.md){target="_blank" rel="noopener"}.
+The full program: [Timeout list and a queue](../examples/003-timeout_list.md){target="_blank" rel="noopener"}.
 
 ---
 
@@ -80,7 +80,7 @@ The handler casts `ptr` to its own type:
 - The map matched the type id, so the cast is right.
 - A type with no handler is counted, not cast.
 
-The full program is [example 004](../examples/004-handler_map.md){target="_blank" rel="noopener"}.
+The full program: [Handler map](../examples/004-handler_map.md){target="_blank" rel="noopener"}.
 
 ---
 
@@ -104,7 +104,7 @@ The handler gets the `Download` back with `fromAny`:
 
 Each `Event` stays small.
 
-The full program is [example 005](../examples/005-large_struct_in_union.md){target="_blank" rel="noopener"}.
+The full program: [Large struct in a union](../examples/005-large_struct_in_union.md){target="_blank" rel="noopener"}.
 
 ---
 

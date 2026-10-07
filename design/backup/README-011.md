@@ -84,7 +84,7 @@ The fix, for the same two structs:
 
 - swap the std Node for a TypedNode,
 - add one `Typed` line after each struct,
-- call `setTypeId` on each new value,
+- mark each new value with `setTypeId`,
 - ask the Node: "are you a Message?"
 
 Copy it and run it. It prints:
@@ -265,6 +265,7 @@ The trigger was the Ziggit post
 
 Paternitas grew out of _Matryoshka_, a toolkit for background processes:
 
+- [Odin](https://github.com/g41797/matryoshka-otk),
 - [C3](https://github.com/g41797/matryoshka-3tk),
 - [Zig](https://github.com/g41797/matryoshka-ztk). Work in progress.
 

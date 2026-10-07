@@ -4,6 +4,134 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-07 — setTypeId wording, example titles, no Odin
+
+The owner's rulings, applied:
+
+- "mark" is the old term. Everywhere it is now setTypeId wording:
+  `guides/set-type-id.md` (a line and the NAQ title), `guides/mixed-list.md`,
+  `guides/lists.md`, `reference/terms.md`, `reference/limits.md`, and the
+  README: "call `setTypeId` on each new value".
+- A link to an example shows the example's title, not its number. "The
+  full program: [Handler map](…)." `lists`, `mixed-list`, `any`,
+  `containers`, `type-ids`, `set-type-id`, the `choose` table, and the
+  `calls` example column (the numbers became titled links).
+- `reference/limits.md`: the line "What *Paternitas* does not do, and
+  what it stops." and its `---` are out. The section headings say it.
+- "Where it came from", in the README's style: the language name is the
+  link. `reference/about.md`: C3, then Zig, "Work in progress." "extracted
+  from the Zig version".
+- The Odin project is out of the README and the site. The owner's ruling,
+  so the MUST rule does not apply. It stays in `design/`.
+- The copy: `design/backup/README-012.md`.
+- Six gates pass. g4: code 189 lines, README 200 lines. The strict site
+  build passes.
+- For the commit: add `design/backup/README-012.md`.
+
+Session end. The preview server is stopped. The owner commits and pushes.
+
+For the commit, seen in `git status`:
+
+- New, not yet added: `design/backup/README-011.md`,
+  `design/backup/README-012.md`.
+- Changed: `README.md`, `design/STATUS.md`, `design/STATUS-LOG.md`,
+  `kitchen/mkdocs.yml`, `kitchen/docs/index.md`, and 13 pages under
+  `kitchen/docs/background/`, `guides/`, `reference/`.
+- The four "AD" leftovers are as before: `design/implementation-plan-001.md`,
+  `design/rules-001.md`, `kitchen/docs/.gitkeep`, `kitchen/tools/.gitkeep`.
+
+Continue prompt:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner's look goes on; README 02 waits for iteration 7
+```
+
+---
+
+## 2026-10-07 — "Migrate your code": one NAQ out
+
+The owner: "NAQ: Does my std list change?" is a strange question.
+
+- It was answered before it was asked: the page's opening bullet and the
+  NAQ above it.
+- No reader thinks a library changes std.
+- Its last line was wrong: "Only the field in your struct changes." The
+  five steps change more.
+- Cut: the NAQ, in `guides/lists.md`. The opening bullet now reads "The
+  list itself does not change: the same std type, the same calls." The
+  MUST rule: that bullet holds it, as does the "Side by side" table on
+  `background/parent-problem.md` and the README.
+
+---
+
+## 2026-10-07 — "Are you my Parent?": the top section
+
+The owner: the top did not read logically. "You need the struct around
+it", then the heading "You probably do not need it".
+
+- "it" had nothing to point to: the page had not named *Paternitas* yet.
+- The page asked "do you need it?" twice: at the top, and in its last
+  section, "Do you need it?".
+- The heading is now "When the trouble starts". New first line: "One
+  list, one struct type: no trouble. You know what is inside." The rest
+  stays. The owner chose the heading.
+- Cut: "You probably do not need it for your first linked list" and "And
+  you have a small problem:". The MUST rule: the page's last section, "Do
+  you need it?", says "No, when each list carries one struct type". The
+  README keeps its own line.
+- No link pointed to the old heading. Six gates pass. The strict site
+  build passes.
+
+---
+
+## 2026-10-07 — two outside reviews: five items taken
+
+The owner had two AIs review the README and the site. Their results:
+`~/Downloads/paternitas-mds-fixed.zip` and `paternitas-mds-improved.zip`.
+
+- "fixed": small edits to 9 files. "improved": every page rewritten. It
+  drops all 17 NAQ blocks and 32 of 36 snippets, so the MUST rule breaks
+  on many pages. Read for ideas only.
+- Taken, the owner said go:
+  1. `guides/choose.md`: the link text "Type ids on their own" is now
+     "Type ids, listless and nodeless", the page's title.
+  2. `README.md`, word edits. "simply" out. "ask firmly" is "When another
+     type is a bug". "That panics and names both types." "the list forgot
+     the type". "a long debugging session", also on
+     `background/parent-problem.md`. No cuts.
+  3. `background/parent-problem.md`, end of "Do you need it?": "Intrusive
+     is not the problem. The unknown type is the problem."
+  4. `kitchen/mkdocs.yml`: the example nav titles carry their numbers,
+     "001 One struct, one list" to "007 Type id without a node".
+     `reference/calls.md` cites examples by number.
+  5. `background/type-erased.md`: a diagram, Message/Job/Task to Node to
+     std list. Example 003 already had a diagram. Skipped there.
+  6. `index.md`: the lines-of-code pill opens `apidocs/` in a new tab.
+     The `.hero-loc-static` CSS rule is now unused. It stays.
+- Not taken:
+  - A link to the site in the README. GitHub's About panel has it; the
+    reader stays on the README.
+  - A fuller "In short". The owner: leave it as is.
+  - "on purpose" (banned in g4). The panic text "asked for Message, found
+    Job": the real one has qualified names, from `@typeName`. The README
+    split into "The problem" and "The fix". The bonus moved up. "Type ids
+    without a list". A menu under the hero. The "improved" README: it
+    drops the size claim and brings back the migration steps.
+- The copy: `design/backup/README-011.md`.
+- Six gates pass. g4: code 189 lines, README 201 lines. The strict site
+  build passes.
+- For the commit: add `design/backup/README-011.md`.
+
+Continue prompt:
+
+```
+Read /home/g41797/dev/root/github.com/g41797/paternitas/design/STATUS.md
+Stage: DOCS 02, the owner's look goes on; README 02 waits for iteration 6
+```
+
+---
+
 ## 2026-10-07 — README iteration 5: the size claim moves to the top
 
 The owner: move "The code is shorter than this README" to the very

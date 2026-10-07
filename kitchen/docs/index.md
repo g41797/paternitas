@@ -26,7 +26,7 @@ hide:
 <h2 class="hero-title"></h2>
 
 <div class="hero-buttons-top">
-  <span class="hero-loc-badge hero-loc-static">{{ src_loc() }} lines of code</span>
+  <a href="apidocs/" class="hero-loc-badge" target="_blank" rel="noopener">{{ src_loc() }} lines of code</a>
   <!-- <a href="apidocs/" class="hero-loc-badge" target="_blank" rel="noopener">API</a> -->
   <!-- <a href="examples/001-set_type_id_and_recover/" class="hero-loc-badge">Examples</a> -->
 </div>

@@ -71,7 +71,7 @@ Ask about the type, without turning it back:
 --8<-- "examples/007-type_id_without_node.zig:isid"
 ```
 
-The full program is [example 007](../examples/007-type_id_without_node.md){target="_blank" rel="noopener"}.
+The full program: [Type id without a node](../examples/007-type_id_without_node.md){target="_blank" rel="noopener"}.
 
 ---
 

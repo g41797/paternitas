@@ -48,13 +48,13 @@ nav:
       - Type ids, listless and nodeless: guides/type-ids.md
       - Your own container: guides/containers.md
   - Examples:
-      - examples/001-set_type_id_and_recover.md
-      - examples/002-mixed_list.md
-      - examples/003-timeout_list.md
-      - examples/004-handler_map.md
-      - examples/005-large_struct_in_union.md
-      - examples/006-anchor_chain.md
-      - examples/007-type_id_without_node.md
+      - 001 One struct, one list: examples/001-set_type_id_and_recover.md
+      - 002 Two types, one list: examples/002-mixed_list.md
+      - 003 Timeout list and a queue: examples/003-timeout_list.md
+      - 004 Handler map: examples/004-handler_map.md
+      - 005 Large struct in a union: examples/005-large_struct_in_union.md
+      - 006 Your own stack: examples/006-anchor_chain.md
+      - 007 Type id without a node: examples/007-type_id_without_node.md
   - Reference:
       - All the calls: reference/calls.md
       - Limits: reference/limits.md

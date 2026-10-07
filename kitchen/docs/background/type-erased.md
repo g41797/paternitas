@@ -10,6 +10,12 @@ The list forgets your struct's type.
 
 The list sees a `Node`. It never sees your `Job`.
 
+```text
+Message --+
+Job ------+--> Node --> std list
+Task -----+
+```
+
 - One `std.DoublyLinkedList` serves every struct type.
 - The code built on the list never names your struct types.
 

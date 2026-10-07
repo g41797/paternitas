@@ -1,9 +1,5 @@
 # Limits
 
-What *Paternitas* does not do, and what it stops.
-
----
-
 ## What *Paternitas* does not do
 
 *Paternitas* is not a list library.
@@ -70,7 +66,7 @@ Do not:
 
 A shared library has its own type ids, even for the same struct type.
 
-- A struct marked in the library fails the type check in the main program.
+- A struct whose type id was set in the library fails the type check in the main program.
 - The same holds the other way round.
 
 ??? question "NAQ: Does it work across a shared library?"  

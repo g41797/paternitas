@@ -15,9 +15,9 @@ The compiler cannot check it.
 Call it even when every field has its default value.
 
 - A new struct has no type id.
-- *Paternitas* does not mark a new struct by itself.
+- *Paternitas* does not set the type id by itself.
 
-??? question "NAQ: Why can Paternitas not mark a new struct by itself?"  
+??? question "NAQ: Why can Paternitas not set the type id by itself?"  
     The TypedNode is one type, shared by every struct that uses it.
 
     Its default value is the same for a `Message` and for a `Job`.
@@ -51,7 +51,7 @@ Writing one field is fine.
 - `message.text = "again";` changes one field.
 - The type id stays there.
 
-[Example 001](../examples/001-set_type_id_and_recover.md){target="_blank" rel="noopener"} does the reset, and checks the struct comes back.
+[One struct, one list](../examples/001-set_type_id_and_recover.md){target="_blank" rel="noopener"} does the reset, and checks the struct comes back.
 
 ---
 
