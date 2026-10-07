@@ -4,6 +4,22 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-07 — Logo hover is visible
+
+- Old hover: a 4px lift. Not clear the logo is a button.
+- `kitchen/docs/stylesheets/extra.css`, `.hero-image a`:
+  - hover: lift 8px, scale 1.06, brightness 1.12, saturate 1.3.
+  - hover: red glow from the logo, `#dc2626` at 0.75, 5px.
+  - transition on transform and filter, 0.3s.
+  - cursor pointer.
+  - keyboard focus: accent outline, 3px.
+- Tried teal and gold glows. Owner chose red.
+- Old CSS: `design/backup/extra.css.2026-10-07`.
+- "Start here" label under the logo: not done. Open.
+- All six gates pass. Preview restarted.
+
+---
+
 ## 2026-10-07 — Gate 3 checks the size claim again
 
 - The new README start says "It is shorter than this README."
