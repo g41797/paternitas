@@ -49,7 +49,7 @@
 //!
 //! You get null for another type.
 //!
-//! The full program is example 006, "Your own stack".
+//! The full program is the example "Your own stack".
 //!
 //! ## Rules
 //!

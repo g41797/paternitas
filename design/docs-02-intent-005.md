@@ -2,7 +2,7 @@
 
 The site's opening pages, in a new order. The owner named it, 2026-10-07.
 
-- The plan: [implementation-plan-021.md](implementation-plan-021.md), "DOCS 02".
+- The plan: [implementation-plan-022.md](implementation-plan-022.md), "DOCS 02".
 - The rules: [rules-014.md](rules-014.md). Part 0, "The README and the site":
   text cut from a page stays on the site.
 - The DOCS 01 plan: [docs-01-intent-009.md](docs-01-intent-009.md).

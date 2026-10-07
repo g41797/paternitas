@@ -103,7 +103,7 @@ A wrong type gives null:
 --8<-- "examples/002-mixed_list.zig:recover"
 ```
 
-Or, when another type is a bug, a panic that names both types:
+Or, when another type is a bug, a panic. The panic message shows both type names:
 
 ```text
 mustParentFromAnchor: asked for must_parent_from_anchor.Msg, found must_parent_from_anchor.Job

@@ -80,11 +80,11 @@ A shared library has its own type ids, even for the same struct type.
 
 ## What the compiler stops
 
-Each message names the type. Each comes from a program in `negative/compile/`, run by the gates.
+Each error message shows the type name. Each comes from a program in `negative/compile/`, run by the gates.
 
 | the mistake | the message | the program |
 |---|---|---|
-| a list call on a struct without a TypedNode | `<P>: no TypedNode, so it has only typeId, isId, toAny and fromAny` | `bare_node.zig` |
+| `node`, `parentFromNode` or another list function on a struct without a TypedNode | `<P>: no TypedNode, so it has only typeId, isId, toAny and fromAny` | `bare_node.zig` |
 | `Typed` of a value that is not a struct | `<P>: not a struct, and Typed takes structs only` | `not_struct.zig` |
 | two TypedNodes in one struct | `<P>: more than one TypedNode, and at most one is allowed` | `two_typed_nodes.zig` |
 | `TypedNode(N)` of a Node that is not a std Node | `TypedNode(<N>): not a std Node, so it cannot be a Paternitas TypedNode` | `typed_node_other_node.zig` |

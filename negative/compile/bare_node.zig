@@ -1,5 +1,8 @@
-//! A bare std Node is not a TypedNode. A struct without a TypedNode gets only
-//! the id calls. A list call does not compile.
+//! A plain std Node is not a TypedNode.
+//!
+//! A struct without a TypedNode cannot go in a list.
+//!
+//! So `node(&b)` does not compile.
 
 const BareNode = struct {
     node: std.DoublyLinkedList.Node = .{},

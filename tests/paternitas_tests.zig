@@ -276,7 +276,9 @@ test "toAny and fromAny" {
     try testing.expect(TypedMsg.anchor(&no_type).toAny() == null);
 }
 
-// Structs with no TypedNode. They get only the id calls.
+// Structs with no TypedNode.
+// They cannot go in a list.
+// They get a type id: `typeId`, `isId`, `toAny`, `fromAny`.
 const Point: type = struct { x: i32, y: i32 };
 const OtherPoint: type = struct { x: i32, y: i32 };
 const Empty: type = struct {};

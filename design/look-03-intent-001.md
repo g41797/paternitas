@@ -2,7 +2,7 @@
 
 The logo gets its "in" side. The owner named it, 2026-10-07.
 
-- The plan: [implementation-plan-021.md](implementation-plan-021.md), "LOOK 03".
+- The plan: [implementation-plan-022.md](implementation-plan-022.md), "LOOK 03".
 - The rules: [rules-014.md](rules-014.md).
 - The logo today: `kitchen/tools/logo/gen_logo.py`, explained in
   [LOGO.md](../kitchen/tools/logo/LOGO.md). LOOK 02 made it.

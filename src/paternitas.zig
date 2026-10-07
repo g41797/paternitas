@@ -5,102 +5,38 @@
 //!
 //! An intrusive list gives you a Node, not your struct.
 //!
-//! Plain `@fieldParentPtr` trusts that you guessed the type correctly.
+//! You get your struct back with `@fieldParentPtr`:
 //!
-//! Paternitas adds a type id to the Node. Now the guess is checked.
+//! ```zig
+//! const node = list.popFirst().?;
+//! const job: *Job = @fieldParentPtr("node", node);
+//! ```
 //!
-//! ## Do you need it?
+//! But maybe `node` belongs to a `Message`.
 //!
-//! One list, one struct type? No. Plain `@fieldParentPtr` is fine.
+//! Nothing stops you.
 //!
-//! Paternitas is for lists that carry several struct types.
+//! Now `job` points at a `Message`.
 //!
-//! Typical places:
+//! The bug may show up much later.
 //!
-//! - a mailbox with different message types,
-//! - a scheduler with different job types,
-//! - a dispatcher,
-//! - a generic intrusive container,
-//! - a queue or a map that passes different structs around.
+//! Paternitas tells you whether the Node really is in the struct you ask for.
 //!
-//! ## Three words first
-//!
-//! - Intrusive: the Node lives in your struct.
-//!   - The list copies nothing.
-//!   - The list allocates nothing.
-//! - Type-erased: the list sees only Nodes, never your struct's type.
-//!   - Code built on the list does not change when you add a struct type.
-//! - Parent: the struct that contains the Node.
-//!
-//! Paternitas keeps intrusive and type-erased.
-//!
-//! It adds a type check.
-//!
-//! Say you keep Messages and Jobs in one `std.DoublyLinkedList`.
-//!
-//! - You pop a Node.
-//! - Is it in a Message or in a Job? The list does not know.
-//! - `@fieldParentPtr` gives you whatever type you ask for.
-//! - Ask for a Job when it is a Message. You read a Message as a Job.
-//! - It compiles. It runs. Nothing warns you.
-//!
-//! With Paternitas, a wrong type gives null.
-//!
-//! - The `must` calls panic instead.
-//! - The panic names both types.
+//! - If it is not, you get null.
+//! - The `must` calls panic instead. The panic message shows both type names.
 //! - This works in every build mode.
-//!
-//! Your list is still the std list. No allocator. No lock.
-//!
-//! The full program and the migration are in the
-//! [README](https://github.com/g41797/paternitas#readme).
+//! - Your list is still the std list. No allocator. No lock.
 //!
 //! ## The four calls you will use
 //!
 //! - `Typed(P)` makes the helper for one struct type.
-//! - `setTypeId(&p)` marks the struct as that type.
+//! - `setTypeId(&p)` sets the struct's type id.
 //! - `node(&p)` gives its Node to the std list.
 //! - `parentFromNode(n)` checks the Node and gives your struct back, or null.
 //!
 //! `mustParentFromNode` panics instead of returning null.
 //!
 //! Use it when another type is a bug.
-//!
-//! ## Typical use
-//!
-//! You put a TypedNode where the Node was.
-//!
-//! - The change is mechanical.
-//! - You find and replace, five times.
-//!
-//! ```
-//! before                       after
-//! Message                      Message
-//! +--------------------+       +---------------------------+
-//! | text               |       | text                      |
-//! | node  <-- the list |       | tnode: DoublyTypedNode    |
-//! +--------------------+       | +-----------------------+ |
-//!                              | | node   <-- the list   | |
-//!                              | | type id               | |
-//!                              | +-----------------------+ |
-//!                              +---------------------------+
-//! ```
-//!
-//! Before:
-//!
-//! ```zig
-//! const Message = struct {
-//!     text: []const u8,
-//!     node: std.DoublyLinkedList.Node = .{},
-//! };
-//!
-//! var message: Message = .{ .text = "hello" };
-//! list.append(&message.node);
-//!
-//! const m: *Message = @fieldParentPtr("node", list.popFirst().?);
-//! ```
-//!
-//! After:
 //!
 //! ```zig
 //! const Message = struct {
@@ -116,85 +52,26 @@
 //! const m: *Message = TypedMessage.mustParentFromNode(list.popFirst().?);
 //! ```
 //!
-//! `Job` gets the same change.
+//! ## The setTypeId rule
 //!
-//! - Its `std.DoublyLinkedList.Node` becomes a `paternitas.DoublyTypedNode`.
-//! - It gets its own `const TypedJob = paternitas.Typed(Job);`.
-//!
-//! Do it for each struct in the list:
-//!
-//! 1. Change the Node.
-//!    - `std.SinglyLinkedList.Node` becomes `paternitas.SinglyTypedNode`.
-//!    - `std.DoublyLinkedList.Node` becomes `paternitas.DoublyTypedNode`.
-//! 2. Add `const TypedMessage = paternitas.Typed(Message);`, once.
-//! 3. Call `TypedMessage.setTypeId(&message)`.
-//!    - Call it right after the struct is created.
-//!    - Call it again after each whole-struct write: a reset, a clear, `= .{...}`.
-//! 4. `&message.node` becomes `TypedMessage.node(&message)`.
-//! 5. `@fieldParentPtr("node", n)` becomes `TypedMessage.mustParentFromNode(n)`.
-//!    - It still returns `*Message`.
-//!    - A wrong type panics, in every build mode.
-//!
-//! The list itself does not change.
-//!
-//! The compiler stops at each place you missed in steps 4 and 5.
-//!
-//! Where a Node can be in another type, use `parentFromNode`.
-//!
-//! It returns null for another type.
-//!
-//! ## A small but important rule
-//!
-//! Call `setTypeId` after you create the struct.
-//!
-//! A whole-struct write erases the type id. Call it again after each one.
-//!
-//! Writing one field keeps the type id.
+//! Call `setTypeId` after you create the struct, and again after each
+//! whole-struct write. The compiler cannot check it.
 //!
 //! The struct MUST stay alive while its Node, Anchor or Any is in use.
 //!
-//! ## Passing a struct through type-erased code
+//! ## Beyond lists
 //!
-//! Outside a std list, pass an `Any`.
+//! - `Any` passes a struct through a queue, a map, a union field or a callback.
+//! - `typeId` gives any struct a type id, with or without a TypedNode.
+//! - `container` is for you, if you write your own container.
 //!
-//! - It holds the struct's address and its type id.
-//! - A queue, a map, a union field or a callback copies these two words. It
-//!   never copies your struct.
-//! - Get one with `toAny`. Get the struct back with `fromAny`.
-//! - Or look up a handler by its `type_id`, and give it `ptr`.
+//! ## The site
 //!
-//! ```zig
-//! try handlers.put(TypedMessage.typeId(), onMessage);
-//! try handlers.put(TypedJob.typeId(), onJob);
+//! The [site](https://g41797.github.io/paternitas/) has the rest:
 //!
-//! // The dispatch never names a type.
-//! if (handlers.get(any.type_id)) |h| h(any.ptr);
-//! ```
-//!
-//! ## Writing a container
-//!
-//! Most application code does not need `Anchor` or `container`.
-//!
-//! They are for you when you write the generic container itself.
-//!
-//! See `Anchor` and `container`.
-//!
-//! ## Limits
-//!
-//! Paternitas is not a container library.
-//!
-//! - It has no list or queue of its own.
-//! - It allocates nothing. It frees nothing.
-//! - It locks nothing. Guard shared lists yourself.
-//! - It checks the type. It does not check that the struct is still alive.
-//!
-//! A type id has limits.
-//!
-//! - It is valid only inside one running program. Do not save it or send it.
-//! - A shared library has its own type ids, even for the same struct type.
-//!   - A struct marked by `setTypeId` in the library fails the type check
-//!     in the program.
-//!   - The same holds the other way round.
+//! - "Are you my Parent?": the problem, and when you need Paternitas.
+//! - "Migrate your code": the five steps from a plain std list.
+//! - "The setTypeId rule", "Limits", and the seven examples.
 
 const _doc_stub = void;
 
@@ -245,31 +122,55 @@ pub fn TypedNode(comptime N: type) type {
     };
 }
 
-/// Makes the helper for one struct type.
+/// Makes the helper for one struct type. Declare it once per type.
+///
+/// What the helper can do depends on your struct.
+///
+/// If your struct has a TypedNode field, it can live in a std list. The
+/// helper puts it in the list, and gets it back from a Node:
 ///
 /// ```zig
+/// const Message = struct {
+///     text: []const u8,
+///     tnode: paternitas.DoublyTypedNode = .{},
+/// };
 /// const TypedMessage = paternitas.Typed(Message);
+///
+/// var message: Message = .{ .text = "hello" };
+/// TypedMessage.setTypeId(&message);
+/// list.append(TypedMessage.node(&message));
+///
+/// const m: ?*Message = TypedMessage.parentFromNode(list.popFirst().?);
 /// ```
 ///
-/// Declare it once per type.
+/// `parentFromNode` gives you your struct only if the Node really is in a
+/// `Message`. Otherwise it gives null. You never write `@fieldParentPtr` or
+/// the field's name. Such a struct is called a Parent.
 ///
-/// Every struct gets the id calls: `typeId`, `isId`, `toAny`, `fromAny`.
+/// If your struct has no TypedNode field, it cannot go in a list. The
+/// helper still gives it a type id. So you can pass it through code that
+/// does not know its type, and get it back safely:
 ///
-/// A struct with a TypedNode is a Parent. It also gets the list calls.
+/// ```zig
+/// const Point = struct { x: i32, y: i32 };
+/// const TypedPoint = paternitas.Typed(Point);
 ///
-/// - They do the `@fieldParentPtr` work for `P`, and check the type.
-/// - You never write `@fieldParentPtr` or the field's name.
-/// - It finds the TypedNode by its type.
-/// - You get your struct back only when the type matches.
-/// - Otherwise you get null. The `must` calls panic instead.
+/// var point: Point = .{ .x = 3, .y = 4 };
+/// const any: paternitas.Any = TypedPoint.toAny(&point);
+///
+/// const p: ?*Point = TypedPoint.fromAny(any); // your Point, or null
+/// ```
+///
+/// A struct with a TypedNode can do this too.
 ///
 /// The rules:
 ///
 /// - `P` MUST be a struct.
 /// - `P` has at most one `SinglyTypedNode` or `DoublyTypedNode` field,
 ///   under any name. With one, `P` is a Parent.
-/// - A list call on a struct without a TypedNode is a compile error.
-/// - Each error names the type.
+/// - On a struct without a TypedNode, a call that needs one, like `node` or
+///   `parentFromNode`, is a compile error.
+/// - Each error message shows the type name.
 pub fn Typed(comptime P: type) type {
     const node_field: ?[]const u8 = comptime findTypedNode(P);
     const has_node: bool = node_field != null;
@@ -277,7 +178,7 @@ pub fn Typed(comptime P: type) type {
     const TN: type = if (has_node) @FieldType(P, field) else NoTypedNode;
 
     return struct {
-        /// Marks `p` as a value of type `P`.
+        /// Sets the type id of `p`: the type id of `P`.
         ///
         /// It writes the type id of `p` into its TypedNode.
         ///
@@ -346,7 +247,7 @@ pub fn Typed(comptime P: type) type {
         /// Use it when another type is a bug.
         ///
         /// - It panics in every build mode.
-        /// - The panic message names both types.
+        /// - The panic message shows both type names.
         /// - The Node MUST be inside a `SinglyTypedNode` or `DoublyTypedNode`.
         pub inline fn mustParentFromNode(n: *Node) *P {
             comptime needNode();
@@ -408,7 +309,7 @@ pub fn Typed(comptime P: type) type {
         /// Like `parentFromAnchor`, but panics instead of returning null.
         ///
         /// - It panics in every build mode.
-        /// - The panic message names both types.
+        /// - The panic message shows both type names.
         pub inline fn mustParentFromAnchor(a: *Anchor) *P {
             comptime needNode();
             return parentFromAnchor(a) orelse wrongType("mustParentFromAnchor", a);
@@ -599,7 +500,7 @@ pub const Any = struct {
     type_id: TypeId,
 };
 
-/// An id for a struct type.
+/// A runtime id for a struct type.
 ///
 /// Every struct type gets its own, through `Typed(P).typeId()`.
 ///
@@ -612,7 +513,7 @@ pub const Any = struct {
 /// - Null means no type: `setTypeId` was never called on that struct.
 /// - It is valid only inside one running program. Do not save it or send it.
 /// - A shared library has its own type ids, even for the same struct type.
-///   A struct marked by `setTypeId` in the library fails the type check in
+///   A struct whose type id was set in the library fails the type check in
 ///   the program.
 pub const TypeId = ?*const anyopaque;
 
@@ -627,8 +528,10 @@ fn kindOf(comptime N: type) NodeKind {
     @compileError("TypedNode(" ++ @typeName(N) ++ "): not a std Node, so it cannot be a Paternitas TypedNode");
 }
 
-// Stands in for the TypedNode of a struct that has none. No list call
-// compiles for such a struct, so nothing uses it.
+// Stands in for the TypedNode of a struct that has none.
+// Such a struct cannot go in a list.
+// `node`, `parentFromNode` and the other list functions do not compile for it.
+// So nothing uses this stand-in.
 const NoTypedNode = struct {};
 
 // The name of `P`'s TypedNode field, or null when `P` has none.

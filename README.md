@@ -140,7 +140,7 @@ When another type is a bug:
 const message = TypedMessage.mustParentFromNode(node);
 ```
 
-That panics and names both types.
+That panics. The panic message shows both type names.
 
 No new container.
 
@@ -186,7 +186,7 @@ Paternitas is for the moment when "I know what this is" becomes "I hope I know w
 - Singly or doubly linked. Both std lists work.
 - No allocation. No copy of your struct.
 - One additional pointer per struct, for the type id.
-- A wrong type gives `null`, or a panic that names both types.
+- A wrong type gives `null`, or a panic. The panic message shows both type names.
 - The check is the same in every build mode, release too.
 - Several struct types in one list, each one checked.
 - The compiler stops the easy mistakes, like two TypedNodes in one struct.

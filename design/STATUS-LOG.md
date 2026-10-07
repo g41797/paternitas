@@ -4,6 +4,113 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-07 — SYNC 01: the owner's read, two rounds
+
+The owner read the new module comment on the preview site. Intent 002 has
+the notes and the text.
+
+- Round one: lines 8-10 sounded like AI. "An id for a struct type" is a
+  runtime id. "It also gets the list calls" was not clear at all.
+- Round two: "puts a type id next to the Node" is how it works, not what it
+  does. "id calls" and "list calls" mean nothing to a reader. Plain
+  English, more words if needed, snippets from the examples.
+- Done, with the owner's go:
+  - The module comment says what Paternitas does: it tells you whether the
+    Node really is in the struct you ask for. 58 lines to 60.
+  - The `Typed` doc comment explains the two cases, with a TypedNode and
+    without, each with a snippet: example 001 and example 007, shortened.
+  - Its rule "A list call on a struct without a TypedNode" says "a call
+    that needs one, like `node` or `parentFromNode`". Not in the intent:
+    it had the same unclear words.
+  - `TypeId`: "A runtime id for a struct type."
+- Cut: "Every struct gets the id calls", "It also gets the list calls",
+  and the five bullets under it. Their facts are in the new text, and on
+  "Migrate your code" and "Type ids, listless and nodeless".
+- Comments only. The code is unchanged: 189 lines.
+- Six gates pass. The strict site build passes. The preview restarted.
+- Left as is: "list call" on two site pages, `reference/limits.md` and
+  `guides/type-ids.md`. Not asked.
+- Round three: one sentence per line, as the rules say. "name the type"
+  needs a snippet, with `Job`. Done with the owner's go: the README's
+  wrong-guess lines and its snippet, `const job: *Job =
+  @fieldParentPtr("node", node);`. The module comment is 73 lines.
+- Round four: "list call" on the site, with the owner's go.
+  - `reference/limits.md`: "`node`, `parentFromNode` or another list
+    function on a struct without a TypedNode".
+  - `guides/type-ids.md`: "Only a struct with a TypedNode can go in a
+    list." Then "So `node`, `parentFromNode` and the other list functions
+    need a TypedNode."
+  - `negative/compile/bare_node.zig`, shown on that page: its header said
+    "id calls" and "list call". Now one sentence per line.
+  - Then the two plain `//` comments, with the owner's go:
+    `NoTypedNode` in `src/paternitas.zig`, and the no-TypedNode structs in
+    `tests/paternitas_tests.zig`. "list call" and "id calls" are gone from
+    `src/`, `tests/`, `examples/`, `negative/`, the README and the site.
+- Round five: "You name the type yourself:" is out of the module comment,
+  with the owner's go. The line before the snippet ends in a colon.
+  - The owner asked for other uses of "name" as a verb. Found in three
+    kinds: "the panic names both types", "each error names the type", "the
+    dispatch never names a type". Listed for the owner.
+  - Done with the owner's go, in `src/`, `examples/`, `negative/`, the
+    README and the site:
+    - "The panic message shows both type names." Nine places.
+    - "Each error message shows the type name." Three places.
+    - "does not use your struct types", the owner's "use" for "name".
+      Six places. 004's header: "It should not have to know every type."
+  - "name" as a noun stays: the field's name, type name, short names.
+
+---
+
+## 2026-10-07 — SYNC 01: the comments follow the site
+
+The owner named a new stage: the comments in the sources and examples
+follow the README and the site. Rulings: the README and the site win; the
+module comment shrinks; the example header opens with its site title; g4
+checks the code folders too.
+
+Setup:
+
+- [sync-01-intent-001.md](sync-01-intent-001.md), with the inventory.
+- [implementation-plan-022.md](implementation-plan-022.md) from 021, with a
+  "SYNC 01" section. 021 is in `design/backup/`. Nine live links repointed.
+
+Done:
+
+- `src/paternitas.zig`, the module comment: 194 lines to 58.
+  - Kept: the problem, what a wrong type gives, the four calls, the
+    "after" code, the setTypeId rule in three lines, `Any`, `typeId`,
+    `container`.
+  - Cut, and the MUST rule: "Do you need it?" and the typical places ("Are
+    you my Parent?", "Queues, maps, union fields", "Your own container");
+    "Three words first" ("Intrusive lists", "Type-erased lists", "Stuck on
+    a word?"); the Messages and Jobs story ("Are you my Parent?"); "Typical
+    use", with the diagram, before, the five steps ("Migrate your code");
+    the full rule ("The setTypeId rule"); the handler code ("Queues, maps,
+    union fields", "Handler map"); "Writing a container" ("Your own
+    container"); "Limits" ("Limits").
+  - The README link for the migration is now a link to the site, with page
+    names. The README itself has no site link, by the owner's ruling. The
+    API pages are on the site, so they can.
+- "marks" and "marked by `setTypeId`": `setTypeId` in the call list,
+  `setTypeId`'s own comment, `TypeId`'s comment.
+- `src/container.zig`: "The full program is the example "Your own
+  stack"."
+- The example headers: each already opens with `Title:` and its site
+  title. Nothing to change.
+- g4: check 2 reads `negative/`. Check 4 is new: "mark", "marks", "marked",
+  "marking". Tested with a copy that looked for `setTypeId`: hits in every
+  folder. The copy is in the scratchpad, not in the repo.
+- Six gates pass. g4: code 189 lines, README 200 lines. The strict site
+  build passes, 0 warnings. The API module page renders in headless Chrome
+  with the new text and the site link.
+
+For the commit: add `design/implementation-plan-022.md`,
+`design/sync-01-intent-001.md`, `design/backup/implementation-plan-021.md`.
+The old path `design/implementation-plan-021.md` shows as deleted: it was
+moved.
+
+---
+
 ## 2026-10-07 — setTypeId wording, example titles, no Odin
 
 The owner's rulings, applied:

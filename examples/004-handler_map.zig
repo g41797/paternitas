@@ -6,7 +6,7 @@
 //!
 //! The loop gets items of many types, as `Any`s.
 //!
-//! It should not name every type.
+//! It should not have to know every type.
 //!
 //! It keeps one handler per type, in a map keyed by `TypeId`.
 //!
@@ -59,7 +59,7 @@ pub fn handler_map(allocator: std.mem.Allocator, io: std.Io) !void {
     var handlers: std.AutoHashMap(paternitas.TypeId, Handler) = .init(allocator);
     defer handlers.deinit();
 
-    // Register the handlers. The dispatch below never names a type.
+    // Register the handlers. The dispatch code does not use your struct types.
     try handlers.put(TypedMessage.typeId(), onMessage);
     try handlers.put(TypedJob.typeId(), onJob);
     // --8<-- [end:register]

@@ -7,7 +7,7 @@ Current state only. Updated in place. The narrative is in
 
 1. Read this file in full.
 2. Read Part 0 of [rules-014.md](rules-014.md).
-3. Read the plan, [implementation-plan-021.md](implementation-plan-021.md), for
+3. Read the plan, [implementation-plan-022.md](implementation-plan-022.md), for
    the stage the owner names. Not before they name it.
 4. Read the design, [paternitas-design-015.md](paternitas-design-015.md), for
    a stage that writes code or docs.
@@ -24,7 +24,7 @@ Current state only. Updated in place. The narrative is in
 |---|---|
 | rules | [rules-014.md](rules-014.md) |
 | design decisions, and what paternitas keeps from ztk | [paternitas-design-015.md](paternitas-design-015.md) |
-| the plan | [implementation-plan-021.md](implementation-plan-021.md) |
+| the plan | [implementation-plan-022.md](implementation-plan-022.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
@@ -32,12 +32,32 @@ Current state only. Updated in place. The narrative is in
 | DOCS 01: the site pages | [docs-01-intent-009.md](docs-01-intent-009.md) |
 | DOCS 02: the opening pages | [docs-02-intent-005.md](docs-02-intent-005.md) |
 | LOOK 03: the logo's "in" side | [look-03-intent-001.md](look-03-intent-001.md) |
+| SYNC 01: the comments follow the site | [sync-01-intent-002.md](sync-01-intent-002.md) |
 | the narrative | [STATUS-LOG.md](STATUS-LOG.md) |
 | the advice collected by the owner, read in AUDT 01 | `paternitas-001.md` |
 | superseded versions | `design/backup/` |
 
 ## Current state
 
+- SYNC 01: the comments in `src/`, `examples/` and `negative/` follow the
+  README and the site. The owner named it, 2026-10-07. The intent is
+  [sync-01-intent-002.md](sync-01-intent-002.md).
+  - Done, 2026-10-07. The owner read it in two rounds; the fixes are in,
+    intent 002. Open: the owner reads the new text on the preview.
+  - The module comment of `src/paternitas.zig`: 194 lines to 73. The
+    problem, the four calls, the "after" code, the setTypeId rule in three
+    lines, one line each for `Any`, `typeId`, `container`, and a link to
+    the site with page names. Each cut is on a site page, listed in the
+    intent.
+  - The site link is `https://g41797.github.io/paternitas/`, not checked
+    live.
+  - "marks", "marked": setTypeId wording, three places. `container.zig`
+    names "Your own stack" by its title.
+  - The example headers already open with their site titles. No change.
+  - g4 reads `negative/` too. Check 4 stops "mark" and its forms in
+    `src/`, `tests/`, `examples/`, `negative/`, the README and the site
+    pages.
+  - Comments only. The code is unchanged: 189 lines.
 - LOOK 03 is done, 2026-10-07. The owner named it. The intent is
   [look-03-intent-001.md](look-03-intent-001.md). Design 015.
   - Three typed shapes go in on the left, in a mixed order. Three gray
@@ -71,7 +91,7 @@ Current state only. Updated in place. The narrative is in
   - No two NAQs back to back. Each sits right after the text it is about,
     not at the end of a section.
 - README 02: a smaller README. The owner named it, 2026-10-07. The plan is
-  [implementation-plan-021.md](implementation-plan-021.md), "README 02".
+  [implementation-plan-022.md](implementation-plan-022.md), "README 02".
   - The README before it: `design/backup/README-004.md`.
   - Each new iteration is copied to `design/backup/`, from README-005 on.
   - A new MUST rule: text cut from the README or a site page stays on the
@@ -146,7 +166,7 @@ Current state only. Updated in place. The narrative is in
   - `AnyParent` is `Any`. A comparison row, "type id without a list".
   - The old README is `design/backup/README-002.md`.
   - Open: the owner's review. Trimming waits for the site pages.
-  - The owner's rulings are in [implementation-plan-021.md](implementation-plan-021.md), "README 01".
+  - The owner's rulings are in [implementation-plan-022.md](implementation-plan-022.md), "README 01".
 - Comments in `src/` took four items from a ChatGPT revision, 2026-10-06.
   The owner said go. Comments only; the code is unchanged.
   - The module doc opens with the problem: "An intrusive list gives you a
@@ -228,9 +248,11 @@ Current state only. Updated in place. The narrative is in
 
 ## Next
 
-1. DOCS 02: the owner's look goes on, then the stage closes.
+1. SYNC 01: the owner reads the fixed module comment and the `Typed`
+   comment on the preview. "list call" and "id calls" are gone from the code and the site.
+2. DOCS 02: the owner's look goes on, then the stage closes.
    [docs-02-intent-005.md](docs-02-intent-005.md).
-2. README 02: the owner reads iteration 7, README-012. The plan:
-   [implementation-plan-021.md](implementation-plan-021.md), "README 02".
-3. The last state: six gates pass, 27 tests, the strict site build passes,
+3. README 02: the owner reads iteration 7, README-012. The plan:
+   [implementation-plan-022.md](implementation-plan-022.md), "README 02".
+4. The last state: six gates pass, 27 tests, the strict site build passes,
    2026-10-07. The owner commits and pushes.

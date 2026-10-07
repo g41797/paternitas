@@ -2,7 +2,7 @@
 # Gate for paternitas' documents and code. It comes from next/ztk's
 # check_next_docs.sh.
 #
-# Three checks:
+# Four checks:
 #
 #   1. Dead cross-references, in both syntaxes — [text](target.md) and
 #      `target.md`.
@@ -10,6 +10,9 @@
 #   3. The README's size claim. While README.md says "The code is shorter
 #      than this README", the code must be shorter: count_src_loc.sh against
 #      count_readme_loc.sh.
+#   4. The old wording. "mark" and its forms gave way to setTypeId wording.
+#      Read in src/, tests/, examples/, negative/, the README and the site
+#      pages. Not in design/: the log and the old docs record it.
 #
 # Exit 0 when clean, 1 on any hit. Read-only — reports, never edits.
 #
@@ -184,8 +187,8 @@ for w in "${banned[@]}" "${banned_forms[@]}" "${banned_phrases[@]}"; do
         --exclude-dir=backup --exclude-dir=source --exclude-dir=.zig-cache --exclude-dir=zig-out \
         --exclude-dir=.git --exclude-dir=.idea --exclude-dir=apidocs \
         -- "$w" "$repo_root/design" "$repo_root/src" "$repo_root/tests" \
-                "$repo_root/examples" "$repo_root/kitchen" "$repo_root/README.md" \
-                2>/dev/null \
+                "$repo_root/examples" "$repo_root/negative" "$repo_root/kitchen" \
+                "$repo_root/README.md" 2>/dev/null \
         | grep -vF "$banned_skip" | grep -v "^$repo_root/kitchen/docs/examples/" \
         | sed "s|^$repo_root/||")
 done
@@ -203,6 +206,22 @@ if grep -qF "$size_claim" "$repo_root/README.md"; then
 else
     echo "  README.md makes no size claim"
 fi
+
+echo "== 4. the old wording =="
+
+old_words=(mark marks marked marking)
+
+for w in "${old_words[@]}"; do
+    while IFS= read -r line; do
+        report "OLD WORD   $w  $line"
+    done < <(grep -rniw --include='*.md' --include='*.zig' \
+        --exclude-dir=.zig-cache --exclude-dir=zig-out --exclude-dir=apidocs \
+        -- "$w" "$repo_root/src" "$repo_root/tests" "$repo_root/examples" \
+                "$repo_root/negative" "$repo_root/kitchen/docs" "$repo_root/README.md" \
+                2>/dev/null \
+        | grep -v "^$repo_root/kitchen/docs/examples/" \
+        | sed "s|^$repo_root/||")
+done
 
 echo
 if [ "$hits" -eq 0 ]; then

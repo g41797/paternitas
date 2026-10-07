@@ -54,7 +54,7 @@ On a struct without a TypedNode, each of these is a compile error.
 | `TypedMessage.parentFromNodeUnchecked(node)` | `*Message`, with no check. Only when the type is already known | none |
 | `TypedMessage.Node` | the std Node type of `Message` | none |
 
-The `must` calls panic in every build mode. The panic names both types.
+The `must` calls panic in every build mode. The panic message shows both type names.
 
 ---
 

@@ -4,7 +4,7 @@ DOCS 01. 2026-10-06. The pages are written. This version adds the owner's
 rulings after the first review of the site, and the new logo subtitle.
 
 - Current state: [STATUS.md](STATUS.md).
-- The plan: [implementation-plan-021.md](implementation-plan-021.md), "DOCS 01". DOCS 01 PLAN is under "Completed stages".
+- The plan: [implementation-plan-022.md](implementation-plan-022.md), "DOCS 01". DOCS 01 PLAN is under "Completed stages".
 - The README before DOCS 01: [README.md](../README.md), the README 01 draft.
 - The long old README: [backup/README-001.md](backup/README-001.md).
 - The drafts: 001 to 006 were removed by the owner, 2026-10-07.

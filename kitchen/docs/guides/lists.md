@@ -139,7 +139,7 @@ There is a fifth call for one case.
 - `TypedMessage.mustParentFromNode(node)` gives you `*Message`, or panics.
 - Use it when another type would be a bug.
 - It panics in every build mode.
-- The panic names both types.
+- The panic message shows both type names.
 
 ??? question "NAQ: Does it check in ReleaseFast?"  
     Yes.

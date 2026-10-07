@@ -93,7 +93,9 @@ The full program: [Type id without a node](../examples/007-type_id_without_node.
 
 ## What the compiler stops
 
-A list call needs a TypedNode.
+Only a struct with a TypedNode can go in a list.
+
+So `node`, `parentFromNode` and the other list functions need a TypedNode.
 
 A plain std Node is not one:
 
@@ -115,4 +117,4 @@ bare_node.BareNode: no TypedNode, so it has only typeId, isId, toAny and fromAny
 u32: not a struct, and Typed takes structs only
 ```
 
-Each message names the type.
+Each error message shows the type name.

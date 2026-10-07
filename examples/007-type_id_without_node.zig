@@ -14,7 +14,7 @@
 //!
 //! - Register one handler per type, under its `typeId`.
 //! - Send a `Point`, a `Tick` and an `Empty` as `Any`s.
-//! - Find the handler by `type_id`. No list. No type named in the loop.
+//! - Find the handler by `type_id`. No list. The loop does not use your struct types.
 //! - Count the `Empty` as unhandled. It has no handler.
 //! - Check with `isId` which type an `Any` holds.
 //! - Get a `Point` back from an `Any` with `fromAny`.
@@ -57,7 +57,7 @@ pub fn type_id_without_node(allocator: std.mem.Allocator, io: std.Io) !void {
     var handlers: std.AutoHashMap(paternitas.TypeId, Handler) = .init(allocator);
     defer handlers.deinit();
 
-    // Register the handlers. The dispatch below never names a type.
+    // Register the handlers. The dispatch code does not use your struct types.
     // --8<-- [start:send]
     try handlers.put(TypedPoint.typeId(), onPoint);
     try handlers.put(TypedTick.typeId(), onTick);

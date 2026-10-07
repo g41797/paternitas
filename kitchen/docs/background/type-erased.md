@@ -17,7 +17,7 @@ Task -----+
 ```
 
 - One `std.DoublyLinkedList` serves every struct type.
-- The code built on the list never names your struct types.
+- The code built on the list does not use your struct types.
 
 That code is your infrastructure: a queue, a scheduler, a dispatcher.
 

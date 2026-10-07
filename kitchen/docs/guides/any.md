@@ -76,7 +76,7 @@ The handler casts `ptr` to its own type:
 --8<-- "examples/004-handler_map.zig:handler"
 ```
 
-- The dispatch never names a type.
+- The dispatch code does not use your struct types.
 - The map matched the type id, so the cast is right.
 - A type with no handler is counted, not cast.
 

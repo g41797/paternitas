@@ -1,4 +1,5 @@
-//! mustParentFromAnchor on another type panics in every build mode, naming both.
+//! mustParentFromAnchor on another type panics in every build mode.
+//! The panic message shows both type names.
 
 const Msg = struct { tnode: p.SinglyTypedNode = .{} };
 const Job = struct { tnode: p.DoublyTypedNode = .{} };
