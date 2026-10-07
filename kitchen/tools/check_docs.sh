@@ -7,8 +7,8 @@
 #   1. Dead cross-references, in both syntaxes — [text](target.md) and
 #      `target.md`.
 #   2. Banned and AI-sh words, from design/rules-NNN.md Part 4.
-#   3. The README's size claim. While README.md says "The code is shorter
-#      than this README", the code must be shorter: count_src_loc.sh against
+#   3. The README's size claim. While README.md says "It is shorter than
+#      this README", the code must be shorter: count_src_loc.sh against
 #      count_readme_loc.sh.
 #   4. The old wording. "mark" and its forms gave way to setTypeId wording.
 #      Read in src/, tests/, examples/, negative/, the README and the site
@@ -195,7 +195,7 @@ done
 
 echo "== 3. the README's size claim =="
 
-size_claim="The code is shorter than this README"
+size_claim="It is shorter than this README"
 if grep -qF "$size_claim" "$repo_root/README.md"; then
     code_lines=$(bash "$repo_root/kitchen/tools/count_src_loc.sh")
     readme_lines=$(bash "$repo_root/kitchen/tools/count_readme_loc.sh" "$repo_root/README.md")

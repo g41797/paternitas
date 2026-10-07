@@ -4,6 +4,17 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-07 — Gate 3 checks the size claim again
+
+- The new README start says "It is shorter than this README."
+- Gate 3 looked for "The code is shorter than this README". It found nothing and skipped the check.
+- `kitchen/tools/check_docs.sh`: the claim text and the header comment now match the README.
+- Gate 3 now checks: code 189 lines, README 206 lines.
+- Line counts: README skips blank lines and `---` rules. Code skips blank, comment and `@import` lines.
+- All six gates pass.
+
+---
+
 ## 2026-10-07 — README: the code link goes to the API docs
 
 - The owner's call: the "code" link goes to
