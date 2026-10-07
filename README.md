@@ -10,9 +10,18 @@
 
 Paternitas makes Zig's intrusive, type-erased lists safer.
 
-The code is shorter than this README.
+Read on.
 
-And a bonus at the end: a runtime type id for any struct. No list, no Node.
+Or visit the [doc site](https://g41797.github.io/paternitas/).
+
+Or jump straight to the [code](https://g41797.github.io/paternitas/apidocs/). It is shorter than this README.
+
+In a few minutes you will know:
+
+- why you need it,
+- what it does,
+- how to use it,
+- and a bonus: a runtime type id for any struct.
 
 ---
 

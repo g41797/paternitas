@@ -4,6 +4,32 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-07 — README: the code link goes to the API docs
+
+- The owner's call: the "code" link goes to
+  `https://g41797.github.io/paternitas/apidocs/`, not `src/paternitas.zig`.
+- The same as the "lines of code" badge on the site's home page.
+- The owner's URL confirms the doc site root.
+
+---
+
+## 2026-10-07 — README: a new start
+
+The owner brought advice on the README start and wrote the final text.
+
+- Done, with the owner's go: README lines 11-15 replaced.
+  - "Read on." Then the doc site link, then the code link.
+  - The code link goes to `src/paternitas.zig`. "It is shorter than this README."
+  - "In a few minutes you will know": why, what, how, and the bonus.
+- The doc site link is `https://g41797.github.io/paternitas/`. GitHub Pages,
+  from the docs workflow. Not checked live: nothing remote.
+- "No list, no Node." left the top. The bonus section still says it.
+- Kept by the owner: "why you need it", though "Do I need it?" says you
+  probably do not.
+- Six gates pass. Strict site build passes. Preview restarted.
+
+---
+
 ## 2026-10-07 — SYNC 01: the owner's read, two rounds
 
 The owner read the new module comment on the preview site. Intent 002 has
