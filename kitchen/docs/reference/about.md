@@ -49,8 +49,9 @@ The trigger was the Ziggit post [New LinkedList API footgun](https://ziggit.dev/
 
 The same problem appeared in each version:
 
-- [C3](https://github.com/g41797/matryoshka-3tk): C3's own `typeid`.
-- [Zig](https://github.com/g41797/matryoshka-ztk): comptime helpers. Work in progress.
+- [Odin](https://github.com/g41797/matryoshka-otk)
+- [C3](https://github.com/g41797/matryoshka-3tk)
+- [Zig](https://github.com/g41797/matryoshka-ztk). Work in progress.
 
 The useful part turned out to be small enough to use by itself.
 

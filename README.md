@@ -274,8 +274,9 @@ The trigger was the Ziggit post
 
 Paternitas grew out of _Matryoshka_, a toolkit for background processes:
 
-- [C3](https://github.com/g41797/matryoshka-3tk),
-- [Zig](https://github.com/g41797/matryoshka-ztk). Work in progress.
+- [Odin](https://github.com/g41797/matryoshka-otk)
+- [C3](https://github.com/g41797/matryoshka-3tk)
+- [Zig](https://github.com/g41797/matryoshka-ztk). Work in progress
 
 The same problem showed up in each one.
 
