@@ -62,7 +62,7 @@
 //! ## Beyond lists
 //!
 //! - `Any` passes a struct through a queue, a map, a union field or a callback.
-//! - `typeId` gives any struct a type id, with or without a TypedNode.
+//! - `TypeId` gives any struct a type id, with or without a TypedNode.
 //! - `container` is for you, if you write your own container.
 //!
 //! ## The site
