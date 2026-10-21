@@ -1,0 +1,163 @@
+/* ===================================================================
+   paternitas Landing Page - Hero Styles
+   Supports Material for MkDocs light/dark mode
+   =================================================================== */
+
+/* Hide navigation sidebar and TOC on landing page only (content is self-contained) */
+body:has(.hero-wrapper) .md-nav,
+body:has(.hero-wrapper) .md-sidebar {
+  display: none !important;
+}
+
+/* Hero Wrapper - Full viewport layout */
+.hero-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+/* Hero Container - Main content area */
+.hero-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+/* Hero Image - Centered project logo, doubles as the primary action */
+.hero-image {
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.hero-image a {
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.hero-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.hero-image a {
+  border-radius: 12px;
+}
+
+.hero-image a:hover {
+  transform: translateY(-8px) scale(1.06);
+  filter: brightness(1.12) saturate(1.3)
+    drop-shadow(0 0 5px rgba(220, 38, 38, 0.75));
+}
+
+.hero-image a:focus-visible {
+  outline: 3px solid var(--md-accent-fg-color);
+  outline-offset: 6px;
+}
+
+/* Hero Buttons - Stacked vertically as lines */
+.hero-buttons-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 320px;
+  width: 100%;
+}
+
+/* Hero buttons - API and Examples. The LOC badge used the same style */
+.hero-loc-badge {
+  display: inline-block;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.95rem;
+  font-family: var(--md-code-font, monospace);
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* LOC badge - Light Mode */
+[data-md-color-scheme="default"] .hero-loc-badge {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.65);
+}
+
+[data-md-color-scheme="default"] .hero-loc-badge:hover {
+  background-color: #00bcd4; /* cyan */
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
+}
+
+/* LOC badge - Dark Mode */
+[data-md-color-scheme="slate"] .hero-loc-badge {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-md-color-scheme="slate"] .hero-loc-badge:hover {
+  background-color: #cddc39; /* lime */
+  color: #121212;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(205, 220, 57, 0.3);
+}
+
+/* LOC badge, text only: not a link, no hover */
+.hero-loc-badge.hero-loc-static {
+  cursor: default;
+}
+
+[data-md-color-scheme="default"] .hero-loc-badge.hero-loc-static:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.65);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-md-color-scheme="slate"] .hero-loc-badge.hero-loc-static:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  transform: none;
+  box-shadow: none;
+}
+
+/* ===================================================================
+   Responsive Design
+   =================================================================== */
+
+@media screen and (max-width: 768px) {
+  .hero-image { max-width: 90%; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Title - the project name, under the logo */
+.hero-title {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+/* An empty title takes no room, so the buttons sit close to the logo */
+.hero-title:empty {
+  display: none;
+}

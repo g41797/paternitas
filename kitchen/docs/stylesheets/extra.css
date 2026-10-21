@@ -33,7 +33,7 @@ body:has(.hero-wrapper) .md-sidebar {
   justify-content: center;
 }
 
-/* Hero Image - Centered project logo, doubles as the primary action */
+/* Hero Image - Centered project logo. Not a link: the buttons below are the actions */
 .hero-image {
   text-align: center;
   max-width: 800px;
@@ -41,32 +41,11 @@ body:has(.hero-wrapper) .md-sidebar {
   margin: 0 auto;
 }
 
-.hero-image a {
-  display: inline-block;
-  cursor: pointer;
-  transition: transform 0.3s ease, filter 0.3s ease;
-}
-
 .hero-image img {
   display: block;
   max-width: 100%;
   height: auto;
   border-radius: 12px;
-}
-
-.hero-image a {
-  border-radius: 12px;
-}
-
-.hero-image a:hover {
-  transform: translateY(-8px) scale(1.06);
-  filter: brightness(1.12) saturate(1.3)
-    drop-shadow(0 0 5px rgba(220, 38, 38, 0.75));
-}
-
-.hero-image a:focus-visible {
-  outline: 3px solid var(--md-accent-fg-color);
-  outline-offset: 6px;
 }
 
 /* Hero Buttons - Stacked vertically as lines */
@@ -108,8 +87,9 @@ body:has(.hero-wrapper) .md-sidebar {
 
 /* LOC badge - Dark Mode */
 [data-md-color-scheme="slate"] .hero-loc-badge {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.7);
+  background-color: #3d4451;
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 [data-md-color-scheme="slate"] .hero-loc-badge:hover {
@@ -132,8 +112,8 @@ body:has(.hero-wrapper) .md-sidebar {
 }
 
 [data-md-color-scheme="slate"] .hero-loc-badge.hero-loc-static:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.7);
+  background-color: #3d4451;
+  color: #ffffff;
   transform: none;
   box-shadow: none;
 }

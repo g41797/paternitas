@@ -4,6 +4,43 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-21 — Dark mode hero buttons: solid background
+
+- Owner: in dark mode the button background shows only on hover.
+- White at 0.18 was still too faint.
+- Dark mode badge: solid `#3d4451`, white text, 1px light inner border.
+- Hover stays lime.
+- All six gates pass. Preview restarted.
+
+---
+
+## 2026-10-21 — Hero buttons: one color, visible in dark mode
+
+- Owner: Get Started same color as LOC.
+  - `.hero-primary` rules removed from `extra.css`. Class removed from `index.md`.
+- Owner: LOC background not visible in dark mode.
+  - Dark mode badge: background white 0.08 → 0.18, text 0.7 → 0.9.
+- All six gates pass. Preview restarted.
+
+---
+
+## 2026-10-21 — Hero: logo is a picture, Get Started is a button
+
+- Problem: the logo opened the doc site, the LOC button opened the API docs. Not consistent.
+- `kitchen/docs/index.md`:
+  - logo: no link. Alt text "Paternitas".
+  - new button "Get Started" → `introduction/`, same tab (`target="_self"`).
+  - "NNN lines of code" → `apidocs/`, new tab. Second.
+- `kitchen/docs/stylesheets/extra.css`:
+  - logo hover, focus and red glow removed.
+  - `.hero-primary`: same pill as the LOC badge, filled with the primary color. Hover as LOC.
+- `kitchen/hooks/new_tab_links.py` opens every link in a new tab. `target="_self"` keeps Get Started in the same tab.
+- Backups: `design/backup/extra.css.2026-10-21`, `design/backup/index.md.2026-10-21`.
+- The "Start here" label item is closed: Get Started replaces it.
+- All six gates pass. Site builds. Preview restarted. The visual look is not checked: owner to review.
+
+---
+
 ## 2026-10-07 — Logo hover is visible
 
 - Old hover: a 4px lift. Not clear the logo is a button.
