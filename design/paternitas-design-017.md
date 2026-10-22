@@ -1,9 +1,22 @@
-# paternitas — Design (015)
+# paternitas — Design (017)
 
 This is the versioned design document. It says what paternitas is, records
 the decisions and their reasons, and keeps the owner's rulings.
 
-Change from 014: LOOK 03, 2026-10-07. The owner named it.
+Change from 016: the ZTK 01 close, 2026-10-22.
+
+- "ztk on paternitas" says what ZTK 01 decided: `AnyParent` is ztk's
+  narrower view of `Any`; `ParentHelper` refuses a struct with no TypedNode;
+  a ztk user needs to know only how to embed one TypedNode.
+
+Change from 015, kept: ZTK 01, step B, 2026-10-22. The owner approved it.
+
+- `findTypedNode` is public, for container authors and for ztk. ztk's
+  `ParentHelper` uses it to refuse a struct with no TypedNode.
+- Its "not a struct" message is neutral: `X: not a struct`. It no longer
+  names `Typed`, since ztk calls it too.
+
+Change from 014, kept: LOOK 03, 2026-10-07. The owner named it.
 
 - The logo gets its "in" side: three typed shapes on the left, in a mixed
   order, merge into the belt. Three gray boxes on the belt, not five.
@@ -114,7 +127,7 @@ The rest of the project state lives in other files.
 - The current state is in [STATUS.md](STATUS.md).
 - The narrative is in [STATUS-LOG.md](STATUS-LOG.md).
 - The rules are in [rules-014.md](rules-014.md).
-- The work still to do is in [implementation-plan-022.md](implementation-plan-022.md).
+- The work still to do is in [implementation-plan-025.md](implementation-plan-025.md).
 - A big task gets its own versioned `.md` under `design/`, linked from here.
 
 ---
@@ -572,7 +585,7 @@ A Parent is a struct with exactly one `SinglyTypedNode` or
 - `Typed` finds the TypedNode by its type, among the top-level fields.
 
 ```text
-not a struct      -> compile error: X: not a struct, and Typed takes structs only
+not a struct      -> compile error: X: not a struct
 zero TypedNodes   -> accepted, not a Parent: typeId, isId, toAny, fromAny only
 one TypedNode     -> accepted, a Parent: every call
 more than one     -> compile error: X: more than one TypedNode, and at most one is allowed
@@ -988,7 +1001,7 @@ map.get(any.type_id);                      // a handler map, no list
 
 | you write | you get |
 |---|---|
-| `Typed(u32)` | `u32: not a struct, and Typed takes structs only` |
+| `Typed(u32)` | `u32: not a struct` |
 | two TypedNodes in `P` | `P: more than one TypedNode, and at most one is allowed` |
 | a list call, `P` has no TypedNode | `P: no TypedNode, so it has only typeId, isId, toAny and fromAny` |
 
@@ -1222,6 +1235,8 @@ pub fn Typed(comptime P: type) type;   // P: any struct, at most one TypedNode
 //   parentFromNode(n: *Node) ?*P
 //   mustParentFromNode(n: *Node) *P
 //   parentFromNodeUnchecked(n: *Node) *P
+
+pub fn findTypedNode(comptime P: type) ?[]const u8;   // the TypedNode field's name, or null
 
 // ---- paternitas.container: for container authors
 
@@ -1483,6 +1498,19 @@ The ztk vocabulary changes too.
   - Some get new names: `OuterId` -> `TypeId`, `fromInner` -> `fromAnchor`.
   - Some change meaning: `Inner` -> `Anchor` or TypedNode, `inner.next` ->
     `TypeInfo.nextField`.
+
+ZTK 01 decided three things. Owner's rulings, 2026-10-22.
+
+- `AnyParent` stays a ztk name: `pub const AnyParent = paternitas.Any;`.
+  The same struct, a narrower promise: a ztk parent always has a TypedNode.
+  `fromAny` on a view of any other struct answers null.
+- `ParentHelper` refuses a struct with no TypedNode, after
+  `Typed(Parent)`, through the public `findTypedNode`:
+  `<P>: no TypedNode, so it cannot be a ztk parent`. `Typed` itself keeps
+  taking such a struct.
+- A ztk user needs to know only how to embed one TypedNode. paternitas names
+  are fine in ztk; its docs are not required reading. The rules:
+  `ztk/design/rules-001.md`.
 
 ---
 

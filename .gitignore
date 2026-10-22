@@ -16,3 +16,6 @@ site/
 /zig-pkg/
 .antigravitycli/
 __pycache__/
+/ztk/docs/
+/ztk/kitchen/docs/apidocs/
+/ztk/kitchen/docs/examples/

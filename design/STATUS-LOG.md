@@ -4,6 +4,209 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+
+## 2026-10-22 — ZTK 02 closed (Opus 5.5)
+
+- The owner read 104 and 105: ok. Plan 003: [ztk-plan-003.md](ztk-plan-003.md).
+
+The owner named it. Intent: [ztk-02-intent-001.md](ztk-02-intent-001.md).
+
+- Answers: 104 and 105 yes. No Mbox receive form for `AnyParent`: Slot
+  usage is MUST. `anchor.typeId()` stays. NEXT's docs, z4 and the audit go
+  to ZTK DOCS.
+- Claude's first sketch for B emptied the Slot with `takeFromSlot` and cast
+  `any.ptr`. Wrong: that is the exit for an own container. Redone: the
+  handler takes the Slot.
+- Written: `Deadline.zig`, 104, 105, two test wrappers. All gates pass,
+  ztk 202/203.
+
+## 2026-10-22 — ZTK 01 closed
+
+- Step D, approved by the owner.
+- Design 017: "ztk on paternitas" records ZTK 01: `AnyParent` the narrower
+  view; `ParentHelper` refuses zero TypedNodes through `findTypedNode`; the
+  minimum-knowledge rule, `ztk/design/rules-001.md`.
+- `ztk-plan-002.md`: the ZTK 01 items done.
+- Plan 025: ZTK 01 under "Completed stages"; "design 005" is "design 017"
+  (question 3); ZTK DOCS takes the docs audit.
+- 016, plan 024, ztk-plan 001 to `design/backup/`. Repointed: `STATUS.md`,
+  `rules-014.md` and the design docs. Not this log.
+- Carried over: questions 4, 6, 7 of intent 002.
+- Six gates pass, three ztk gates pass.
+- After a clear: "Read design/STATUS.md. Start ZTK 02." once the owner
+  names it. Model: Opus.
+
+---
+
+## 2026-10-22 — ZTK 01, step C: ztk green
+
+- `ztk/src/helper.zig`: after `const P = paternitas.Typed(Parent);`, a
+  comptime check: `findTypedNode(Parent) == null` is
+  `<P>: no TypedNode, so it cannot be a ztk parent`.
+- `ztk/build.zig`: 306 and 314 expect the ztk text; 307 expects
+  `more than one TypedNode, and at most one is allowed`.
+- `kitchen/ztk_gates.sh`: all three pass. z1: 200/201, 1 skipped, in each of
+  the four modes. z2: negatives in four modes. z3: fmt.
+- `kitchen/gates.sh`: all six pass.
+- Next: step D, the close.
+
+---
+
+## 2026-10-22 — ZTK 01, step B: paternitas fix
+
+- The owner approved step B.
+- `src/paternitas.zig`: `pub fn findTypedNode`, with the agreed `///`. Moved
+  next to `container`, where a container author meets it. Message
+  `<P>: not a struct`. The two-TypedNode message unchanged.
+- `build.zig`: `not_struct.zig` expects `not a struct`.
+- The site: `guides/type-ids.md`, `reference/limits.md`.
+- Design 016: the two message lines, `findTypedNode` in the public surface.
+  015 to `design/backup/`. Repointed: `STATUS.md`, `rules-014.md`, plan 024,
+  four design docs. Not this log.
+- `STATUS.md`: the TYID line quotes the new message.
+- Not changed: `name-01-intent-002.md`, a record; the `not_struct.zig`
+  header.
+- Six paternitas gates pass; the README size claim holds. ztk: z1 passes;
+  z2 fails on 306, 307, 314 only, as expected.
+- Next: step C.
+
+---
+
+## 2026-10-22 — ztk rules 001
+
+- New `ztk/design/rules-001.md`, the owner's choice: ztk-only rules. It adds
+  to rules-014 while ztk is here; it merges into matryoshka-ztk's rules at
+  ZTK HOME.
+- Rule 1: minimum knowledge. Rule 2: paternitas is mentioned in three
+  places only. Rule 3: reserved for the z4 check.
+- `STATUS.md`: "Start here" step 7 and the sources table point to it.
+- No code changed.
+
+---
+
+## 2026-10-22 — ZTK 01, step A
+
+- Intent 002: the owner's new requirement, a ztk user needs no knowledge of
+  paternitas beyond the minimum. A first look at the former API: G1
+  published Matryoshka (`PolyNode` …), G2 NEXT (`Inner` …), G3 ztk now.
+  The owner: G1 not a concern; paternitas names in ztk are fine; the docs
+  stand alone. The docs audit goes into ZTK DOCS.
+- Step A approved and done, only in `ztk/`:
+  - `src/inner.zig`: `AnyParent = paternitas.Any`, its doc says a view of a
+    struct with no TypedNode gets null from `fromAny`.
+  - `anyFromSlot` doc: null also when setTypeId was never called.
+  - `tests/layer1_any.zig`: 330, `anyFromSlot` null without setTypeId; 331,
+    `fromAny` null for a view of a struct with no TypedNode.
+  - `build.zig`: the test module imports paternitas, for 331 only. Not in
+    the intent's words; needed for its test.
+- `ztk_gates.sh`: z1 passes, four modes, 200/201, 1 skipped. z2 fails on
+  306, 307, 314 only, as expected. fmt clean. Six paternitas gates pass.
+- Next: step B, the paternitas fix, needs its own approval.
+
+---
+
+## 2026-10-22 — ZTK 00 closed; ZTK 01 intent
+
+- The owner closed ZTK 00 and named ZTK 01.
+- Plan 024: ZTK 00 under "Completed stages"; ZTK 01 takes the rulings.
+  023 to `design/backup/`. Repointed: `STATUS.md` and eleven design docs.
+  Not this log.
+- Owner's rulings, before the close: `ParentHelper` refuses zero TypedNodes
+  itself, after `Typed(Parent)`, no struct guard (checked in scratch);
+  paternitas `findTypedNode` public, its doc agreed; message
+  `<P>: not a struct`.
+- New: `ztk-01-intent-001.md`. Rounds A ztk, B paternitas fix, C ztk, D close.
+  Four questions.
+- No code changed.
+
+---
+
+## 2026-10-22 — ZTK 00: set up
+
+- `ztk/` at the root: a copy of `design/source/paternitas-and-ztk/ztk`,
+  3.8M. Not copied: `docs/`, `kitchen/docs/apidocs/`,
+  `kitchen/docs/examples/`, `.zig-cache/`. `design/source/` untouched.
+- `ztk/build.zig.zon`: `.paternitas = .{ .path = ".." }`.
+- `.gitignore`: `/ztk/docs/`, `/ztk/kitchen/docs/apidocs/`,
+  `/ztk/kitchen/docs/examples/`. The owner said yes.
+- New `kitchen/ztk_gates.sh`: z1 test, four modes; z2 negative, four modes;
+  z3 fmt. Logs `zig-out/ztk_z*.log`.
+- First run: z1 fails, as expected: `src/inner.zig:59`, no `AnyParent` in
+  paternitas. z3 fmt passes when run alone. z2 not reached.
+- `kitchen/gates.sh` does not look into `ztk/`: every gate names its paths.
+  No change.
+- New `design/ztk-plan-001.md`: the outside plan in today's names, each item
+  done or open. Nearly all of it is done in the copy.
+- Found, for ZTK 01: since TYID, `Typed` takes a struct with no TypedNode.
+  `ParentHelper` relied on paternitas to refuse it and has no refusal of its
+  own. Negatives 306, 307, 314 expect the old texts.
+
+NEXT check.
+
+- NEXT's newest file: 2026-09-21. Unchanged.
+- 140 lines of `diff -rq`, without `.zig-cache`, `docs`, `apidocs`.
+- The paternitas move: all 127 differing files. Checked by filtering the move
+  words (outer, inner, item, stamp, link, parent, typeId, Anchor, Any) and
+  reading what was left: the `id` field to `typeId`, node access, the `Any`
+  API, the README's "Built on Paternitas". Plus moved names:
+  `examples/items` to `parents`, `tests/outers` to `parents`,
+  `internal/info.zig` gone, negatives 300, 320 to 322 renamed or replaced,
+  314 new.
+- Other, for the owner:
+  1. NEXT `design/` has newer README-stage docs, all 2026-09-21:
+     `readme-creation-002.md`, `comments-creation-002.md`, `README-001.md`
+     (a 34K draft README), and `backup/` with the 001s. The copy has only
+     `readme-creation-001.md`, `comments-creation-001.md`, rewritten
+     2026-10-01.
+  2. NEXT has `zig-out/` and two `__pycache__/`. Build leftovers.
+- Nothing in matryoshka-ztk changed.
+
+Next: the owner closes ZTK 00 (one line under "Completed stages" in a new
+plan version) and names ZTK 01. After a clear: read `STATUS.md`. Model: Opus.
+
+---
+
+## 2026-10-22 — Plan 023: the ZTK stages
+
+- The ZTK stages were only in the intent. The plan still said "ZTK — later".
+- New: `implementation-plan-023.md`. Section "ZTK": the rulings and the stages
+  ZTK 00, 01, 02 …, DOCS, HOME. The order line names them.
+- New: `ztk-00-intent-003.md`. ZTK 00 only. Later stages point to the plan.
+- 022 and intent 002 to `design/backup/`.
+- Repointed to 023: `STATUS.md` and nine design docs. Not this log.
+- matryoshka-ztk `next-status.md`: pointer now names intent 003.
+- No code changed.
+
+---
+
+## 2026-10-22 — ZTK 00 intent 002 approved
+
+- Owner's answers: `ztk/` at the root; `AnyParent` stays a ztk name; NEXT survey becomes a light check.
+- `AnyParent` vs `Any`: same struct, narrower promise. A ztk parent always has a TypedNode.
+- NEXT unchanged since 2026-09-21. The copy came after it.
+- `Anchor.toAny` answers `?Any`. ztk's `anyFromSlot` doc to be fixed in ZTK 01.
+- New: `design/ztk-00-intent-002.md`. 001 to `design/backup/`.
+- matryoshka-ztk: pointer in `next-status.md`, entry in `next-log.md`. Owner's permission.
+- No code changed.
+
+---
+
+## 2026-10-22 — ZTK 00 intent written
+
+- Owner's ruling: ztk is moved onto paternitas in this repo.
+- Owner's ruling: writes to matryoshka-ztk are allowed, with permission each time.
+- The ztk copy, `design/source/paternitas-and-ztk/ztk`, analyzed.
+  - Against this repo it fails on one line: `src/inner.zig:59`, `paternitas.AnyParent`.
+  - With that line changed, in a scratch copy: 198/199 pass, 1 skipped. Debug only.
+  - `ztk/root` is not in the copy.
+- New: `design/ztk-00-intent-001.md`. Three questions for the owner.
+- `STATUS.md` "Next": item 4, ZTK 00.
+- Not done: the pointer in matryoshka-ztk `next-status.md` and `next-log.md`.
+  The owner approved it. The session's tool guard blocked the write. Left for the owner.
+- No code changed. Gates not run: docs only.
+
+---
+
 ## 2026-10-21 — Dark mode hero buttons: solid background
 
 - Owner: in dark mode the button background shows only on hover.

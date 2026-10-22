@@ -85,7 +85,7 @@ Each error message shows the type name. Each comes from a program in `negative/c
 | the mistake | the message | the program |
 |---|---|---|
 | `node`, `parentFromNode` or another list function on a struct without a TypedNode | `<P>: no TypedNode, so it has only typeId, isId, toAny and fromAny` | `bare_node.zig` |
-| `Typed` of a value that is not a struct | `<P>: not a struct, and Typed takes structs only` | `not_struct.zig` |
+| `Typed` of a value that is not a struct | `<P>: not a struct` | `not_struct.zig` |
 | two TypedNodes in one struct | `<P>: more than one TypedNode, and at most one is allowed` | `two_typed_nodes.zig` |
 | `TypedNode(N)` of a Node that is not a std Node | `TypedNode(<N>): not a std Node, so it cannot be a Paternitas TypedNode` | `typed_node_other_node.zig` |
 | a doubly Node given to a singly struct | Zig's own type error: `found '*DoublyLinkedList.Node'` | `wrong_node.zig` |

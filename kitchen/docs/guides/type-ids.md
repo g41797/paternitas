@@ -114,7 +114,7 @@ bare_node.BareNode: no TypedNode, so it has only typeId, isId, toAny and fromAny
 ```
 
 ```text
-u32: not a struct, and Typed takes structs only
+u32: not a struct
 ```
 
 Each error message shows the type name.

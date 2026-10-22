@@ -124,7 +124,7 @@ fn addNegative(
 
     // Each of these must fail to compile, with that message.
     const refused_at_compile_time = [_]struct { file: []const u8, says: []const u8 }{
-        .{ .file = "negative/compile/not_struct.zig", .says = "not a struct, and Typed takes structs only" },
+        .{ .file = "negative/compile/not_struct.zig", .says = "not a struct" },
         .{ .file = "negative/compile/bare_node.zig", .says = "bare_node.BareNode: no TypedNode, so it has only typeId, isId, toAny and fromAny" },
         .{ .file = "negative/compile/two_typed_nodes.zig", .says = "more than one TypedNode, and at most one is allowed" },
         .{ .file = "negative/compile/wrong_node.zig", .says = "found '*DoublyLinkedList.Node'" },

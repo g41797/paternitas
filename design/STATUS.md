@@ -7,14 +7,16 @@ Current state only. Updated in place. The narrative is in
 
 1. Read this file in full.
 2. Read Part 0 of [rules-014.md](rules-014.md).
-3. Read the plan, [implementation-plan-022.md](implementation-plan-022.md), for
+3. Read the plan, [implementation-plan-025.md](implementation-plan-025.md), for
    the stage the owner names. Not before they name it.
-4. Read the design, [paternitas-design-015.md](paternitas-design-015.md), for
+4. Read the design, [paternitas-design-017.md](paternitas-design-017.md), for
    a stage that writes code or docs.
 5. Read [paternitas-intake-001.md](paternitas-intake-001.md) for the ztk
    stage: the outside work and the questions left for it.
 6. Read the head of [STATUS-LOG.md](STATUS-LOG.md) when the stage needs the
    last stage's account.
+7. For a ZTK stage, read [ztk/design/rules-001.md](../ztk/design/rules-001.md)
+   too: the ztk-only rules.
 
 **No stage starts because a document says it is next.** The owner names it.
 
@@ -23,8 +25,9 @@ Current state only. Updated in place. The narrative is in
 | what | where |
 |---|---|
 | rules | [rules-014.md](rules-014.md) |
-| design decisions, and what paternitas keeps from ztk | [paternitas-design-015.md](paternitas-design-015.md) |
-| the plan | [implementation-plan-022.md](implementation-plan-022.md) |
+| ztk-only rules, during ZTK | [ztk/design/rules-001.md](../ztk/design/rules-001.md) |
+| design decisions, and what paternitas keeps from ztk | [paternitas-design-017.md](paternitas-design-017.md) |
+| the plan | [implementation-plan-025.md](implementation-plan-025.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
 | the outside work itself, as it came | `design/source/` |
@@ -39,6 +42,32 @@ Current state only. Updated in place. The narrative is in
 
 ## Current state
 
+- ZTK 02 is closed, 2026-10-22. The intent is
+  [ztk-02-intent-001.md](ztk-02-intent-001.md).
+  - Examples 104, a DoublyTypedNode parent from a timeout list through a
+    mailbox and back, and 105, a handler map that keeps the Slot to the
+    end. A demo parent, `Deadline`.
+  - No `AnyParent` receive form: Slot usage is MUST (the owner).
+  - ztk: three gates, 202/203 tests, 1 skipped. Six paternitas gates.
+  - The plan: [ztk-plan-003.md](ztk-plan-003.md).
+- ZTK 01 is closed, 2026-10-22. The intent was
+  [ztk-01-intent-002.md](ztk-01-intent-002.md).
+  - ztk is green on today's paternitas: all three ztk gates, four modes,
+    200/201 tests, 1 skipped. All six paternitas gates.
+  - `AnyParent = paternitas.Any`, ztk's narrower view. `ParentHelper`
+    refuses zero TypedNodes through the public `findTypedNode`.
+  - paternitas: `findTypedNode` public; `<P>: not a struct`. Design 017.
+  - The requirement: a ztk user needs to know only how to embed one
+    TypedNode. paternitas names are fine; the docs stand alone. The rules:
+    [ztk/design/rules-001.md](../ztk/design/rules-001.md). The docs audit
+    goes into ZTK DOCS.
+  - Carried over, intent 002: question 4, NEXT's newer README-stage docs;
+    question 6, the z4 check; question 7, `anchor.typeId()` in examples.
+- ZTK 00 is closed, 2026-10-22. The intent was
+  [ztk-00-intent-003.md](ztk-00-intent-003.md).
+  - `ztk/` at the root, on `.path = ".."`. `kitchen/ztk_gates.sh`: z1
+    test, z2 negative, z3 fmt.
+  - The current plan: [ztk-plan-003.md](ztk-plan-003.md).
 - SYNC 01: the comments in `src/`, `examples/` and `negative/` follow the
   README and the site. The owner named it, 2026-10-07. The intent is
   [sync-01-intent-002.md](sync-01-intent-002.md).
@@ -91,7 +120,7 @@ Current state only. Updated in place. The narrative is in
   - No two NAQs back to back. Each sits right after the text it is about,
     not at the end of a section.
 - README 02: a smaller README. The owner named it, 2026-10-07. The plan is
-  [implementation-plan-022.md](implementation-plan-022.md), "README 02".
+  [implementation-plan-025.md](implementation-plan-025.md), "README 02".
   - The README before it: `design/backup/README-004.md`.
   - Each new iteration is copied to `design/backup/`, from README-005 on.
   - A new MUST rule: text cut from the README or a site page stays on the
@@ -166,7 +195,7 @@ Current state only. Updated in place. The narrative is in
   - `AnyParent` is `Any`. A comparison row, "type id without a list".
   - The old README is `design/backup/README-002.md`.
   - Open: the owner's review. Trimming waits for the site pages.
-  - The owner's rulings are in [implementation-plan-022.md](implementation-plan-022.md), "README 01".
+  - The owner's rulings are in [implementation-plan-025.md](implementation-plan-025.md), "README 01".
 - Comments in `src/` took four items from a ChatGPT revision, 2026-10-06.
   The owner said go. Comments only; the code is unchanged.
   - The module doc opens with the problem: "An intrusive list gives you a
@@ -181,7 +210,7 @@ Current state only. Updated in place. The narrative is in
   - `Typed(P)` takes every struct. Without a TypedNode it has only
     `typeId`, `isId`, `toAny` and `fromAny`. A list call is a compile
     error that says so.
-  - `Typed(u32)` says `u32: not a struct, and Typed takes structs only`.
+  - `Typed(u32)` says `u32: not a struct` (ZTK 01 dropped "and Typed takes structs only").
     It no longer says "Paternitas Parent", since not every struct it takes
     is a Parent.
   - Two TypedNodes say `P: more than one TypedNode, and at most one is
@@ -253,6 +282,10 @@ Current state only. Updated in place. The narrative is in
 2. DOCS 02: the owner's look goes on, then the stage closes.
    [docs-02-intent-005.md](docs-02-intent-005.md).
 3. README 02: the owner reads iteration 7, README-012. The plan:
-   [implementation-plan-022.md](implementation-plan-022.md), "README 02".
-4. The last state: six gates pass, 27 tests, the strict site build passes,
-   2026-10-07. The owner commits and pushes.
+   [implementation-plan-025.md](implementation-plan-025.md), "README 02".
+4. ZTK DOCS: the owner names it. It takes the docs audit, NEXT's
+   README-stage docs, the z4 question and `anchor.typeId()`'s ztk doc.
+   [ztk-02-intent-001.md](ztk-02-intent-001.md), [ztk-plan-003.md](ztk-plan-003.md). The ZTK stages run in this
+   repo; writes to matryoshka-ztk need the owner's permission each time.
+5. The last state, 2026-10-22: six gates pass, three ztk gates pass. The
+   owner commits and pushes.

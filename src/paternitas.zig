@@ -522,24 +522,21 @@ pub const TypeId = ?*const anyopaque;
 /// Application code does not need it.
 pub const container = @import("container.zig");
 
-fn kindOf(comptime N: type) NodeKind {
-    if (N == std.SinglyLinkedList.Node) return .single;
-    if (N == std.DoublyLinkedList.Node) return .double;
-    @compileError("TypedNode(" ++ @typeName(N) ++ "): not a std Node, so it cannot be a Paternitas TypedNode");
-}
-
-// Stands in for the TypedNode of a struct that has none.
-// Such a struct cannot go in a list.
-// `node`, `parentFromNode` and the other list functions do not compile for it.
-// So nothing uses this stand-in.
-const NoTypedNode = struct {};
-
-// The name of `P`'s TypedNode field, or null when `P` has none.
-fn findTypedNode(comptime P: type) ?[]const u8 {
+/// Finds the TypedNode field of `P`.
+///
+/// Returns the field's name, or null when `P` has no TypedNode.
+///
+/// Use it when you write your own container and need to reach
+/// the TypedNode by name, with `@field`.
+///
+/// - `P` MUST be a struct.
+/// - `P` has at most one `SinglyTypedNode` or `DoublyTypedNode` field.
+/// - Breaking either rule is a compile error that names the type.
+pub fn findTypedNode(comptime P: type) ?[]const u8 {
     comptime {
         const ti: std.builtin.Type = @typeInfo(P);
         if (ti != .@"struct")
-            @compileError(@typeName(P) ++ ": not a struct, and Typed takes structs only");
+            @compileError(@typeName(P) ++ ": not a struct");
         var found: ?[]const u8 = null;
         for (ti.@"struct".fields) |f| {
             if (f.type == SinglyTypedNode or f.type == DoublyTypedNode) {
@@ -551,6 +548,18 @@ fn findTypedNode(comptime P: type) ?[]const u8 {
         return found;
     }
 }
+
+fn kindOf(comptime N: type) NodeKind {
+    if (N == std.SinglyLinkedList.Node) return .single;
+    if (N == std.DoublyLinkedList.Node) return .double;
+    @compileError("TypedNode(" ++ @typeName(N) ++ "): not a std Node, so it cannot be a Paternitas TypedNode");
+}
+
+// Stands in for the TypedNode of a struct that has none.
+// Such a struct cannot go in a list.
+// `node`, `parentFromNode` and the other list functions do not compile for it.
+// So nothing uses this stand-in.
+const NoTypedNode = struct {};
 
 /// Panics when runtime safety is on, and compiles to nothing otherwise.
 inline fn check(ok: bool, msg: []const u8) void {
