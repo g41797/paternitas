@@ -1,14 +1,17 @@
-//! The bridge: requests from the io side, workers on the Matryoshka side.
+//! Title: Requests from the io side
 //!
-//! - The io side owns an `Io.Queue(Msg)` and puts requests into it.
-//! - A handler waits on that queue and dispatches on the tag.
-//! - A request becomes a greeting from the pool, sent to a shared mailbox.
-//! - Workers receive from the mailbox and change the greeting.
-//! - A worker takes the greeting's bare Anchor out of its Slot and puts it on the queue.
-//! - The handler puts it back into a Slot, hands the text to the io side.
-//! - The greeting goes back to the pool.
-//! - Shutdown: `stop` ends the handler, then the mailbox closes and the workers leave.
+//! The io side sends requests. Workers on the toolkit side answer them.
 //!
+//! - Let the io side put requests into an `Io.Queue(Msg)`.
+//! - Wait on that queue in a handler, and switch on the tag.
+//! - Turn each request into a greeting from the pool, and send it to a shared
+//!   mailbox.
+//! - Receive the greeting in a worker, and change it.
+//! - Take the greeting's bare Anchor out of the worker's Slot, and put it on
+//!   the queue.
+//! - Put it back into a Slot in the handler, and give the text to the io side.
+//! - Give the greeting back to the pool.
+//! - Shut down: `stop` ends the handler, the mailbox closes, the workers leave.
 //!
 //! ```
 //!  io side ──request──► Io.Queue(Msg) ──► handler ──► pool.get, mbx.send

@@ -1,29 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool + Future: simple worker.
+//! Title: A pool and a future, no mailbox
 //!
-//! - Master seeds the pool with 1 empty container, spawns one worker with N passed at spawn time.
-//! - Worker loops N times: pl.getWait, writes its own counter into the container, pl.put.
-//! - fut.await blocks until the worker finishes all N cycles.
-//! - No mailbox needed — pool is the only coordination point.
+//! One worker and one pool. The pool is all the coordination there is.
 //!
-//! Transfers (mailbox-less):
+//! - Put one empty container in the pool, and start one worker. Pass it N.
+//! - Loop N times in the worker: `pl.getWait`, write its counter into the
+//!   container, `pl.put`.
+//! - Wait for the worker with `fut.await`.
+//!
+//! The container is a place to work, not a carrier of data.
 //!
 //! ```
-//!  pool (1 empty container seeded — code=0)
-//!  │ io.concurrent (n=3 passed at spawn time)
+//!  pool (1 empty container: code=0)
+//!  │ io.concurrent (n=3, passed at the start)
 //!  ▼
-//!  worker loop (n cycles):
-//!    pl.getWait ──► slot ──► ev.code = worker counter ──► pl.put ──► pool
+//!  worker loop (n times):
+//!    pl.getWait ──► Slot ──► ev.code = the counter ──► pl.put ──► pool
 //!  │
-//!  fut.await ──► master reads ctx.counter (= n after all cycles)
-//!  pl.close ──► on_close ──► freed
+//!  fut.await ──► the master reads ctx.counter (= n)
+//!  pl.close ──► on_close ──► released
 //! ```
-//!
-//!  Work input: spawn-time arg n + worker's own counter.
-//!  A pool parent is an empty container — a processing slot, not a data carrier.
-//!  No mailbox needed for simple single-worker coordination.
 //!
 
 pub fn pool_future_simple_worker(allocator: std.mem.Allocator, io: std.Io) !void {

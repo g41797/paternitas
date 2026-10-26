@@ -1,28 +1,25 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool + Select + Network.
+//! Title: A pool and a network read, no mailbox
 //!
-//! - Pool seeded with items, a mock network read runs alongside it in Select.
-//! - Two independent event sources: pool availability and simulated network data.
-//! - Both re-spawn until their target counts are met; no mailbox anywhere.
+//! Two independent sources in one Select: the pool and the network.
 //!
-//! Transfers (mailbox-less):
+//! - Fill the pool. Run a mock network read next to it in the Select.
+//! - Restart each source after you handle it, until both targets are met.
 //!
 //! ```
-//!  pool (seeded)            mock network (sleepFn)
+//!  pool (filled)            mock network (sleepFn)
 //!  │ getWaitResult           │ networkReadFn
 //!  └──────────┬──────────────┘
 //!             ▼
 //!  Select(MasterEvent)
 //!  │
-//!  .pool_ev .item ──► process ──► pl.put ──► pool (re-spawn)
-//!  .network       ──► log receipt ──► re-spawn (until targets met)
+//!  .pool_ev .anchor ──► handle ──► pl.put ──► pool (restart)
+//!  .network         ──► log it ──► restart (until the targets are met)
 //!  │
-//!  sel.cancelDiscard ──► pl.close ──► on_close ──► freed
+//!  sel.cancelDiscard ──► pl.close ──► on_close ──► released
 //! ```
-//!
-//!  No mailbox. Pool + Select + external Io: two independent event sources.
 //!
 
 pub fn pool_select_network(allocator: std.mem.Allocator, io: std.Io) !void {

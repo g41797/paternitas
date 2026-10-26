@@ -1,26 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Dispatch through a handler map, with the Slot to the end.
+//! Title: Dispatch through a handler map
 //!
-//! - A map from TypeId to a handler. A handler takes the Slot, not a pointer.
-//! - A producer sends Events and Sensors, mixed, into a mailbox.
-//! - The consumer receives into a Slot, reads the id, finds the handler and
-//!   passes it the Slot.
-//! - The handler gets its parent from the Slot through its own helper, a
-//!   checked and typed call, and consumes it.
-//! - After each call the consumer checks the Slot is empty: a handler that
-//!   forgot the parent is caught at once.
+//! A handler takes the Slot, not a pointer. The parent stays in the Slot until
+//! its handler takes it.
 //!
-//! The consumer never casts. It reads the id only. The parent stays in a
-//! Slot until the one handler that knows its type takes it.
+//! - Keep a map from TypeId to a handler.
+//! - Send Events and Sensors, mixed, into a mailbox.
+//! - Receive into a Slot in the consumer. Read the id, find the handler, and
+//!   pass it the Slot.
+//! - Get the parent from the Slot in the handler, with its own helper, and
+//!   handle it.
+//! - Check after each call that the Slot is empty. A handler that forgot the
+//!   parent is caught at once.
 //!
+//! The consumer never casts. It reads only the id.
 //!
 //! ```
-//!  mailbox ──mbx.receive──► slot ── typeId ──► handlers ──► handler(&slot)
-//!                                                               │ mustFromSlot, destroy
-//!                                                               ▼
-//!                                                          slot == null
+//!  mailbox ──mbx.receive──► Slot ── typeId ──► handlers ──► handler(&slot)
+//!                                                              │ mustFromSlot, destroy
+//!                                                              ▼
+//!                                                         slot == null
 //! ```
 //!
 

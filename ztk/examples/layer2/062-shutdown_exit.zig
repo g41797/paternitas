@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Shutdown via ShutdownCommand.
+//! Title: Stop with a ShutdownCommand
 //!
-//! - Main sends 3 Events, then a ShutdownCommand parent.
-//! - Worker processes each Event, exits cleanly on the sentinel.
-//! - Mailbox stays open throughout — worker owns every item it received.
+//! A ShutdownCommand parent tells the worker to stop.
 //!
+//! - Send three Events from main, then a ShutdownCommand.
+//! - Handle each Event in the worker. Stop on the ShutdownCommand.
+//!
+//! The mailbox stays open all the time. The worker releases every parent it
+//! received.
 //!
 //! ```
-//!  main ──Event×3──► mailbox ──► worker (processes, destroySlot)
-//!  main ──ShutdownCommand──► mailbox ──► worker (exits, destroySlot)
-//!  (mailbox stays open; worker owns all received items)
+//!  main ──Event×3──► mailbox ──► worker (handles, destroySlot)
+//!  main ──ShutdownCommand──► mailbox ──► worker (stops, destroySlot)
 //! ```
 //!
 

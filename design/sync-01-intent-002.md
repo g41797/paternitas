@@ -3,9 +3,9 @@
 The comments in `src/`, `examples/` and `negative/` follow the README and
 the site. The owner named it, 2026-10-07.
 
-- The plan: [implementation-plan-025.md](implementation-plan-025.md),
+- The plan: [implementation-plan-034.md](implementation-plan-034.md),
   "SYNC 01".
-- The rules: [rules-014.md](rules-014.md). Part 0, "The README and the site":
+- The rules: [rules-015.md](rules-015.md). Part 0, "The README and the site":
   text cut from a comment stays on the site.
 
 ---

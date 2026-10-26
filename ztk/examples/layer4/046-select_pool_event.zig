@@ -1,32 +1,33 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool getWait as Select event source.
+//! Title: A pool as a Select source
 //!
-//! - Pool seeded with 3 empty Event containers, used as a Select event source.
-//! - runEventLoop fills each returned container with the Master's own cycle counter.
-//! - Re-spawns getWaitResult until the target cycle count is reached, then stops.
-//! - Work input is the Master's counter; the pool item is only an empty container.
+//! `getWaitResult` turns a pool into one source of a Select.
 //!
+//! - Fill the pool with three empty Events first. Each is only a container.
+//! - Wait on it with `getWaitResult`, next to a timer.
+//! - Write the Master's cycle counter into each parent you get, and put it
+//!   back: `runEventLoop`.
+//! - Restart `getWaitResult` until the target count, then stop.
+//!
+//! At the target, `getWaitResult` is not restarted. So `cancelDiscard`
+//! cancels only the timer. No parent is in flight, and nothing leaks.
 //!
 //! ```
-//!  pool (seeded: Event×3, all empty — code=0)
-//!  │ getWaitResult — blocks until item available
+//!  pool (Event×3, empty: code=0)
+//!  │ getWaitResult (waits for a parent)
 //!  ▼
 //!  Select(MasterEvent) ◄── sleepFn (timer)
 //!  │
-//!  .pool_ev .item ──► fill ev.code from Master counter ──► put back
-//!                 ──► re-spawn getWaitResult (while cycle < target)
-//!                 ──► break (when cycle == target, timer still in-flight)
-//!  .timer         ──► log Master counter ──► re-spawn timer
+//!  .pool_ev .anchor ──► write the counter into ev.code ──► put back
+//!                   ──► restart getWaitResult (while cycle < target)
+//!                   ──► stop (at the target; the timer still runs)
+//!  .timer           ──► log the counter ──► restart the timer
 //!  │
-//!  sel.cancelDiscard() ──► timer cancelled (no items in-flight at this point)
-//!  pl.close ──► on_close ──► freed
+//!  sel.cancelDiscard() ──► cancels the timer (no parent in flight)
+//!  pl.close ──► on_close ──► released
 //! ```
-//!
-//!  Work input: Master's own cycle counter. Pool item is an empty container.
-//!  Stop condition: cycle reaches target. getWaitResult not re-spawned at target,
-//!  so cancelDiscard only cancels the timer — no items in-transit, no leak.
 //!
 
 pub fn pool_get_wait_as_select_event_source(allocator: std.mem.Allocator, io: std.Io) !void {

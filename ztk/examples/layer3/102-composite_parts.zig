@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Composite parent gives its parts back.
+//! Title: A parent with parts
 //!
-//! - A Composite holds two Events, taken from the same pool.
-//! - Put of the Composite runs on_put. The hook moves the parts onto `extra`.
-//! - The pool takes the parts back the same way as the parent in the Slot.
+//! One put gives back a parent and the parents inside it.
+//!
+//! - Make a Composite with two Events in it, taken from the same pool.
+//! - Put the Composite back. `on_put` moves its parts onto `extra`.
+//! - The pool takes the parts back the same way as the Composite.
 //! - One put stores three parents: the Composite and both Events.
-//!
 //!
 //! ```
 //!  Composite { a, b } ──► pl.put
 //!       │ on_put: extra ◄── a, b
 //!       ▼
-//!  pool holds Composite, Event, Event
+//!  the pool keeps Composite, Event, Event
 //! ```
 //!
 

@@ -34,9 +34,29 @@ theme:
     - navigation.footer
 nav:
   - Home: index.md
+  - Get Started: get-started.md
+  - Tools:
+      - Item: tools/item.md
+      - Mailbox: tools/mailbox.md
+      - Pool: tools/pool.md
+      - Master: tools/master.md
+  - API Reference: api/index.md
+  - Patterns:
+      - patterns/index.md
+      - Crossing to std.Io: patterns/bridge.md
+  - Examples: examples/index.md
+  - Background: background/index.md
+  - Errors: errors.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
 
 hooks:
   - hooks/count_lines.py
+  - hooks/new_tab_links.py
 
 plugins:
   - search

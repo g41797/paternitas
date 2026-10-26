@@ -1,25 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Two mailboxes + timer in Select.
+//! Title: Two mailboxes and a timer in a Select
 //!
-//! - Both mailboxes use matryoshka.mbox.receiveResult as Select event sources.
-//! - A short timer triggers first, before either mailbox has an item.
-//! - Timer seeds both mailboxes, re-spawns itself with a longer duration.
-//! - Loop exits once both mailboxes have delivered one item each.
+//! Wait on two mailboxes and a timer at once.
 //!
+//! - Add both mailboxes to an `Io.Select` with `mbox.receiveResult`.
+//! - Add a short timer. It ends first, while both mailboxes are empty.
+//! - Send one parent to each mailbox from the timer branch, and restart the
+//!   timer, longer.
+//! - Stop once each mailbox has given one parent.
 //!
 //! ```
 //!  mbx1 (empty)    mbx2 (empty)
 //!  │ receiveResult  │ receiveResult
 //!  └────────┬───────┘
 //!           ▼
-//!  Select(MasterEvent) ◄── sleepFn (short timer triggers first)
+//!  Select(MasterEvent) ◄── sleepFn (a short timer ends first)
 //!  │
-//!  .timer ──► send item to mbx1, send item to mbx2
-//!             re-spawn timer (longer)
-//!  .inbox1 .item ──► freeSlot, re-spawn inbox1
-//!  .inbox2 .item ──► freeSlot
+//!  .timer ──► send a parent to mbx1, send a parent to mbx2
+//!             restart the timer (longer)
+//!  .inbox1 .anchor ──► destroySlot, restart inbox1
+//!  .inbox2 .anchor ──► destroySlot
 //!  sel.cancelDiscard()
 //! ```
 //!

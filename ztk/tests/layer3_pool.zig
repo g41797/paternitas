@@ -7,7 +7,7 @@
 //! ones that need a second context — 81, 82, 83, 84, 282, 283, 288, 290 —
 //! are in `layer3_threads.zig`.
 //!
-//! Every parent here is allocated. What the pool hands back has to be a
+//! Every parent here is allocated. What the pool returns has to be a
 //! pointer the allocator gave out.
 
 /// One pool, its hooks, its `Io`, and the teardown, in one place.
@@ -248,9 +248,9 @@ test "74 and 284 — close hands every stored parent to the close hook" {
 
     f.pool.close();
 
-    // Flattened across both identities, by value. The queue the hook was
-    // handed is the only way to those parents, and the pool kept nothing:
-    // 284 is that the hook's copy is the whole of it.
+    // One queue, by value, with both identities in it. The hook's queue is
+    // the only way to those parents. The pool kept nothing. Test 284 checks
+    // that the hook's copy is all of them.
     try expectEqual(@as(usize, 1), f.rec.close_calls);
     try expectEqual(@as(usize, 2), f.rec.closed_items);
     try expect(f.pool.isClosed());
@@ -443,8 +443,8 @@ test "289 — reuse is last in, first out" {
     try f.pool.get(o.MSG.ID, .available_only, &out);
     defer o.releaseSlot(&out, alloc, f.io);
 
-    // The one that came back most recently goes out next, so a parent that
-    // went stale while nothing was happening meets its next owner at once.
+    // The parent that came back last goes out first. So a parent that went
+    // bad comes back out at once, and the next user sees it.
     try expect(out.? == last_in);
 }
 

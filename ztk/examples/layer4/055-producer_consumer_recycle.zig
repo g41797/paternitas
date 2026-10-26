@@ -1,25 +1,25 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Producer → consumer with recycling.
+//! Title: Producer and consumer, with reuse
 //!
-//! - produce: pl.get fills a parent, mbx.send transfers it.
-//! - consume: mbx.receive gets it back, verifies same pointer, pl.put recycles it.
-//! - verifyRecycle: available_only get confirms the same parent — but
-//!   on_put already reset the data, so the recycled parent holds defaults, not
-//!   the value the producer set.
+//! The consumer gives the parent back to the pool. The producer gets it again.
 //!
+//! - Get a parent, fill it, and send it: `produce`.
+//! - Receive it, check it is the same pointer, and put it back: `consume`.
+//! - Get with `.available_only`. It is the same parent, but `on_put` reset its
+//!   data: `verifyRecycle`.
 //!
 //! ```
-//!  pl.get ──► slot ──► producer fills (code=1)
+//!  pl.get ──► Slot ──► the producer fills it (code=1)
 //!  mbx.send ──► mailbox
 //!  │
-//!  consumer: mbx.receive ──► slot (same pointer)
-//!            verify code==1
-//!            pl.put ──► on_put resets data ──► pool (parent recycled)
+//!  consumer: mbx.receive ──► Slot (the same pointer)
+//!            check code==1
+//!            pl.put ──► on_put resets the data ──► pool
 //!  │
-//!  pl.get ──► slot (same pointer, data reset)
-//!  verify reset ──► pl.put ──► pool
+//!  pl.get ──► Slot (the same pointer, data reset)
+//!  check the reset ──► pl.put ──► pool
 //!  pl.close ──► on_close ──► destroyQueue
 //! ```
 //!

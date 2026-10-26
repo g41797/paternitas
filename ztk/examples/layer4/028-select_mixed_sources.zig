@@ -1,26 +1,29 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Multiple event source types in one Select.
+//! Title: A mailbox, a pool and a timer in one Select
 //!
-//! - Inbox uses matryoshka.mbox.receiveResult, job pool uses matryoshka.pool.getWaitResult, timer uses Io.sleep.
-//! - All three are event sources with uniform result handling in one switch.
-//! - Loop re-spawns each source after handling it, exits once both targets are met.
-//! - Timer just counts ticks; it drives no work in this example.
+//! Three kinds of source, one switch.
 //!
+//! - Wait on the inbox with `mbox.receiveResult`.
+//! - Wait on the job pool with `pool.getWaitResult`.
+//! - Wait on a timer with `Io.sleep`.
+//! - Restart each source after you handle it. Stop once both targets are met.
+//!
+//! The timer only counts ticks. It drives no work here.
 //!
 //! ```
-//!  mailbox (Event items)    pool (Sensor items)    timer
-//!  │ receiveResult           │ getWaitResult         │ sleepFn
-//!  └──────────────────┬──────┘                        │
-//!                     ▼                               │
-//!             Select(MasterEvent) ◄───────────────────┘
-//!                     │ sel.await() loop
-//!                     ▼
-//!  .inbox .item  ──► freeSlot             (count inbox)
-//!  .pool_ev .item──► pl.put             (count pool)
-//!  .timer        ──► re-spawn timer       (count ticks)
-//!  exit when inbox_target + pool_target reached ──► sel.cancelDiscard()
+//!  mailbox (Events)    pool (Sensors)    timer
+//!  │ receiveResult      │ getWaitResult    │ sleepFn
+//!  └──────────────┬─────┘                  │
+//!                 ▼                        │
+//!         Select(MasterEvent) ◄────────────┘
+//!                 │ sel.await() loop
+//!                 ▼
+//!  .inbox .anchor   ──► destroySlot   (count inbox)
+//!  .pool_ev .anchor ──► pl.put        (count pool)
+//!  .timer           ──► restart timer (count ticks)
+//!  both targets met ──► sel.cancelDiscard()
 //! ```
 //!
 

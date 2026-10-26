@@ -1,33 +1,30 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool + Select: job scheduler.
+//! Title: A pool and a Select, no mailbox
 //!
-//! - Pool seeded with N empty containers, used as a Select source alongside a timer.
-//! - runEventLoop fills each container with the Master's cycle counter, re-spawns.
-//! - Timer just logs progress from Master state; pool gates the processing rate.
-//! - No mailbox anywhere in this example.
+//! The pool sets the pace. A timer reports progress.
 //!
-//! Transfers (mailbox-less):
+//! - Fill the pool with N empty containers. Wait on it next to a timer.
+//! - Write the Master's cycle counter into each container, put it back, and
+//!   restart: `runEventLoop`.
+//! - Log progress from the timer, from the Master's state.
 //!
 //! ```
-//!  pool (N_ITEMS empty containers seeded — code=0)
+//!  pool (N_ITEMS empty containers: code=0)
 //!  │ getWaitResult         timer (sleepFn)
 //!  └──────┬────────────────────────┘
 //!         ▼
 //!  Select(MasterEvent)
 //!  │
-//!  .pool_ev .item ──► fill ev.code from Master cycle index ──► pl.put ──► pool
-//!                 ──► re-spawn getWaitResult (while cycle < TARGET)
-//!                 ──► break (at TARGET, no getWaitResult re-spawned)
-//!  .timer         ──► log cycle from Master state ──► re-spawn timer (while cycle < TARGET)
+//!  .pool_ev .anchor ──► write the cycle into ev.code ──► pl.put ──► pool
+//!                   ──► restart getWaitResult (while cycle < TARGET)
+//!                   ──► stop (at TARGET, not restarted)
+//!  .timer           ──► log the cycle ──► restart the timer (while cycle < TARGET)
 //!  │
-//!  sel.cancelDiscard ──► timer cancelled (no items in-flight at this point)
-//!  pl.close ──► on_close ──► freed
+//!  sel.cancelDiscard ──► cancels the timer (no parent in flight)
+//!  pl.close ──► on_close ──► released
 //! ```
-//!
-//!  Work input: Master's own cycle counter. Pool item is an empty container — the processing slot.
-//!  No mailbox. Pool + Select gates the processing loop.
 //!
 
 pub fn pool_select_job_scheduler(allocator: std.mem.Allocator, io: std.Io) !void {

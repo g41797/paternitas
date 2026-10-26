@@ -1,22 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool → Mailbox → Pool roundtrip.
+//! Title: Pool to mailbox to pool
 //!
-//! - getAndSend: pl.get fills a parent, mbx.send transfers it.
-//! - receiveAndVerify: mbx.receive gets it back, verifies same pointer and data.
-//! - verifyRecycle: pl.put then available_only get confirms the same pointer recycles.
-//! - Single-threaded — no concurrency needed to prove the transfer path.
+//! The same parent goes out of the pool, through a mailbox, and back.
 //!
+//! - Get a parent from the pool, and send it: `getAndSend`.
+//! - Receive it, and check it is the same pointer with the same data:
+//!   `receiveAndVerify`.
+//! - Put it back, then get with `.available_only`. It is the same pointer
+//!   again: `verifyRecycle`.
+//!
+//! One thread is enough to show the path.
 //!
 //! ```
-//!  pl.get ──► slot (code=42, ptr=P)
-//!  mbx.send ──► mailbox holds P
-//!  mbx.receive ──► slot (same ptr P, code still 42)
-//!  verify code==42, ptr==P
-//!  pl.put ──► pool store (P recycled)
-//!  pl.get (.available_only) ──► slot (same ptr P)
-//!  verify ptr==P ──► pl.put ──► pool
+//!  pl.get ──► Slot (code=42, ptr=P)
+//!  mbx.send ──► the mailbox has P
+//!  mbx.receive ──► Slot (the same P, code still 42)
+//!  check code==42, ptr==P
+//!  pl.put ──► the pool keeps P
+//!  pl.get (.available_only) ──► Slot (the same P)
+//!  check ptr==P ──► pl.put ──► pool
 //!  pl.close ──► on_close ──► released
 //! ```
 //!

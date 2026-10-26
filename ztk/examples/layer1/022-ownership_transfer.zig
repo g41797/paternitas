@@ -1,25 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Parent transfer via Slot.
+//! Title: Move a parent through a Slot
 //!
-//! - Create an Event, place it in a Slot.
-//! - Take it out with moveFromSlot, append it to a queue.
-//! - Pop the parent back out of the queue, assign it to a Slot.
-//! - Verify the recovered data, then release it.
+//! A parent moves from a Slot to a queue and back.
 //!
-//! moveFromSlot checks the id and empties the Slot in one step.\
-//! fromSlot would leave the Slot full — that is the difference.
+//! - Create an Event into a Slot.
+//! - Take it out with `moveFromSlot`, and append it to a queue.
+//! - Pop it from the queue, and put it back into a Slot.
+//! - Check its data, then release it.
 //!
+//! `moveFromSlot` checks the type and empties the Slot in one step. `fromSlot`
+//! leaves the Slot full. That is the difference.
 //!
 //! ```
-//!  create ──► slot (non-null)
+//!  create ──► Slot (full)
 //!       │ moveFromSlot + queue.append
 //!       ▼
-//!  queue (holds parent)
-//!       │ queue.popFirst + slot=inner
+//!  queue (has the parent)
+//!       │ queue.popFirst, into the Slot
 //!       ▼
-//!  slot (holds parent again)
+//!  Slot (has the parent again)
 //!       │ destroySlot
 //!       ▼
 //!  released

@@ -1,21 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Select mailbox close propagation.
+//! Title: A close reaches the Select
 //!
-//! - Mailbox is empty; receiveResult blocks as a Select event source.
-//! - A timer triggers first, closes the mailbox while receiveResult is running.
-//! - The blocked receive unblocks with .closed, propagated through sel.await().
+//! Closing a mailbox wakes its waiting `receiveResult` with `.closed`.
 //!
+//! - Wait on an empty mailbox with `receiveResult`, as a Select source.
+//! - Let a timer end first, and close the mailbox.
+//! - The waiting receive returns `.closed`, through `sel.await()`.
 //!
 //! ```
 //!  mailbox (empty)
-//!  │ receiveResult (blocking)
+//!  │ receiveResult (waits)
 //!  ▼
-//!  Select(MasterEvent) ◄── sleepFn (timer triggers first)
+//!  Select(MasterEvent) ◄── sleepFn (the timer ends first)
 //!  │
 //!  .timer ──► mbx.close() ──► destroyQueue(rem)
-//!             (running receiveResult unblocks with .closed)
+//!             (the waiting receiveResult returns .closed)
 //!  │
 //!  sel.await() ──► .inbox .closed
 //!  sel.cancelDiscard()

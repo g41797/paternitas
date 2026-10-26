@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Worker loop pattern.
+//! Title: A worker loop
 //!
-//! - Main sends 3 Events and 2 Sensors into a mailbox.
-//! - Worker thread loops on mbx.receive, dispatches on tag.
-//! - Worker exits on error.Closed.
-//! - Main closes the mailbox, frees any items left unreceived.
+//! A worker thread receives until the mailbox closes.
 //!
+//! - Send three Events and two Sensors from main.
+//! - Loop on `mbx.receive` in the worker, and dispatch on the type.
+//! - Leave the loop on `error.Closed`.
+//! - Close the mailbox in main, and release what was not received.
 //!
 //! ```
-//!  main ──alloc.create──► slot ──mbx.send──► mailbox
-//!                                                    │
-//!                                              worker thread
-//!                                              mbx.receive
-//!                                                    │ destroySlot
+//!  main ──create──► Slot ──mbx.send──► mailbox
+//!                                            │
+//!                                      worker thread
+//!                                      mbx.receive
+//!                                            │ destroySlot
 //!  mbx.close ──► remaining queue ──► destroyQueue (main)
 //! ```
 //!

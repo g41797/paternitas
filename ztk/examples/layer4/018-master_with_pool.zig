@@ -1,21 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Master with Pool.
+//! Title: A Master with a pool
 //!
-//! - Master owns a pool (with hooks) and a mailbox.
-//! - sendItems fills 3 pool items with Event data, sends each into the mailbox.
-//! - Worker loops on mbx.receive, returns each item to the pool via pl.put.
-//! - Shutdown cancels the worker future, then destroy releases pool and mailbox in order.
+//! Parents come from a pool, travel through a mailbox, and go back.
 //!
+//! - Keep a pool, with hooks, and a mailbox in the Master.
+//! - Get three parents from the pool, set their Event data, and send each one:
+//!   `sendItems`.
+//! - Loop on `mbx.receive` in the worker, and put each parent back.
+//! - Shut down: cancel the worker, then `destroy` closes the pool and the
+//!   mailbox, in that order.
 //!
 //! ```
-//!  master ──pl.get──► slot ──mbx.send──► mailbox
-//!                                                 │ worker (io.concurrent)
-//!                                                 │ mbx.receive ──► slot
-//!                                                 │ pl.put (defer) ──► pool (recycled)
-//!  fut.cancel ──► worker exits at next mbx.receive
-//!  master.destroy ──► pl.close ──► mbx.close ──► free remaining
+//!  master ──pl.get──► Slot ──mbx.send──► mailbox
+//!                                            │ worker (io.concurrent)
+//!                                            │ mbx.receive ──► Slot
+//!                                            │ pl.put (defer) ──► pool
+//!  fut.cancel ──► the worker stops at its next mbx.receive
+//!  master.destroy ──► pl.close ──► mbx.close ──► release what is left
 //! ```
 //!
 

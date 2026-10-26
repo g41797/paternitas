@@ -7,32 +7,36 @@
 //!
 //! There is nothing to instantiate and nothing to keep.
 //!
-//! The helper wraps `paternitas.Typed(Parent)`. It finds the one
-//! `SinglyTypedNode` or `DoublyTypedNode` field by type, so its name is yours
-//! to choose. Zero such fields, or two, is a compile error naming the type.
+//! It finds the one `SinglyTypedNode` or `DoublyTypedNode` field by type.
 //!
-//! Two methods your parent declares, where the helper creates or releases it:
+//! - The field's name is yours to choose.
+//! - Zero such fields, or two, is a compile error that names the type.
+//!
+//! Your parent declares two methods. The helper calls them when it creates
+//! or releases the parent.
 //!
 //! - `pub fn init(self: *Parent, alloc: std.mem.Allocator, io: std.Io) !void`
 //! - `pub fn finish(self: *Parent, alloc: std.mem.Allocator, io: std.Io) void`
 //!
-//! An empty body is fine. It says there is nothing to do, and a parent that
-//! uses neither the allocator nor the `Io` says so with `_ = alloc;`. A container that
-//! allocates itself never calls `create`, so it declares neither.
+//! An empty body is fine when there is nothing to do. Write `_ = alloc;` and
+//! `_ = io;` for what you do not use.
+//!
+//! A parent you allocate yourself never meets `create` or `destroy`. It
+//! declares neither.
 //!
 //! Examples:
 //! https://g41797.github.io/matryoshka-ztk/examples/helper/
 const _doc_stub = void;
 
-/// Generates the runtime type support for `Parent`.
+/// The helper for `Parent`.
 ///
-/// What it gives you:
+/// It gives you:
 ///
-/// - the type's id, and the test against it
-/// - the crossing from an `*Anchor` or a `Slot` back to your pointer
-/// - the crossing the other way
-/// - the dispatch view, both ways
-/// - create and destroy, which run your own `init` and `finish`
+/// - the type's id, and a test against it
+/// - your pointer back, from an `*Anchor` or a `Slot`
+/// - the `*Anchor`, from your pointer
+/// - the dispatch view, `AnyParent`, both ways
+/// - `create` and `destroy`, which run your `init` and `finish`
 pub fn ParentHelper(comptime Parent: type) type {
     const P = paternitas.Typed(Parent);
     comptime {
@@ -41,9 +45,7 @@ pub fn ParentHelper(comptime Parent: type) type {
     }
 
     return struct {
-        /// This type's id.
-        ///
-        /// One description per type, `const`, so its address is the identity.
+        /// This type's id. Equal ids mean the same type.
         pub const ID: TypeId = P.typeId();
 
         /// True when the id is this type's.
@@ -51,11 +53,13 @@ pub fn ParentHelper(comptime Parent: type) type {
             return P.isId(id);
         }
 
-        /// Makes a fresh parent you allocated yourself usable: clears its
+        /// Makes a parent you allocated yourself ready for use. It clears the
         /// link and writes the id.
         ///
-        /// Runs once per parent, before it is used anywhere. `create` does it
-        /// for you. Never on a parent that is on a chain or a std list.
+        /// Call it once, before the parent goes anywhere. `create` calls it
+        /// for you.
+        ///
+        /// Never call it on a parent that is on a chain or a std list.
         pub inline fn setTypeId(self: *Parent) void {
             P.node(self).* = .{};
             P.setTypeId(self);
@@ -63,14 +67,14 @@ pub fn ParentHelper(comptime Parent: type) type {
 
         /// The Anchor embedded in your parent.
         ///
-        /// Cannot fail — the type is known at compile time.
+        /// It cannot fail. The type is known at compile time.
         pub inline fn toAnchor(self: *Parent) *Anchor {
             return P.anchor(self);
         }
 
         /// Your pointer, from a bare Anchor.
         ///
-        /// Null when the Anchor belongs to another type. Reads the Anchor and
+        /// Null when the Anchor is in another type. It reads the Anchor and
         /// changes nothing.
         pub inline fn fromAnchor(anchor: *Anchor) ?*Parent {
             return P.parentFromAnchor(anchor);
@@ -78,22 +82,21 @@ pub fn ParentHelper(comptime Parent: type) type {
 
         /// Your pointer, from a bare Anchor. Panics on another type.
         ///
-        /// Panics in every optimization mode, and the message names the type
+        /// It panics in every optimization mode. The message names the type you
         /// asked for and the type that was there.
         pub inline fn mustFromAnchor(anchor: *Anchor) *Parent {
             return fromAnchor(anchor) orelse wrongType("mustFromAnchor", anchor);
         }
 
-        /// Your pointer, from the Slot holding it.
+        /// Your pointer, from the Slot it sits in.
         ///
-        /// Null when the Slot is empty or holds another type. Leaves the Slot
-        /// full.
+        /// Null when the Slot is empty or has another type. The Slot stays full.
         pub inline fn fromSlot(slot: *const Slot) ?*Parent {
             const anchor = slot.* orelse return null;
             return fromAnchor(anchor);
         }
 
-        /// Your pointer, from the Slot holding it. Panics on an empty Slot or
+        /// Your pointer, from the Slot it sits in. Panics on an empty Slot or
         /// another type.
         pub inline fn mustFromSlot(slot: *const Slot) *Parent {
             const anchor = slot.* orelse
@@ -101,10 +104,10 @@ pub fn ParentHelper(comptime Parent: type) type {
             return fromAnchor(anchor) orelse wrongType("mustFromSlot", anchor);
         }
 
-        /// Takes your parent out of the Slot.
+        /// Takes your parent out of the Slot. On success the Slot is empty.
         ///
-        /// Null when the Slot is empty or holds another type, and then the
-        /// Slot is untouched. On success the Slot is empty.
+        /// Null when the Slot is empty or has another type. The Slot is
+        /// untouched then.
         ///
         /// Refuses a parent still on a chain. Take it off first.
         pub inline fn moveFromSlot(slot: *Slot) ?*Parent {
@@ -120,8 +123,8 @@ pub fn ParentHelper(comptime Parent: type) type {
         /// Takes your parent out of the Slot. Panics on an empty Slot or
         /// another type.
         ///
-        /// The form for a caller who knows what is there and does not want to
-        /// write the unwrap.
+        /// Use it when you know what is there, and do not want to write the
+        /// unwrap.
         pub inline fn mustMoveFromSlot(slot: *Slot) *Parent {
             const anchor = slot.* orelse
                 @panic("mustMoveFromSlot: the Slot is empty");
@@ -135,8 +138,7 @@ pub fn ParentHelper(comptime Parent: type) type {
 
         /// The dispatch view of your parent.
         ///
-        /// A view, not an owner. The parent stays where it is and whoever
-        /// owned it still does.
+        /// It is only a view. The parent stays where it is, and nothing moves.
         pub inline fn toAny(self: *Parent) AnyParent {
             return P.toAny(self);
         }
@@ -153,17 +155,19 @@ pub fn ParentHelper(comptime Parent: type) type {
 
         /// The std Node embedded in your parent, for a std list of your own.
         ///
-        /// MUST: the parent is on none of the toolkit's chains while it is on
-        /// a std list. The `next` word is shared.
+        /// The parent MUST NOT be on a toolkit chain while it is on a std list.
+        /// The two share the `next` word.
         pub inline fn node(self: *Parent) *Node {
             return P.node(self);
         }
 
-        /// Your pointer, from a std Node. Null when the Node belongs to
-        /// another type, or when setTypeId was never called.
+        /// Your pointer, from a std Node.
         ///
-        /// MUST: the Node lives in a TypedNode. A std list handed back by a
-        /// caller holds only Nodes of parents.
+        /// Null when the Node is in another type, or when setTypeId was never
+        /// called on it.
+        ///
+        /// The Node MUST live in a TypedNode. A std list you get back from a
+        /// caller has only Nodes of parents.
         pub inline fn fromNode(n: *Node) ?*Parent {
             return P.parentFromNode(n);
         }
@@ -173,20 +177,24 @@ pub fn ParentHelper(comptime Parent: type) type {
             return inner.isLinked(toAnchor(self));
         }
 
-        /// Allocates your parent, runs its `init`, calls setTypeId, and fills the
-        /// Slot.
+        /// Makes a parent for you, in four steps:
         ///
-        /// Frees the parent again when `init` fails, and passes the failure
-        /// on. The Slot stays empty then.
+        /// - allocates it
+        /// - runs its `init`
+        /// - calls setTypeId
+        /// - puts it into the Slot
         ///
-        /// Refuses a Slot that is not empty on entry.
+        /// When `init` fails, it frees the parent and returns the error. The Slot
+        /// stays empty then.
         ///
-        /// Your `init` gets the allocator and the `Io`, and the toolkit keeps
-        /// neither. ztk passes both where 3tk passes an allocator alone,
-        /// because Zig 0.16 moved file, net, time and concurrency behind
-        /// `Io`, and a parent that owns a connection cannot release it
-        /// without one. A parent that keeps the `Io` in a field MUST NOT
-        /// outlive the runtime that produced it.
+        /// Refuses a Slot that is not empty.
+        ///
+        /// Your `init` gets the allocator and the `Io`. The toolkit keeps neither.
+        /// In Zig 0.16 files, sockets, time and threads all go through `Io`. A
+        /// parent with a connection needs it to close the connection.
+        ///
+        /// A parent that keeps the `Io` in a field MUST NOT outlive the runtime
+        /// that made it.
         pub fn create(allocator: std.mem.Allocator, io: Io, slot: *Slot) !void {
             comptime requireHooks();
             check(slot.* == null, "an acquisition needs an empty Slot on entry");
@@ -200,10 +208,10 @@ pub fn ParentHelper(comptime Parent: type) type {
             slot.* = toAnchor(parent);
         }
 
-        /// Runs your parent's `finish`, empties the Slot, and frees the parent.
+        /// Runs your parent's `finish`, empties the Slot and frees the parent.
         ///
-        /// Does nothing on an empty Slot, so one `defer` covers every path
-        /// out, including the path where the parent was never created.
+        /// Does nothing on an empty Slot. So one `defer` covers every way out,
+        /// even when the parent was never created.
         ///
         /// Refuses a parent still on a chain.
         pub fn destroy(allocator: std.mem.Allocator, io: Io, slot: *Slot) void {

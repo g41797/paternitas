@@ -1,25 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Worker finish signal via mailbox return.
+//! Title: A worker sends its mailbox back
 //!
-//! - Master spawns a worker via `io.concurrent`, sends 3 Events + a ShutdownCommand sentinel.
-//! - On the sentinel, the worker sends its own mailbox back to the master's inbox.
-//! - Master confirms the returned parent is an Mbox and the expected instance.
-//! - Master closes and destroys the worker's mailbox, then awaits the worker's future.
+//! A mailbox is a parent too, so it can travel through another mailbox.
 //!
-//! A mailbox is itself a parent, so it travels like any other: `toAnchor` going in,
-//! `fromAnchor` coming out. The id says what it is (class); the pointer says
-//! which one (instance).
+//! - Start a worker with `io.concurrent`. Send it three Events and a
+//!   ShutdownCommand.
+//! - On the ShutdownCommand, the worker sends its own mailbox to the Master's
+//!   inbox.
+//! - Check in the Master that the parent is an `Mbox`, and the right one.
+//! - Close and destroy the worker's mailbox, then wait for the worker.
 //!
+//! The mailbox goes in with `toAnchor` and comes out with `fromAnchor`. The id
+//! says what it is. The pointer says which one.
 //!
 //! ```
 //!  master ──Event×3 + ShutdownCommand──► worker_mbx ──► worker task
-//!                                                           │ process
-//!                                                           │ send worker_mbx ──► master_inbox
-//!                                                           ▼ exit
+//!                                                          │ handle
+//!                                                          │ send worker_mbx ──► master_inbox
+//!                                                          ▼ stop
 //!  master ◄──worker_mbx (as *Anchor)── master_inbox
-//!  master: close + destroy worker_mbx (id + pointer verified first)
+//!  master: check the id and the pointer, then close + destroy worker_mbx
 //! ```
 //!
 

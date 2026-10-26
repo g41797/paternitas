@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Refused send.
+//! Title: A refused send
 //!
-//! - Close the mailbox, then try to send an Event.
-//! - send answers error.Closed.
-//! - The Slot still holds the parent: a refused send takes nothing.
-//! - The caller releases it.
+//! A refused send leaves the parent with you.
 //!
+//! - Close the mailbox, then send an Event.
+//! - `send` returns `error.Closed`.
+//! - The parent is still in your Slot. A refused send takes nothing.
+//! - Release it yourself.
 //!
 //! ```
 //!  mbx.close
 //!       │
-//!  alloc.create ──► slot ──mbx.send──► error.Closed
-//!       │ slot still full
+//!  create ──► Slot ──mbx.send──► error.Closed
+//!       │ the Slot is still full
 //!       ▼
 //!  destroySlot
 //! ```

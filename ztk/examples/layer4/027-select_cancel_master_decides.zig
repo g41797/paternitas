@@ -1,27 +1,28 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Cancel reports, Master decides.
+//! Title: A cancel reports, the Master decides
 //!
-//! - Phase 1: two mailboxes in Select, timer triggers first (both empty).
-//! - sel.cancel() reports both as .canceled — mailboxes stay open.
-//! - Master decides: close mbx1 permanently, keep mbx2 for phase 2.
-//! - Phase 2: fresh Select on mbx2 only, sends and receives 2 items.
+//! After a cancel, the Master chooses which mailbox to keep.
 //!
+//! - Put two empty mailboxes and a timer in a Select. The timer ends first.
+//! - Call `sel.cancel()`. Both report `.canceled`, and both stay open.
+//! - Decide in the Master: close mbx1 for good, keep mbx2.
+//! - Start a new Select on mbx2 alone. Send two parents and receive them.
 //!
 //! ```
 //!  mbx1 (empty)    mbx2 (empty)
 //!  │ receiveResult  │ receiveResult
 //!  └────────┬───────┘
-//!            ▼
-//!  Select(MasterEvent) ◄── sleepFn (timer triggers first — both mailboxes empty)
+//!           ▼
+//!  Select(MasterEvent) ◄── sleepFn (the timer ends first)
 //!  │
 //!  .timer ──► sel.cancel() loop
-//!             .inbox1 .canceled ──► master decides: close mbx1 permanently
-//!             .inbox2 .canceled ──► master decides: keep mbx2, re-spawn later
+//!             .inbox1 .canceled ──► the Master closes mbx1 for good
+//!             .inbox2 .canceled ──► the Master keeps mbx2
 //!  │
-//!  Phase 2: new Select, mbx2 only
-//!  send 2 items to mbx2 ──► receive them via fresh Select
+//!  a new Select, mbx2 only
+//!  send 2 parents to mbx2 ──► receive them
 //! ```
 //!
 

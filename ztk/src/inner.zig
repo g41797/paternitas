@@ -1,46 +1,45 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! The small types everything else is written against.
+//! The small types the rest of the toolkit is built on.
 //!
-//! **Parent** means the struct that embeds the TypedNode — the word Zig uses in
-//! `@fieldParentPtr`. It is not a parent in a tree of tasks or mailboxes.
-//! In the Matryoshka model it is the outer doll: parent, then TypedNode, then
-//! Anchor.
+//! A **parent** is your struct, the one that embeds the TypedNode. Zig uses
+//! the same word in `@fieldParentPtr`. It is not a parent in a tree of tasks
+//! or mailboxes. In the Matryoshka model it is the outer doll: parent, then
+//! TypedNode, then Anchor.
 //!
 //! An **item** is a parent while it is in a mailbox, a queue or a pool. The
-//! word names that role, not a type. In code, what a container holds is an
-//! `*Anchor`, and the names say `anchor`.
+//! word names a role, not a type. In code a container has an `*Anchor`, and
+//! the names say `anchor`.
 //!
-//! - A parent embeds one `SinglyTypedNode` or `DoublyTypedNode`: a std Node and an `Anchor`.
-//! - `Slot` is the place where one parent may be, or may not.
+//! - A parent embeds one `SinglyTypedNode` or `DoublyTypedNode`. Each is a
+//!   std Node and an `Anchor`.
+//! - A `Slot` is a place where one parent is, or is not.
 //! - The mailbox and the pool see an `*Anchor` and nothing else.
 //!
-//! The types come from Paternitas. This file adds what Matryoshka decides:
-//! the chain convention, the Slot, and the borders out of the toolkit.
+//! A parent's id says what type a parent is, never which parent it is. You
+//! compare ids. You read nothing out of one.
 //!
-//! A parent's id is an opaque pointer, compared by address, so an id says what
-//! a thing is and never which one it is. A parent's id is null until
-//! setTypeId is called, so a zeroed TypedNode is a valid TypedNode with no
-//! type.
+//! The id is null until setTypeId is called. So a zeroed TypedNode is valid,
+//! with no type.
 //!
 //! Examples:
 //! https://g41797.github.io/matryoshka-ztk/examples/inner/
 const _doc_stub = void;
 
-/// A parent's id. Opaque: a caller passes it and compares it, and reads
-/// nothing out of it.
+/// A parent's type id. You pass it and compare it. You read nothing out of
+/// it.
 ///
-/// Two parents of one type answer the same id. Two types answer two ids. The
-/// helper's `ID` is where one comes from, and the toolkit is what reads it.
+/// Two parents of one type have the same id. Two types have two ids. The
+/// helper's `ID` gives you one.
 ///
-/// **Null is the id of a parent whose setTypeId was never called.** So the
-/// zero value of a TypedNode has no type, and zeroed memory —
-/// `std.mem.zeroes`, a `@splat` of `.{}` — is a valid parent with no type
-/// rather than an accidental one.
+/// **Null is the id of a parent whose setTypeId was never called.** So zeroed
+/// memory, such as `std.mem.zeroes` or a `@splat` of `.{}`, is a valid parent
+/// with no type. It does not become some type by accident.
 pub const TypeId = paternitas.TypeId;
 
-/// The word inside every parent that setTypeId writes. `*Anchor` is what containers hold.
+/// The word inside every parent that setTypeId writes. Containers keep an
+/// `*Anchor`.
 pub const Anchor = paternitas.Anchor;
 
 /// Embedded in a parent, once. A `std.SinglyLinkedList.Node` and an Anchor.
@@ -48,63 +47,60 @@ pub const SinglyTypedNode = paternitas.SinglyTypedNode;
 
 /// Embedded in a parent, once. A `std.DoublyLinkedList.Node` and an Anchor.
 ///
-/// A parent with a DoublyTypedNode can also live in the application's own
-/// `std.DoublyLinkedList` — a timeout list, an LRU — one place at a time.
+/// A parent with a DoublyTypedNode can also live in your own
+/// `std.DoublyLinkedList`, such as a timeout list or an LRU. It is in one
+/// place at a time.
 pub const DoublyTypedNode = paternitas.DoublyTypedNode;
 
 /// The dispatch view of a parent: its address and its id.
 ///
-/// For a consumer that keeps a map from id to handler and wants no toolkit
-/// calls in its hot path. A view, not an owner: a copy is an alias.
+/// Use it to keep a map from id to handler, with no toolkit calls in the hot
+/// path.
 ///
-/// A ztk parent always has a TypedNode, so `fromAny` on a view of anything
-/// else answers null.
+/// It is only a view. A copy points at the same parent.
+///
+/// A ztk parent always has a TypedNode. So `fromAny` on a view of anything
+/// else returns null.
 pub const AnyParent = paternitas.Any;
 
-/// Where one parent may be, or may not.
+/// A place where one parent is, or is not.
 ///
-/// Empty means the caller has nothing. Full means the caller has that parent.
-/// A call that takes the parent leaves the Slot empty, with no line left for
-/// the caller to write.
+/// Empty means you have nothing. Full means you have that parent.
+///
+/// A call that takes the parent empties the Slot itself. You have no line to
+/// write.
 pub const Slot = ?*Anchor;
 
-/// The chain link of a parent: the `next` field of its std Node, holding an
-/// Anchor.
+/// The chain link of a parent: the `next` field of its std Node. On a
+/// toolkit chain it has an Anchor:
 ///
-/// - the next parent's Anchor on the chain
-/// - the Anchor itself when it is the last one on a chain
-/// - null when the parent is on no chain
+/// - the next parent's Anchor
+/// - the Anchor itself, when it is the last one
+/// - null, when the parent is on no chain
 ///
-/// So the link test is exact, and it costs one compare. A chain of one is
-/// seen, which a null-or-not test cannot do.
+/// So the link test is exact. It costs one compare, and it sees a chain of
+/// one.
 ///
-/// The border with `std` — MUST:
+/// Std lists share the `next` word. You MUST know three things:
 ///
-/// - The `next` word is shared with std lists. A parent leaves this toolkit's
-///   chains before it goes onto a std list. One item, one chain.
-/// - The two chains disagree on the last tnode: ours points at itself, std's
-///   is null. One field cannot hold both conventions at once.
-/// - `std` does not clear the link it hands back. An item returning from a
-///   std list arrives still pointing into it, and the crossing back refuses
+/// - Take a parent off the toolkit's chains before it goes onto a std list.
+///   One parent, one chain.
+/// - The last link differs. Ours points at itself. Std's is null.
+/// - Std does not clear the link when a parent leaves its list. A parent
+///   straight from a std list still points into it, and `fillSlot` refuses
 ///   it.
 ///
-/// Panics in every build mode when setTypeId was never called on the parent:
-/// without an id there is
-/// no description, and so no `next`.
+/// Panics in every build mode when setTypeId was never called on the
+/// parent. Without an id there is no `next`.
 ///
-/// **The one type pun in the toolkit.** The word is declared by std as
-/// `?*SinglyLinkedList.Node` or `?*DoublyLinkedList.Node`. While a parent is
-/// on one of our chains, it holds an `*Anchor` instead. Paternitas only says
-/// where the word is (`nextField`, typed `*?*anyopaque`); what it holds is
-/// decided here. Same size, same alignment, and Zig does no type-based alias
-/// analysis today, which this relies on. A debugger shows the word as a
-/// "wrong" Node pointer while the parent is on a chain.
+/// While a parent is on a toolkit chain, the word has an `*Anchor`, not a
+/// std Node pointer. A debugger then shows it as a wrong Node pointer.
 pub inline fn next(a: *Anchor) *?*Anchor {
     const ti = a.info() orelse @panic("setTypeId was never called on the parent: make it with create, or call setTypeId once");
     return @ptrCast(ti.nextField(a));
 }
 
-/// One parent, as a dispatch view. Leaves the Slot full.
+/// The parent in the Slot, as a dispatch view. The Slot stays full.
 ///
 /// Null when the Slot is empty, or when setTypeId was never called on the
 /// parent.
@@ -113,17 +109,20 @@ pub fn anyFromSlot(slot: *const Slot) ?AnyParent {
     return anchor.toAny();
 }
 
-/// Takes the bare Anchor out of a Slot, for a container of your own.
+/// Takes the bare Anchor out of a Slot, for a container of your own. The
+/// Slot ends up empty.
 ///
-/// The way out of the toolkit — MUST:
+/// It returns an `*Anchor`, whatever type the parent is. `fillSlot` puts it
+/// back.
 ///
-/// - setTypeId was called on the parent
-/// - it is unlinked as it crosses
-/// - the Slot is cleared
+/// It refuses:
 ///
-/// It answers an `*Anchor`, whatever type the parent is. The way back is
-/// `fillSlot`. A copied `*Anchor` is a second owner, as a copied Slot would
-/// be.
+/// - an empty Slot, in every build mode
+/// - a parent whose setTypeId was never called
+/// - a parent still on a chain
+///
+/// Do not copy the `*Anchor`. Two copies are two places for one parent, as
+/// two copies of a Slot would be.
 pub fn takeFromSlot(slot: *Slot) *Anchor {
     const anchor = slot.* orelse @panic("takeFromSlot: the Slot is empty");
 
@@ -136,14 +135,16 @@ pub fn takeFromSlot(slot: *Slot) *Anchor {
 
 /// Puts a bare Anchor back into an empty Slot.
 ///
-/// The way back in — MUST:
+/// It refuses:
 ///
-/// - setTypeId was called on the parent
-/// - it is unlinked as it crosses
-/// - the Slot is empty
+/// - a full Slot
+/// - a parent whose setTypeId was never called
+/// - a parent still on a chain
 ///
-/// A std list does not clear the link it hands back, so an item coming
-/// straight from one is still pointing into it and is refused here.
+/// Is the parent coming from a std list? std does not clear the link when it
+/// takes a parent off its list. The parent still points at its old
+/// neighbour. So `fillSlot` takes it for a parent on a chain, and refuses
+/// it. Call `unlink` on it first.
 pub fn fillSlot(slot: *Slot, anchor: *Anchor) void {
     check(slot.* == null, "never overwrite a full Slot");
     check(anchor.typeId() != null, "setTypeId was never called on the parent: make it with create, or call setTypeId once");
@@ -154,8 +155,10 @@ pub fn fillSlot(slot: *Slot, anchor: *Anchor) void {
 
 /// True when the parent is on a chain.
 ///
-/// Exact. The only item of a chain points at itself, so it reads as linked.
-/// A parent with no type id is on no chain: every insert refuses one.
+/// It is exact. The only parent of a chain points at itself, so it reads as
+/// linked.
+///
+/// A parent with no type id is on no chain. Every insert refuses one.
 pub inline fn isLinked(a: *Anchor) bool {
     if (a.typeId() == null) return false;
     return next(a).* != null;
@@ -163,7 +166,8 @@ pub inline fn isLinked(a: *Anchor) bool {
 
 /// Clears the chain link.
 ///
-/// Called for the caller by every removal. Nothing hands back a linked item.
+/// Every toolkit removal calls it for you. Nothing in the toolkit returns a
+/// linked parent.
 pub inline fn unlink(a: *Anchor) void {
     next(a).* = null;
 }

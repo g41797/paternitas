@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool seeding.
+//! Title: Fill a pool first
 //!
-//! - Seed the pool with 5 Sensors via get (new_only) + pl.put.
-//! - Take all 5 with available_only — nothing is made.
-//! - Release each one, verify the count.
+//! Make parents ahead of time, then take them without making any.
 //!
+//! - Fill the pool with five Sensors: get with `.new_only`, then put.
+//! - Take all five with `.available_only`. Nothing new is made.
+//! - Release each one, and check the count.
 //!
 //! ```
 //!  pl.get (new_only) × 5 ──► pl.put × 5
-//!  (pool holds 5 parents)
+//!  (the pool keeps 5 parents)
 //!       │ pl.get (available_only) × 5
 //!       ▼
-//!  slot ──► SensorHelper.destroy per parent
+//!  Slot ──► SensorHelper.destroy per parent
 //! ```
 //!
 

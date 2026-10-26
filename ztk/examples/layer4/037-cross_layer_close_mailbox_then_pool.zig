@@ -1,22 +1,23 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Close ordering: mailbox then pool.
+//! Title: Close the mailbox, then the pool
 //!
-//! - Seed the pool with 1 parent, the mailbox with 1 parent.
-//! - closeMailbox closes the mailbox, returns its queue.
-//! - returnCloseQueueToPool walks that queue, puts each parent in the still-open pool.
-//! - pl.close (deferred) then releases both parents via on_close.
+//! What the mailbox returns can go back to a pool that is still open.
+//!
+//! - Put one parent in the pool, and one in the mailbox.
+//! - Close the mailbox. It returns its queue: `closeMailbox`.
+//! - Put each parent from that queue back into the open pool:
+//!   `returnCloseQueueToPool`.
+//! - Close the pool on `defer`. `on_close` releases both.
 //!
 //! ```
-//!  pool (1 parent stored)    mailbox (1 parent queued)
+//!  pool (1 parent)    mailbox (1 parent)
 //!  │
 //!  mbx.close ──► Queue (1 parent)
-//!  walk queue: popFirst ──► slot ──► pl.put (pool still open)
-//!  │                                     └──► pool store (now 2 parents)
-//!  pl.close ──► on_close ──► destroyQueue (both parents released)
-//!  │
-//!  Verify: pool received the parent from the mailbox close queue.
+//!  popFirst ──► Slot ──► pl.put (the pool is still open)
+//!  │                         └──► the pool keeps 2 parents
+//!  pl.close ──► on_close ──► destroyQueue (both released)
 //! ```
 //!
 

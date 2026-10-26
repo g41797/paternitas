@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Send with a limit.
+//! Title: Send with a limit
 //!
-//! - sendLimited counts the queued parents of the sender's own type.
-//! - Two Events fit under a limit of 2. The third is refused with error.Limit.
-//! - The refused Slot is untouched, so the caller releases it.
-//! - A Sensor is a different type and is not counted against the Events.
+//! `sendLimited` counts only the queued parents of the sender's own type.
 //!
+//! - Send two Events under a limit of 2. Both fit.
+//! - Send a third. It is refused with `error.Limit`.
+//! - The refused Slot is untouched. Release the parent yourself.
+//! - Send a Sensor. It is another type, so the Events do not count against it.
 //!
 //! ```
 //!  Event ──sendLimited(2)──► queued (1)
 //!  Event ──sendLimited(2)──► queued (2)
-//!  Event ──sendLimited(2)──► error.Limit, slot still full ──► destroySlot
-//!  Sensor ─sendLimited(2)──► queued (other type)
+//!  Event ──sendLimited(2)──► error.Limit, the Slot still full ──► destroySlot
+//!  Sensor ─sendLimited(2)──► queued (another type)
 //! ```
 //!
 

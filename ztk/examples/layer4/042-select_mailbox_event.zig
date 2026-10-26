@@ -1,23 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Mailbox receive as Select event source.
+//! Title: A mailbox as a Select source
 //!
-//! - Mailbox pre-loaded with 3 Events; a timer runs alongside it in Select.
-//! - runEventLoop re-spawns matryoshka.mbox.receiveResult after each item, re-spawns the timer per tick.
-//! - Loop exits once all 3 items are received; sel.cancelDiscard cleans up the rest.
+//! `receiveResult` turns a mailbox into one source of a Select.
 //!
+//! - Put three Events in the mailbox first. Run a timer next to it in the
+//!   Select.
+//! - Restart `mbox.receiveResult` after each parent, and the timer after each
+//!   tick: `runEventLoop`.
+//! - Stop once all three are received. `sel.cancelDiscard` cleans up the rest.
 //!
 //! ```
-//!  mailbox (pre-loaded: Event×3)
+//!  mailbox (Event×3, sent first)
 //!     │ receiveResult
 //!     ▼
-//!  Select(MasterEvent) ◄── sleepFn (timer, re-spawned each tick)
+//!  Select(MasterEvent) ◄── sleepFn (the timer, restarted each tick)
 //!     │ sel.await()
 //!     ▼
-//!  .inbox .item ──► freeSlot (re-spawn receiveResult)
-//!  .timer        ──► re-spawn sleepFn
-//!  .inbox .closed ──► exit loop
+//!  .inbox .anchor ──► destroySlot (restart receiveResult)
+//!  .timer         ──► restart sleepFn
+//!  .inbox .closed ──► leave the loop
 //!  │
 //!  sel.cancelDiscard()
 //! ```

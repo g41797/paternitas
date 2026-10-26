@@ -1,22 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Master pre-shutdown collect.
+//! Title: Collect from several mailboxes before shutdown
 //!
-//! - Fill mailbox_a with 2 Events, mailbox_b with 3 Sensors.
-//! - closeAndMerge closes both, merges the queues with concat.
-//! - collectAndRelease walks the combined queue once, releases every parent.
+//! Close two mailboxes, join their queues, and release in one walk.
 //!
+//! - Put two Events in mailbox_a and three Sensors in mailbox_b.
+//! - Close both, and join the two queues with `concat`: `closeAndMerge`.
+//! - Walk the joined queue once, and release every parent:
+//!   `collectAndRelease`.
 //!
 //! ```
-//!  mailbox_a (2 items)    mailbox_b (3 items)
+//!  mailbox_a (2 parents)    mailbox_b (3 parents)
 //!  │
 //!  mailbox_a.close ──► list_a (Queue, 2 parents)
 //!  mailbox_b.close ──► list_b (Queue, 3 parents)
-//!  list_a.concat(&list_b) ──► combined (5 items)
-//!  walk combined: popFirst ──► destroySlot (×5)
+//!  list_a.concat(&list_b) ──► 5 parents
+//!  popFirst ──► destroySlot (×5)
 //!  │
-//!  One walk handles parents from multiple mailboxes — no special API.
+//!  One walk releases parents from both mailboxes. No special call.
 //! ```
 //!
 

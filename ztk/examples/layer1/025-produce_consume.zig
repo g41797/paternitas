@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Produce-consume with defer cleanup.
+//! Title: Produce and consume
 //!
-//! - Append 5 Events to a queue (producer).
-//! - Pop each, sum the codes (consumer).
-//! - defer releases any parents remaining on error, before or after the loop.
+//! One queue, a producer and a consumer, with `defer` for the cleanup.
 //!
+//! - Append five Events to a queue: the producer.
+//! - Pop each one and add up the codes: the consumer.
+//! - Let `defer` release any parent left on an error, before or after the loop.
 //!
 //! ```
 //!  create × 5 ──► queue (producer)

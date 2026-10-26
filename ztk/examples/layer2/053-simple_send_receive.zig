@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Simple send-receive.
+//! Title: Send and receive
 //!
-//! - One thread sends an Event, then a Sensor, into a mailbox.
-//! - Same thread receives both back, in order.
-//! - Verifies each roundtrip value.
+//! One thread sends two parents into a mailbox and receives them back.
 //!
+//! - Send an Event, then a Sensor.
+//! - Receive both, in the same order.
+//! - Check each value.
 //!
 //! ```
-//!  alloc.create ──► slot ──mbx.send──► mailbox (owns)
-//!                                              │ mbx.receive
-//!                                              ▼
-//!                                         slot ──► destroySlot
+//!  create ──► Slot ──mbx.send──► mailbox (has it)
+//!                                      │ mbx.receive
+//!                                      ▼
+//!                                 Slot ──► destroySlot
 //! ```
 //!
 

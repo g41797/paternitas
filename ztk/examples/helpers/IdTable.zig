@@ -1,22 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! A dispatch table: `{id, handler}` pairs owned by a receiver.
+//! A dispatch table: `{id, handler}` pairs that a receiver keeps.
 //!
-//! An TypeId says what a parent **is**, not what a receiver should **do** with
-//! it. The same Event means a log line to one Master and a counter bump to
-//! another, so the handler cannot belong to the id. It belongs to the pair
-//! (receiver, id) — which is what this table holds.
+//! A TypeId says what a parent **is**, not what a receiver should **do** with
+//! it. The same Event is a log line to one Master, and a count to another.
+//! So the handler belongs to the pair (receiver, id). This table keeps that
+//! pair.
 //!
-//! Nothing in `src/` is needed. `ParentHelper.ID` is a value that can be
-//! stored, comparing two ids is `==`, and `Slot` reports what the handler did
-//! with the item. The table is composed from blocks that already exist.
+//! It needs nothing new from the toolkit.
 //!
-//! Not part of matryoshka: the handler's first parameter is the application's
-//! own receiver type, which the toolkit cannot name. Applications are free to
-//! write a different table, or none at all.
+//! - `ParentHelper.ID` is a value you can store.
+//! - Two ids compare with `==`.
+//! - The Slot tells you what the handler did with the parent.
 //!
-//! See `design/table-dispatch-002.md`.
+//! It is not part of the toolkit. The handler's first parameter is your own
+//! receiver type, which the toolkit cannot name. Write a different table, or
+//! none at all.
 
 /// Builds a dispatch table type for receiver type `T`.
 pub fn IdTable(comptime T: type) type {
@@ -25,22 +25,23 @@ pub fn IdTable(comptime T: type) type {
 
         /// A handler for one id.
         ///
-        /// **The transfer rule.** On return, the Slot is null if the handler
-        /// took the item, full if it did not. A handler may take the item,
-        /// forward it elsewhere, or look and leave it — but it must leave the
-        /// Slot telling the truth about which. The caller frees whatever is
-        /// left.
+        /// **The transfer rule.** On return, the Slot is empty if the handler
+        /// took the parent, and full if it did not.
         ///
-        /// This is a convention between the handler author and the loop that
-        /// calls it. Matryoshka cannot enforce it and does not care.
+        /// - A handler may take the parent, pass it on, or look and leave it.
+        /// - Whatever it does, the Slot MUST tell the truth.
+        /// - The caller releases whatever is left.
         ///
-        /// A handler may both move the item and then fail. The Slot reports
-        /// where the item is; the error reports whether the work succeeded.
-        /// They are two different questions.
+        /// The toolkit cannot enforce this. It is an agreement between the
+        /// handler and the loop that calls it.
         ///
-        /// `anyerror` and not an inferred error set: a function pointer type
-        /// needs its error set written out, and the table holds handlers
-        /// written by different authors.
+        /// A handler may move the parent and then fail. The Slot tells you
+        /// where the parent is. The error tells you whether the work
+        /// succeeded. These are two different questions.
+        ///
+        /// It returns `anyerror`, not an inferred error set. A function
+        /// pointer type needs its error set written out, and different
+        /// people write the handlers in one table.
         pub const Handler = *const fn (self: *T, slot: *Slot) anyerror!void;
 
         /// One id mapped to one handler.
@@ -49,9 +50,9 @@ pub fn IdTable(comptime T: type) type {
             handler: Handler,
         };
 
-        /// Usually a comptime literal. May also be a slice of a buffer the
-        /// receiver owns — see `design/table-dispatch-002.md`. No allocator
-        /// either way, and no `init` or `deinit`: a table is a value.
+        /// Usually a comptime literal. It may also be a slice of a buffer the
+        /// receiver keeps. Either way there is no allocator, and no `init` or
+        /// `deinit`. A table is a value.
         entries: []const Entry = &.{},
 
         /// The handler for `id`, or null when no entry matches.
@@ -65,15 +66,14 @@ pub fn IdTable(comptime T: type) type {
             return null;
         }
 
-        /// Calls the handler for the item in `slot`.
+        /// Calls the handler for the parent in `slot`.
         ///
-        /// - `error.EmptySlot` — nothing to dispatch.
-        /// - `error.NoHandler` — no entry matched. Nothing was called and the
-        ///   Slot is untouched, so the caller still holds the item and frees
-        ///   it. Unlike the last branch of an `isIt` chain, which cannot.
+        /// - `error.EmptySlot`: nothing to dispatch.
+        /// - `error.NoHandler`: no entry matched. Nothing was called, and the
+        ///   Slot is untouched. You still have the parent, and you release it.
         ///
-        /// Anything else comes from the handler itself. Look at the Slot, not
-        /// at the error, to learn where the item went.
+        /// Any other error comes from the handler. Look at the Slot, not at
+        /// the error, to learn where the parent went.
         pub fn dispatch(self: Self, receiver: *T, slot: *Slot) anyerror!void {
             const anchor = slot.* orelse return error.EmptySlot;
             const handler = self.find(anchor.typeId()) orelse return error.NoHandler;

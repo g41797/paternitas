@@ -37,9 +37,9 @@ const Fixture = struct {
     }
 };
 
-/// Spins until the condition holds. There is no `sleep` in std here —
-/// waiting is `Io`'s job in 0.16 — so a test that must let another context
-/// reach a point yields instead.
+/// Spins until the condition is true. std has no `sleep` here: in 0.16
+/// waiting is `Io`'s job. So a test that must let another thread reach a
+/// point yields instead.
 fn spinUntil(comptime done: fn (*Fixture) bool, f: *Fixture) void {
     while (!done(f)) std.Thread.yield() catch {};
 }
@@ -223,9 +223,9 @@ test "282, 283 and 288 — a close while the put hook runs loses nothing" {
 
     try expect(p.outcome == null);
 
-    // The straggling put found the pool closed and handed everything it
-    // still had to the close hook rather than dropping it: the parent it
-    // took out of the caller's Slot, and both parts the hook added.
+    // The late put found the pool closed. It gave everything it still had
+    // to the close hook, and dropped nothing: the parent it took out of the
+    // caller's Slot, and both parts the hook added.
     try expectEqual(@as(usize, 2), f.rec.close_calls);
     try expectEqual(@as(usize, 3), f.rec.closed_items);
 

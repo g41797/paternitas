@@ -129,7 +129,7 @@ test "49 - receive future awaited directly" {
     var threaded: std.Io.Threaded = std.Io.Threaded.init(allocator, .{});
     defer threaded.deinit();
     const io: std.Io = threaded.io();
-    examples.layer4.b.receive_future_direct.receive_future_awaited_directly(allocator, io) catch |err| {
+    examples.layer4.b.receive_future_direct.await_a_receive(allocator, io) catch |err| {
         std.log.err("example failed: {s}", .{@errorName(err)});
         return err;
     };
@@ -140,7 +140,7 @@ test "51 - receive future with timeout" {
     var threaded: std.Io.Threaded = std.Io.Threaded.init(allocator, .{});
     defer threaded.deinit();
     const io: std.Io = threaded.io();
-    examples.layer4.b.receive_future_timeout.receive_future_with_timeout(allocator, io) catch |err| {
+    examples.layer4.b.receive_future_timeout.await_a_receive_with_timeout(allocator, io) catch |err| {
         std.log.err("example failed: {s}", .{@errorName(err)});
         return err;
     };

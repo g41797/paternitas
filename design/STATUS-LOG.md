@@ -5,6 +5,254 @@ Append-only. Newest entries at top. Only the head is read.
 ---
 
 
+## 2026-10-26 — ZTK PREP 02 (Opus 5.5, effort medium, unattended)
+
+- The owner's ruling: unattended until ZTK HOME. Plan 033, backlog 013.
+- B37: `ztk/kitchen/gates.sh`, the four ztk gates inside ztk. paternitas
+  `kitchen/ztk_gates.sh` calls it. `/ztk/zig-out/` in `.gitignore`.
+- B38: `ztk/design/ztk-design-001.md`, from design 018 and plan 003.
+- B39: `ztk/design/ztk-log.md`, a summary of ZTK 00 to now.
+- B40: no link above `ztk/` was changed. Four are listed for the owner.
+- ztk rules 003: the gate script's place.
+- Read only: paternitas CI and zon `.paths` leave `ztk/` out.
+- Post-stage cleanup: none.
+- Four ztk gates, six gates pass. Plan 034, backlog 014.
+- The unattended run stops here. ZTK HOME waits for the owner.
+
+---
+
+
+## 2026-10-26 — ZTK HUMAN (Opus 5.5, effort high)
+
+- The owner named it. Plan 032, backlog 012. The intent:
+  [ztk-human-intent-001.md](ztk-human-intent-001.md).
+- The owner's answers: the order small to large; paternitas wins over
+  rules-050 (B19: `Title:`); no other rules read; one step per section.
+- With the owner, one step at a time: `matryoshka.zig`, `queue.zig`,
+  `internal/check.zig`, `internal/cond_timeout.zig` (a header only; std's
+  comments kept, no SPDX), `internal/stack.zig`, `helper.zig` (4 sections),
+  `inner.zig` (3 sections; `fillSlot` has new advice), `mbox.zig` section A.
+- The owner's ruling: unattended until ZTK HOME. Files before:
+  `design/backup/ztk-human-before/`. Review:
+  [ztk-human-review-001.md](ztk-human-review-001.md).
+- Unattended: the rest of `mbox.zig`, `pool.zig` (fixed: `newPool` is
+  `new`), 75 example headers, the example helpers, the tests.
+- Text moved out of comments: the intent's list, backlog B48.
+- Slips: Claude removed an empty temporary file it had made (`rm -f`).
+  Claude wrote "fires" (banned) in new headers; the scan found it, fixed.
+- Post-stage cleanup: none. The banned-word scan of ztk comments is clean.
+- Four ztk gates, six gates pass. Plan 033, backlog 013.
+- After a clear: read STATUS. ZTK PREP 02, unattended. Opus, effort medium.
+
+---
+
+
+## 2026-10-26 — rules 015 (Opus 5.5)
+
+- The owner's ruling: Claude states the effort level next to the model, for
+  each stage, with the reason. The continue prompt shows both.
+- Levels: rules or design high or max; code, README, pages, comments medium
+  or high; mechanical work low.
+- Rules 014 is in `design/backup/`. Live references point at 015.
+- ZTK HUMAN: Opus, effort high.
+
+---
+
+
+## 2026-10-26 — ZTK DOCS 05 (Opus 5.5)
+
+- The owner named it. Plan 031, backlog 008. The intent:
+  [ztk-docs-05-intent-001.md](ztk-docs-05-intent-001.md). Ideas kept in
+  [ztk-docs-05-ideas-001.md](ztk-docs-05-ideas-001.md).
+- The owner's answers: a short README; the "two worlds" opening stays;
+  install "to come"; badges and the site link to matryoshka-ztk; the lines
+  of code stated and checked.
+- New backlog items: B44 Paternitas 101 (later, its own page), B45 the
+  claim's gate, B46 read NEXT's README-001 against the inventory, B47 the
+  Matryoshka model text, kept word for word.
+- NEXT's `README-001.md` copied as is to `ztk/design/`.
+- The first example: `ztk/examples/layer4/020-pipeline_masters.zig`, the
+  owner's choice. Code changes, the owner's approval:
+  - `poly` renamed `anchor`.
+  - Four `destroySlot` calls removed; the `defer` covers them.
+  - A comment: a Master is your code, not ztk's. "Master" stays until B42.
+  - The old file: `design/backup/020-pipeline_masters-001.zig`.
+- The old README's notes moved, as drafts, the MUST rule:
+  - "Steps for a reader" to `ztk/kitchen/docs/get-started.md`.
+  - "The bridge" and "The working code" to the new
+    `ztk/kitchen/docs/patterns/bridge.md`, "Crossing to std.Io".
+  - The model text of "Built on Paternitas" to B47.
+  - Dropped: the planning line about 3tk's "How to start" (F3.4).
+- `ztk/README.md`: the logo, five badges, two worlds, "about 800 lines",
+  what you get, a pipeline (diagram, `transformerFn`, four bullets), install
+  "to come", Built on Paternitas, Learn more. No License section: the badge
+  has it. The old file: `design/backup/ztk-README-temp-001.md`.
+- z4_readme: `ztk/kitchen/tools/check_readme_claim.sh`. It fails on a wrong
+  claim and names the right one; tried with 900.
+- ztk rules 002: the gates named; the rule 2 check is z5. The owner.
+- Claude ran `git stash list` once, against Part 0. Reported to the owner.
+- Post-stage cleanup: none. The banned-word check (g4) is clean.
+- Four ztk gates, six gates, the ztk strict build pass.
+- Plan 032, backlog 012.
+- After a clear: read STATUS. ZTK HUMAN (B43) is next, when the owner names
+  it. Model: Opus.
+
+---
+
+
+## 2026-10-26 — ZTK DOCS 04 (Opus 5.5)
+
+- The owner named it. Plan 030, backlog 007.
+- Rule 2 in `ztk/`: four comments no longer name paternitas.
+  - `src/inner.zig:19`: "This file sets the chain convention, the Slot,
+    and the borders out of the toolkit."
+  - `src/inner.zig:96`: "ztk decides what the word holds." The
+    `nextField` how-it-is-built text is gone.
+  - `src/helper.zig:10`: "The helper wraps `paternitas.Typed(Parent)`." cut.
+  - `tests/layer1_any.zig:202` (F2.4, owner added it): "read through its
+    location only".
+  - No text cut that a reader needs: each was about paternitas internals.
+- F2.5, `build.zig:57`, still waits for the ruling.
+- g4 failed on four links to backup files the owner removed. Owner: remove.
+  New versions: docs-01-intent-010, docs-02-intent-006, design 018.
+- New stage ZTK HUMAN, B43: many ztk comments do not read human (the
+  owner). ztk only. After ZTK DOCS 05, before B5 and B6. Plan 031,
+  backlog 008.
+- Six gates pass, three ztk gates pass.
+- Continue after a clear: read STATUS; ZTK DOCS 05 when named, then ZTK
+  HUMAN. Model: Opus.
+
+## 2026-10-26 — ZTK DOCS 03, the owner's answers (Opus 5.5)
+
+- Inventory 002. Verdicts agreed. Background splits: Ideas (10 pages),
+  Comparisons (3). `slot-idiom` merges into `slot-based-programming`. The
+  order agreed. The ztk nav still says Background; it changes in the
+  first Ideas or Comparisons stage.
+- Continue after a clear: read STATUS; ZTK DOCS 04 when named. Model: Opus.
+
+## 2026-10-26 — ZTK DOCS 03 (Opus 5.5)
+
+- The owner named it. Plan 030, backlog 007.
+- The inventory, ztk-docs-03-inventory-001: 60 hand-written matryoshka-ztk
+  pages, one verdict each, and the new place on the ZTK DOCS 02 nav. take
+  31, rewrite 15, merge 12, drop 2. 35 pages have 3tk names. 7 orphans.
+- The 88 example pages: take, generated (B30, B34).
+- The order of the page stages: Get Started, Errors, Tools, API, Patterns,
+  Background, the pointer page; Master items wait for B42.
+- Four questions for the owner: the verdicts, Background's size, the
+  `slot-idiom` merge, the order.
+- No page written. matryoshka-ztk read only.
+- Continue after a clear: read STATUS; the owner's answers go into a new
+  inventory version; then ZTK DOCS 04 when named. Model: Opus.
+
+## 2026-10-22 — ZTK DOCS 02 (Opus 5.5)
+
+- The owner named it. Plan 029, backlog 006, intent
+  ztk-docs-02-intent-001.
+- Owner's answers: the nav groups as proposed; B32 now; "Get Started" to a
+  placeholder; the site name stays "Be Master of your systems" for now,
+  with a note to decide on the Master concept (B42).
+- `ztk/kitchen/`: the hero rewritten; nav Home, Get Started, Tools (Item,
+  Mailbox, Pool, Master), API Reference, Patterns, Examples, Background,
+  Errors, ten "To come." pages; a `validation` block; hook
+  `new_tab_links.py`; `fix_md_hardbreaks.sh`, `fix_md_lists.sh` copied from
+  paternitas (they touch `kitchen/docs/` only).
+- `build_site.sh`: `--strict`. The examples generator is commented out: its
+  pages are not in the nav and strict stops on them. B30 brings it back.
+- g4 flagged two short paths in the new intent as dead refs; reworded.
+- Gates: six pass. ztk: three pass. ztk strict build passes, 801 lines.
+- Continue after a clear: read STATUS; ZTK DOCS 03 when the owner names
+  it. Model: Opus.
+
+## 2026-10-22 — ZTK PREP 01 (Opus 5.5)
+
+- The owner named it. Plan 028 and backlog 005 after it.
+- matryoshka-ztk: two pointers fixed, the owner's go. Root STATUS line 12,
+  plan 002 to 019; line 345 is a past entry, left. next-status.md line 10:
+  the state is paternitas `design/STATUS.md`.
+- `ztk/src/matryoshka.zig`: `VERSION` removed. Tests "317" removed from
+  `layer1_id.zig` and `layer2_mbox.zig`, and 317 from the layer1 `//!`.
+  `ztk/design/` still names `VERSION` in three files: docs stages.
+- Gates: six pass. ztk: 200/201, 1 skipped. z2 failed once on
+  `312_destroy_while_receiving` (exit 0, expected ABRT); three reruns
+  pass. B41.
+- Continue after a clear: read STATUS; ZTK DOCS 02 when the owner names
+  it. Model: Opus.
+
+## 2026-10-22 — plan 027, the ZTK HOME answers (Opus 5.5)
+
+- The owner answered the six home questions. Route 2, straight to the
+  root; zon by url; nothing deleted, cleanup later; fix two pointers in
+  matryoshka-ztk; remove `VERSION`.
+- `VERSION` is read by two tests "317": they go with it.
+- [implementation-plan-027.md](implementation-plan-027.md): ZTK PREP 01
+  next. [ztk-docs-backlog-004.md](ztk-docs-backlog-004.md): B35 to B40.
+  [ztk-home-audit-002.md](ztk-home-audit-002.md): the answers. 026, 003,
+  001 are in `design/backup/`.
+
+## 2026-10-22 — ZTK HOME audit (Opus 5.5)
+
+- The owner asked: what must change when ztk moves back to matryoshka-ztk.
+- [ztk-home-audit-001.md](ztk-home-audit-001.md): three ztk trees and four
+  sets of plans; items H1 to H26; what ZTK DOCS can do now so the move is a
+  plain copy; six questions.
+- Found: two stale pointers in matryoshka-ztk (H1, H2); `VERSION` 0.1.0
+  against the zon's 0.0.1 (H9); the ztk gates live outside `ztk/` (H11).
+- Nothing changed in matryoshka-ztk. Read only.
+
+## 2026-10-22 — plan 026 (Opus 5.5)
+
+- The owner: no stage starts without a plan update. The plan lives in
+  the owner's `.md` files.
+- [implementation-plan-026.md](implementation-plan-026.md): ZTK 02 and
+  ZTK DOCS 01 in completed stages. ZTK DOCS as small stages: 02 the frame,
+  03 the inventory, 04 rule 2 in `src/`, 05 the README; then from the
+  backlog. 025 is in `design/backup/`.
+
+## 2026-10-22 — ZTK DOCS: backlog 003 (Opus 5.5)
+
+- The example pages are generated: fixed in the `//!` headers, not the
+  `.md`. The inventory covers the 60 hand-written pages.
+- [ztk-docs-backlog-003.md](ztk-docs-backlog-003.md): B28, B30, B31
+  changed; B34 new, the example headers. 002 is in `design/backup/`.
+
+## 2026-10-22 — ZTK DOCS: backlog 002 (Opus 5.5)
+
+- The owner: the docs are the whole site. The README was temporary and
+  grows. The hero takes the paternitas style: image, two buttons.
+- [ztk-docs-backlog-002.md](ztk-docs-backlog-002.md): the site inventory
+  (148 matryoshka-ztk pages, 35 with 3tk names), a new order of steps,
+  items B27 to B33. 001 is in `design/backup/`.
+
+## 2026-10-22 — ZTK DOCS: the backlog (Opus 5.5)
+
+- The owner: one stage cannot fix all of it. The work is iterative. The
+  main rule: do not lose important information.
+- Written: [ztk-docs-backlog-001.md](ztk-docs-backlog-001.md). 26 items,
+  each with its F number, size and state. Items are never deleted.
+- Suggested first steps, comments only: A rule 2 in `src/`, B the
+  `typeId` and alias docs, C "Built on Paternitas", D the errors page.
+
+## 2026-10-22 — ZTK DOCS 01, the audit (Opus 5.5)
+
+The owner named it. Intent: [ztk-docs-01-intent-001.md](ztk-docs-01-intent-001.md).
+Findings: [ztk-docs-01-findings-001.md](ztk-docs-01-findings-001.md).
+
+- Nothing in ztk's code, comments or README changed.
+- The findings: paternitas members reached through ztk's aliases carry
+  paternitas text (`Typed(P)`, `Any`, "Paternitas"); five rule-2 hits;
+  six dead example links in `//!` headers; the README is a context note,
+  not a README; two examples numbered 104; the intent's `Inner`, `item.id`
+  are no longer there.
+- The rules compared, 014 against 050: eight to take, six kept in ztk,
+  three conflicts for the owner.
+- NEXT's `readme-creation-002` and `comments-creation-002` copied into
+  `ztk/design/`. The 001 copies moved to the new `ztk/design/backup/`.
+- g4 failed on backtick paths in the new intent and findings. Fixed by
+  writing the paths from the repo root.
+- Gates: three ztk, six paternitas, all pass.
+- Six questions wait for the owner, at the end of the findings.
+
 ## 2026-10-22 — ZTK 02 closed (Opus 5.5)
 
 - The owner read 104 and 105: ok. Plan 003: [ztk-plan-003.md](ztk-plan-003.md).

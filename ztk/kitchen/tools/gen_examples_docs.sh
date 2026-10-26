@@ -17,7 +17,7 @@ out_root="$repo_root/kitchen/docs/examples"
 # Only clear the mirrored per-example subdirs, not the whole out_root — it
 # also holds hand-authored catalog/group pages (index.md, polynode.md,
 # mailbox.md, pool.md, io.md, flow.md) that this script must not touch.
-rm -rf "$out_root/layer1" "$out_root/layer2" "$out_root/layer3" "$out_root/layer4" \
+rm -rf "$out_root/bridge" "$out_root/layer1" "$out_root/layer2" "$out_root/layer3" "$out_root/layer4" \
        "$out_root/parents" "$out_root/hooks" "$out_root/helpers" "$out_root/stories"
 mkdir -p "$out_root"
 
@@ -38,8 +38,14 @@ gen_one() {
         started { exit }
     ' "$src")"
 
-    local title
-    title="$(printf '%s\n' "$desc" | sed -n '1{s/[.]*$//;p;q}')"
+    # The title comes from a `//! Title: ...` first line. That line, and the
+    # blank line after it, are not part of the description.
+    local title=""
+    if printf '%s\n' "$desc" | head -1 | grep -q '^Title: '; then
+        title="$(printf '%s\n' "$desc" | sed -n '1{s/^Title: *//;p;q}')"
+        desc="$(printf '%s\n' "$desc" | sed '1d' | sed '1{/^$/d}')"
+    fi
+    [ -n "$title" ] || title="$(printf '%s\n' "$desc" | sed -n '1{s/[.]*$//;p;q}')"
     [ -n "$title" ] || title="$(basename "$src" .zig)"
 
     # Split desc into prose (before the first fenced ``` line, trailing
@@ -65,7 +71,8 @@ gen_one() {
         # Drop the SPDX header, then the leading blank/`//!` run (the
         # description + diagram, already rendered above as markdown) from
         # the embedded snippet. Source file itself is untouched.
-        sed -e '/^\/\/ SPDX-FileCopyrightText:/d' -e '/^\/\/ SPDX-License-Identifier:/d' "$src" \
+        sed -e '/^\/\/ SPDX-FileCopyrightText:/d' -e '/^\/\/ SPDX-License-Identifier:/d' \
+            -e '/^[[:space:]]*\/\/ --8<-- \[\(start\|end\):[a-z0-9_-]*\]$/d' "$src" \
             | awk '
                 !done && ($0 == "" || $0 ~ /^\/\/!/) { next }
                 { done=1; print }
@@ -80,6 +87,7 @@ mirror_root() {
     while IFS= read -r -d '' f; do
         rel="${f#"$repo_root/$src_root/"}"
         is_barrel "$f" && continue
+        grep -q '^//! Page: none$' "$f" && continue
         out="$out_root${dest_prefix:+/$dest_prefix}/${rel%.zig}.md"
         gen_one "$f" "$out"
     done < <(find "$repo_root/$src_root" -name '*.zig' -print0)

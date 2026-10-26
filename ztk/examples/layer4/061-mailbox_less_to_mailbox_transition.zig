@@ -1,30 +1,30 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! When to add Mailbox.
+//! Title: When to add a mailbox
 //!
-//! - Same pool + Select setup as scenario 60, plus multiple independent mock clients.
-//! - Clients are unknown and independent — fan-in requires a mailbox as a third source.
-//! - Shows the transition point: mailbox-less works until senders multiply and diverge.
+//! Many independent senders need a mailbox.
 //!
-//! Transfers (transition: mailbox-less → mailbox needed):
+//! - Start from example 060: a pool and a Select.
+//! - Add several mock clients. They do not know each other.
+//! - Collect from them through a mailbox, a third source in the Select.
+//!
+//! Without a mailbox it works until the senders multiply. Then a mailbox is
+//! the place where they all meet.
 //!
 //! ```
-//!  pool (seeded)       mock clients (io.concurrent ×N_CLIENTS → mbx.send)
+//!  pool (filled)       mock clients (io.concurrent ×N_CLIENTS → mbx.send)
 //!  │ getWaitResult      │ receiveResult
 //!  └────────┬───────────┘
 //!           ▼
 //!  Select(MasterEvent)
 //!  │
-//!  .pool_ev .item ──► process ──► pl.put ──► pool (re-spawn)
-//!  .inbox .item   ──► freeSlot               (re-spawn receiveResult)
+//!  .pool_ev .anchor ──► handle ──► pl.put ──► pool (restart)
+//!  .inbox .anchor   ──► destroySlot           (restart receiveResult)
 //!  │
-//!  clients finish → mbx.close → inbox returns .closed
-//!  sel.cancelDiscard ──► pl.close ──► on_close ──► freed
+//!  the clients finish → mbx.close → the inbox returns .closed
+//!  sel.cancelDiscard ──► pl.close ──► on_close ──► released
 //! ```
-//!
-//!  Transition: when senders are multiple and independent, fan-in via mailbox
-//!  becomes necessary. Mailbox is the third event source in Select.
 //!
 
 pub fn when_to_add_mailbox(allocator: std.mem.Allocator, io: std.Io) !void {

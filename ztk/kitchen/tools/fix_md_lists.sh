@@ -5,6 +5,7 @@
 # sentence instead of rendering a <ul>/<ol>. Auto-fixes every kitchen/docs/
 # .md file in place; mechanical formatting only, no wording changes.
 #
+# Skips a leading front matter block (--- ... ---): it is YAML, not Markdown.
 # Skips fenced code blocks (``` or ~~~) so `-`/`1.` lines inside example
 # source or shell snippets are never touched. Does not insert a blank line
 # when the previous line is itself a list item or blank — only when a list
@@ -17,7 +18,13 @@ docs_root="$repo_root/kitchen/docs"
 fix_one() {
     local f="$1"
     awk '
-        BEGIN { in_fence = 0; prev_is_list = 1; prev_is_blank = 1 }
+        BEGIN { in_fence = 0; in_front = 0; prev_is_list = 1; prev_is_blank = 1 }
+        NR == 1 && /^---[[:space:]]*$/ { in_front = 1; print; next }
+        in_front {
+            print
+            if ($0 ~ /^---[[:space:]]*$/) in_front = 0
+            next
+        }
         {
             line = $0
             is_fence = (line ~ /^[[:space:]]*(```|~~~)/)

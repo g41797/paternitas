@@ -1,21 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! OOB via sendOob.
+//! Title: Send ahead of the queue
 //!
-//! - Send 3 Events via mbx.send, queued in order.
-//! - Send 1 Sensor via mbx.sendOob, jumps to queue front.
-//! - Receive 4 items: OOB Sensor arrives first, then the 3 Events.
-//! - Free every received item.
+//! A parent sent with `sendOob` comes out first.
 //!
+//! - Send three Events with `mbx.send`. They queue in order.
+//! - Send one Sensor with `mbx.sendOob`. It goes ahead of them.
+//! - Receive four parents: the Sensor first, then the three Events.
+//! - Release each one.
 //!
 //! ```
-//!  mbx.send (Event×3) ──► queue tail
-//!  mbx.sendOob (Sensor) ──► queue front
+//!  mbx.send (Event ×3) ──► the ordinary queue
+//!  mbx.sendOob (Sensor) ──► ahead of it
 //!       │ mbx.receive ×4
 //!       ▼
-//!  OOB Sensor arrives first, then Events in send order
-//!  destroySlot per item
+//!  the Sensor first, then the Events in send order
+//!  destroySlot per parent
 //! ```
 //!
 

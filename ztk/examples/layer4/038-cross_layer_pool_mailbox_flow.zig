@@ -1,21 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool + Mailbox flow.
+//! Title: Pool and mailbox, the smallest flow
 //!
-//! - getAndSend: pl.get fills a parent, mbx.send transfers it.
-//! - receiveAndVerify: mbx.receive gets it back, pl.put returns it.
-//! - One transfer circuit, single-threaded — the minimal cross-layer flow.
+//! One parent out of the pool, through a mailbox, and back. One thread.
+//!
+//! - Get a parent from the pool, and send it: `getAndSend`.
+//! - Receive it, and put it back: `receiveAndVerify`.
 //!
 //! ```
-//!  pl.get ──► slot (code=7)
-//!  mbx.send ──► mailbox holds the parent
-//!  mbx.receive ──► slot (same parent)
-//!  pl.put ──► pool store
+//!  pl.get ──► Slot (code=7)
+//!  mbx.send ──► the mailbox has it
+//!  mbx.receive ──► Slot (the same parent)
+//!  pl.put ──► the pool keeps it
 //!  pl.close ──► on_close ──► released
 //! ```
-//!
-//!  Pattern: pool → mailbox → pool. One transfer circuit, single-threaded.
 //!
 
 pub fn pool_mailbox_flow(allocator: std.mem.Allocator, io: std.Io) !void {

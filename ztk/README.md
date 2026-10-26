@@ -1,69 +1,101 @@
-# matryoshka-ztk
+![](kitchen/docs/assets/matryoshka-ztk-logo.png)
 
-The rewritten toolkit. This file stores the context for the README that DOCS  
-writes. It is not the README yet.
+# Toolkit for Building Background Processes
 
-## The bridge
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Linux](https://github.com/g41797/matryoshka-ztk/actions/workflows/linux.yml/badge.svg)](https://github.com/g41797/matryoshka-ztk/actions/workflows/linux.yml)
+[![Windows](https://github.com/g41797/matryoshka-ztk/actions/workflows/windows.yml/badge.svg)](https://github.com/g41797/matryoshka-ztk/actions/workflows/windows.yml)
+[![macOS](https://github.com/g41797/matryoshka-ztk/actions/workflows/mac.yml/badge.svg)](https://github.com/g41797/matryoshka-ztk/actions/workflows/mac.yml)
+[![Deploy Documentation](https://github.com/g41797/matryoshka-ztk/actions/workflows/docs.yml/badge.svg)](https://github.com/g41797/matryoshka-ztk/actions/workflows/docs.yml)
 
-The toolkit does not replace the io side. It sits beside it.
+Software has two worlds.
 
-- The io side has its own queue and its own types.
-- Matryoshka has parents, a pool and a mailbox.
-- The bridge is the point where a parent crosses to the io side and back.
+- The first moves data.
+- The second processes data.
 
-A parent crosses as its bare `*Anchor`: one word that says where the parent
-is and what it is.
+Matryoshka-Ztk is a _toolkit_ for the second world.
 
-- `inner.takeFromSlot(&slot)` takes the Anchor out, before a put.
-- `inner.fillSlot(&slot, anchor)` puts it back into a Slot, after a get.
-- `fromAnchor` tells the receiver whether it is its own type.
-- A copied `*Anchor` is a second owner, as a copied Slot would be.
+The whole toolkit is about 800 lines of Zig. A script counts them.
 
-A receiver that dispatches by id through a handler map takes a view
-instead: `inner.anyFromSlot(&slot)` gives an `AnyParent`, the parent's
-address and its id. A view, not an owner.
+## What you get
 
-## The working code
+- **A mailbox.** Your threads send work to each other through it.
+  - Nothing is allocated when a message is sent.
+  - One mailbox carries any mix of your structs.
+  - Many senders, many receivers, with timeouts.
+  - `close` gives back whatever is still queued.
+- **A pool.** Used structs come back and go out again.
+  - Your hooks decide what reuse means.
+- **A queue.** A first in, first out chain of your structs.
+  - It allocates nothing and locks nothing.
+- **A helper.** One line per struct type.
+  - It creates your struct, checks its type and releases it.
 
-`examples/bridge/104-server_handler_and_workers.zig`, tested by  
-`tests/examples_bridge.zig`. Run it alone with `zig build examples-bridge`.
+Take only what you need. The mailbox works without the pool.
 
-- The queue carries `Msg`: `request` from the io side, `reply` as a bare
-  `*Anchor`, and `stop`.
-- A handler dispatches on the tag.
-- A request becomes a greeting from the pool, sent to a shared mailbox.
-- Workers receive from the mailbox and reply through the queue.
-- "Hello, Matryoshka!" goes in, "Hello, Io" comes out.
+## A pipeline
 
-## Steps for a reader
+Three threads, two mailboxes.
 
-The order the README follows, from 3tk's "How to start".
+```text
+ producer ──Event──► transformer_mbx ──► transformer
+                                             │ Event → Sensor
+                                             ▼
+ consumer ◄──Sensor── consumer_mbx ◄── transformer
 
-1. One thread, one struct. A `SinglyTypedNode` in your struct, a helper, a `Queue`.
-2. Add a thread. Send parents over `Io.Queue(*Anchor)`.
-3. Add a pool, when repeated allocation becomes a problem.
-4. Replace the channel with a mailbox, when the channel stops being enough.
+ ShutdownCommand goes down the same way and stops each thread.
+```
 
-What the mailbox adds to a channel:
+The transformer, the middle thread:
 
-- no allocation on transfer
-- `close` gives back what was queued
-- timeouts, `wakeUpAll`, sending to the front, a per-type limit
+```zig
+fn transformerFn(ctx: *TransformerCtx) anyerror!void {
+    while (true) {
+        var slot: Slot = null;
+        defer parents.destroySlot(&slot, ctx.alloc, ctx.io);
+        ctx.in_mbx.receive(&slot, null) catch return;
+        const anchor: *Anchor = slot.?;
 
-If the channel already does what you need, keep it.
+        if (parents.Event.EventHelper.fromAnchor(anchor)) |ev| {
+            const value: f64 = @floatFromInt(ev.code);
+            parents.destroySlot(&slot, ctx.alloc, ctx.io);
+            parents.Sensor.SensorHelper.create(ctx.alloc, ctx.io, &slot) catch continue;
+            parents.Sensor.SensorHelper.mustFromSlot(&slot).value = value;
+            ctx.out_mbx.send(&slot) catch {};
+            std.log.info("transformer: Event→Sensor value={d}", .{value});
+        } else if (parents.ShutdownCommand.ShutdownCommandHelper.fromAnchor(anchor)) |_| {
+            ctx.out_mbx.send(&slot) catch {};
+            std.log.info("transformer: forwarded ShutdownCommand, done", .{});
+            return;
+        }
+    }
+}
+```
+
+What to look at:
+
+- A `Slot` is where a struct sits while it is yours. Empty means it is not.
+- `receive` fills the Slot. `send` empties it.
+- An Anchor is the part of your struct the mailbox sees.
+- `fromAnchor` tells you which struct arrived. One mailbox, three types.
+- `defer` releases whatever is left in the Slot. Nothing leaks.
+
+The whole file:
+[020-pipeline_masters.zig](https://github.com/g41797/matryoshka-ztk/blob/main/examples/layer4/020-pipeline_masters.zig).
+
+## Install
+
+To come.
 
 ## Built on Paternitas
 
-A parent is the struct that embeds the TypedNode, as in `@fieldParentPtr`.
-The Matryoshka model calls it the outer doll: parent, then TypedNode, then
-Anchor.
+Under the toolkit sits Paternitas, a small library of its own.
 
-An item is a parent while it is in a mailbox, a queue or a pool. In code,
-what a container holds is an `*Anchor`.
+- It puts the Anchor into your struct, and finds your struct again from it.
+- These pages and the site cover all you need. You need not read it.
+- If you are curious: [Paternitas](https://g41797.github.io/paternitas/).
 
-The TypedNode, the Anchor and the type description come from Paternitas
-(`../paternitas`). Matryoshka adds the policy: the chain convention, the
-Slot, the mailbox and the pool.
+## Learn more
 
-A parent embeds `SinglyTypedNode` or `DoublyTypedNode`. A DoublyTypedNode parent can also live in the
-application's own `std.DoublyLinkedList` — one place at a time.
+The site has the tools, the patterns and the examples:
+[Matryoshka-Ztk](https://g41797.github.io/matryoshka-ztk/).

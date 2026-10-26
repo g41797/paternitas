@@ -3,9 +3,9 @@
 The intent of PTRN 01, the code, and the owner's answers of 2026-10-02.
 Opus 5.5.
 
-- Rules: [rules-014.md](rules-014.md).
-- Plan: [implementation-plan-025.md](implementation-plan-025.md).
-- Design: [paternitas-design-017.md](paternitas-design-017.md).
+- Rules: [rules-015.md](rules-015.md).
+- Plan: [implementation-plan-034.md](implementation-plan-034.md).
+- Design: [paternitas-design-018.md](paternitas-design-018.md).
 
 ---
 

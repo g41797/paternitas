@@ -1,22 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Wake blocked receiver without a message.
+//! Title: Wake a receiver with no message
 //!
-//! - Worker thread blocks in mbx.receive with no item ever sent.
-//! - Coordinator flips a shutdown flag, then calls mbx.wakeUpAll —
-//!   no item is sent, no message crosses the mailbox.
-//! - Worker wakes with error.Wakeup, re-checks the flag, exits.
+//! `wakeUpAll` wakes a waiting receiver. Nothing is sent.
 //!
+//! - Let a worker wait in `mbx.receive`. Nothing is ever sent.
+//! - Set a shutdown flag in the coordinator, then call `mbx.wakeUpAll`.
+//! - The worker wakes with `error.Wakeup`, reads the flag, and stops.
 //!
 //! ```
 //!  worker thread
-//!  mbx.receive (blocks — mailbox stays empty)
+//!  mbx.receive (waits: the mailbox stays empty)
 //!       │
 //!  coordinator: shutdown.store(true) ──► mbx.wakeUpAll
 //!       │ error.Wakeup
 //!       ▼
-//!  worker re-checks shutdown flag ──► exits
+//!  worker reads the flag ──► stops
 //! ```
 //!
 

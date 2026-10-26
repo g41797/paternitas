@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pipeline.
+//! Title: A pipeline
 //!
-//! - Chain of 3 stages: producer, transformer, consumer.
-//! - Producer sends 5 Events, then a sentinel (code == -1).
-//! - Transformer squares each code, forwards the sentinel, then exits.
-//! - Consumer sums results, frees the sentinel, exits.
+//! Three stages connected by two mailboxes.
 //!
+//! - Send five Events from the producer, then a last Event with code -1.
+//! - Square each code in the transformer, and pass it on. Pass on the -1 too,
+//!   then stop.
+//! - Add up the results in the consumer. Release the -1 Event, then stop.
 //!
 //! ```
 //!  producer ──Event──► stage1 mailbox ──► transformer
-//!                                              │ Event→Event (code²)
-//!                                              ▼
+//!                                             │ code becomes code²
+//!                                             ▼
 //!  consumer ◄──Event── stage2 mailbox ◄── transformer
-//!  (sentinel: Event code=-1 terminates each stage; consumer frees)
+//!  (an Event with code -1 stops each stage; the consumer releases it)
 //! ```
 //!
 

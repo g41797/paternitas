@@ -1,25 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! receive_future awaited directly.
+//! Title: Await a receive
+//!
+//! `receiveFuture` gives a future you can await. No Select is needed.
 //!
 //! - Send one Event into the mailbox.
-//! - mbx.receive_future returns an Io.Future(Mbox.Result), no Select needed.
-//! - fut.await blocks until the item arrives, then it's freed.
-//!
+//! - Get an `Io.Future(Mbox.Result)` with `mbx.receiveFuture`.
+//! - Await it. It returns the parent, and you release it.
 //!
 //! ```
-//!  master ──EventHelper.create──► slot
-//!          ──mbx.send──► mailbox
-//!          │
-//!  receive_future ──► Future(Mbox.Result)
-//!  fut.await ──► Mbox.Result .item ──► slot (master owns)
-//!          │
-//!  freeSlot
+//!  master ──EventHelper.create──► Slot
+//!         ──mbx.send──► mailbox
+//!         │
+//!  receiveFuture ──► Future(Mbox.Result)
+//!  fut.await ──► .anchor ──► Slot (yours now)
+//!         │
+//!  destroySlot
 //! ```
 //!
 
-pub fn receive_future_awaited_directly(allocator: std.mem.Allocator, io: std.Io) !void {
+pub fn await_a_receive(allocator: std.mem.Allocator, io: std.Io) !void {
     var mbx_slot: Slot = null;
     try matryoshka.mbox.new(allocator, io, &mbx_slot);
     const mbx: *Mbox = Mbox.moveFromSlot(&mbx_slot).?;
@@ -51,7 +52,7 @@ fn receiveAndVerify(mbx: *Mbox, alloc: std.mem.Allocator, io: std.Io) !void {
             defer parents.destroySlot(&received, alloc, io);
             const ev: *parents.Event = parents.Event.EventHelper.mustFromSlot(&received);
             try helpers.expect(error.ReceiveFutureDirectFailed, ev.code == 42, "wrong code");
-            std.log.info("receive_future direct: got Event code={d}", .{ev.code});
+            std.log.info("receiveFuture awaited: got Event code={d}", .{ev.code});
         },
         else => return error.ReceiveFutureDirectFailed,
     }

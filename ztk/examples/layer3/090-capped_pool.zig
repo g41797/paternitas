@@ -1,22 +1,23 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Backpressure pool.
+//! Title: A pool with a cap
 //!
-//! - 4 tasks concurrently pl.get and pl.put, 8 iterations each.
-//! - on_put caps the pool at 2 parents, releases anything past the cap.
-//! - After all tasks finish, empty the pool and count what remains.
-//! - Verify the remaining count never exceeds the cap.
+//! `on_put` keeps at most two parents, and releases the rest.
 //!
+//! - Run four tasks at once. Each gets and puts eight times.
+//! - Keep at most two parents in `on_put`. Release anything past the cap.
+//! - When the tasks finish, empty the pool and count what was left.
+//! - Check that the count never went past the cap.
 //!
 //! ```
 //!  CappedPool (cap=2)
-//!       │ pl.get (available_or_new) — 4 tasks concurrently
+//!       │ pl.get (available_or_new), four tasks at once
 //!       ▼
-//!  worker task (processes)
-//!       │ pl.put (defer) — on_put releases excess above cap
+//!  worker task (uses it)
+//!       │ pl.put (defer): on_put releases what is past the cap
 //!       ▼
-//!  CappedPool (≤ cap parents retained)
+//!  CappedPool (at most 2 parents kept)
 //! ```
 //!
 

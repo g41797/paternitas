@@ -1,19 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Multi-worker Master.
+//! Title: A Master with several workers
 //!
-//! - Master spawns 3 workers via Io.Group, all sharing one mailbox.
-//! - sendItems pushes 3 Events; workers compete for them.
-//! - awaitAll closes the mailbox, frees anything left, awaits the group.
-//! - Shutdown cancels the group on defer, in case a worker is still running.
+//! Three workers share one mailbox.
 //!
+//! - Start three workers in an `Io.Group`.
+//! - Send three Events. The workers race for them: `sendItems`.
+//! - Close the mailbox, release what is left, and wait for the group:
+//!   `awaitAll`.
+//! - Cancel the group on `defer`, in case a worker still runs.
 //!
 //! ```
 //!  master ──Event×3──► mailbox ──► worker A (Io.Group)
-//!                             ├──► worker B  (compete; each freeSlot)
-//!                             └──► worker C
-//!  mbx.close ──► remaining freeList ──► group.await
+//!                            ├──► worker B  (each parent goes to one)
+//!                            └──► worker C
+//!  mbx.close ──► destroyQueue ──► group.await
 //! ```
 //!
 

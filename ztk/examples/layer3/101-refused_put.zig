@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Refused put.
+//! Title: A refused put
 //!
-//! - A pool keeps parents of the ids it was made with, and no others.
-//! - Put into a closed pool is silent: the Slot keeps the parent, and the
-//!   caller releases it.
-//! - Put of an unknown id is error.UnknownIdentity, and the Slot is untouched.
-//!   The same answer in every build.
+//! A pool keeps only the ids it was made with.
 //!
+//! - Put a Sensor into a pool made for Events. It returns
+//!   `error.UnknownIdentity`, and the Slot is untouched. Every build does the
+//!   same.
+//! - Close the pool, then put an Event. Nothing is reported. The parent stays
+//!   in your Slot. Release it yourself.
 //!
 //! ```
 //!  pl (Event only) ◄── pl.put (Sensor) ──► error.UnknownIdentity
 //!       │ pl.close
 //!       ▼
-//!  pl.put (Event) ──► silent, Slot still full ──► caller releases
+//!  pl.put (Event) ──► nothing reported, the Slot still full ──► you release it
 //! ```
 //!
 

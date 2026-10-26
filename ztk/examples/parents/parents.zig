@@ -7,10 +7,10 @@ pub const Timer = @import("Timer.zig");
 
 /// Releases the parent in `slot`, whichever of the five it is.
 ///
-/// A helper releases one type, because it must know the type. Something that
-/// holds parents of several types finds the type by the id and calls that
-/// type's helper. These five are the whole set of the examples, so an id that
-/// is none of them means the caller passed something else.
+/// A helper releases one type, because it must know the type. Code that has
+/// parents of several types finds the type by the id, and calls that type's
+/// helper. These five are all the examples use. An id that is none of them
+/// means the caller passed something else.
 pub fn destroySlot(slot: *Slot, alloc: std.mem.Allocator, io: std.Io) void {
     const anchor = slot.* orelse return;
     destroyById(anchor.typeId(), alloc, io, slot);

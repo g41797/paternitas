@@ -1,45 +1,47 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! A last in, first out chain of parents. The pool's store.
+//! A last in, first out chain of parents. The pool keeps its parents here.
 //!
-//! The link is the `next` field of each parent's std Node, so a stack
-//! allocates nothing and locks nothing. It is the same chain the queue uses
-//! and the same insert guard, with the other end open.
+//! A stack links parents through their own TypedNode. It allocates nothing
+//! and locks nothing. It uses the same chain and the same insert checks as
+//! the queue, with the other end open.
 //!
-//! **Why the pool stores on a stack.** The parent that came back most
-//! recently is the one handed out next, so a writer that went stale while
-//! nothing was happening meets its next owner at once rather than after
-//! every other item has been through. A queue would hand out the oldest
-//! item, and a broken one could sit at the tail for as long as the pool
-//! stays busy.
+//! The pool uses a stack, not a queue, to catch broken parents early.
 //!
-//! Internal. Reachable from `pool.zig` and from nowhere else — it is not
-//! re-exported by `matryoshka.zig`, and no public call takes one or hands
-//! one back. The pool's border with a caller is a `Queue`: a close empties
-//! every bucket into one.
+//! - The parent that came back last goes out first.
+//! - A parent that went bad comes back out at once, and the next user sees
+//!   it.
+//! - A queue would give out the oldest parent first. A broken one could wait
+//!   at the end for as long as the pool stays busy.
+//!
+//! Internal. Only `pool.zig` uses it.
+//!
+//! - `matryoshka.zig` does not export it.
+//! - No public call takes one or returns one.
+//! - A caller gets a `Queue` instead: a pool's close empties every store
+//!   into one.
 const _doc_stub = void;
 
-/// A chain of parents, held by their Anchors, with the last one in on top.
+/// A chain of parents, linked through their Anchors. The last one in is on
+/// top.
 ///
-/// The top item points at itself, exactly as the last item of a queue does,
-/// so `isLinked` is as exact here as it is there and an item on a stack of
-/// one still reads as linked.
+/// The top parent points at itself, as the last parent of a queue does. So
+/// `isLinked` is exact here too, even on a stack of one.
 ///
-/// What it refuses, where runtime safety is on:
+/// It refuses these, where runtime safety is on:
 ///
 /// - a parent whose setTypeId was never called
-/// - a parent already on a chain, including a chain of one
+/// - a parent already on a chain, even a chain of one
 pub const AnchorStack = struct {
-    /// True when the stack holds no items.
+    /// True when the stack has no parents.
     pub inline fn isEmpty(self: *const AnchorStack) bool {
         return self._count == 0;
     }
 
-    /// Number of items. A stored count, so O(1).
+    /// The number of parents. O(1): the stack keeps a count.
     ///
-    /// This is the pool's `in_pool`: the count is read off the store itself,
-    /// and there is no second one to keep true.
+    /// The pool's `in_pool` reads this count. The pool keeps no second count.
     pub inline fn len(self: *const AnchorStack) usize {
         return self._count;
     }
@@ -54,9 +56,9 @@ pub const AnchorStack = struct {
         self._count += 1;
     }
 
-    /// Takes the top parent off, or null when the stack is empty.
+    /// Takes the top parent off. Null when the stack is empty.
     ///
-    /// The item comes back with a clear link. The caller repairs nothing.
+    /// The parent comes out with a clear link. The caller repairs nothing.
     pub fn pop(self: *AnchorStack) ?*Anchor {
         const anchor = self._top orelse return null;
 
@@ -69,7 +71,7 @@ pub const AnchorStack = struct {
         return anchor;
     }
 
-    /// The insert guard, the same one the queue states.
+    /// The insert checks, the same as the queue's.
     inline fn _guardInsert(self: *const AnchorStack, anchor: *Anchor) void {
         _ = self;
         check(anchor.typeId() != null, "setTypeId was never called on the parent: make it with create, or call setTypeId once");

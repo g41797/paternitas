@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Id-dispatch consume loop.
+//! Title: Dispatch by asking each type
+//!
+//! A loop takes mixed parents off one queue and finds each one's type.
 //!
 //! - Append an Event and a Sensor to one queue.
-//! - Pop each inner, and ask each type to cast it: fromAnchor.
-//! - The cast that matches gives the typed pointer, the others give null.
-//! - Release each parent as it is handled.
-//!
+//! - Pop each parent.
+//! - Ask each type for it with `fromAnchor`. The matching type gives a typed
+//!   pointer. The others give null.
+//! - Release each parent once it is handled.
 //!
 //! ```
 //!  create (Event) ──► queue

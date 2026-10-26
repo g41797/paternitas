@@ -3,53 +3,51 @@
 
 //! A first in, first out chain of parents.
 //!
-//! The link is the `next` field of each parent's std Node, so a queue
-//! allocates nothing and locks nothing. SinglyTypedNode and DoublyTypedNode parents mix freely.
+//! A queue links parents through their own TypedNode. It allocates nothing
+//! and locks nothing. SinglyTypedNode and DoublyTypedNode parents mix freely.
 //!
-//! What a caller does with one — MUST:
+//! Five things you MUST know:
 //!
 //! - Walk it with `while (q.popFirst())`. There is no iterator.
-//! - Every item comes out with a clear link. No repair call.
-//! - The items are the caller's to release.
-//! - It is not a `std.SinglyLinkedList` and does not convert to one.
-//! - A queue value is **moved, never copied**. `Mbox.close` hands one back by
-//!   value, and the mailbox no longer has those items. Write
-//!   `var rem = mbx.close();`. A second copy of that value is a second owner
-//!   of one chain, and both would free it.
+//! - Each parent comes out with a clear link. You repair nothing.
+//! - The parents are yours to release.
+//! - It is not a `std.SinglyLinkedList`, and does not convert to one.
+//! - Move a queue value. Never copy it.
+//!   - `Mbox.close` returns one by value. The mailbox no longer has those
+//!     parents.
+//!   - Write `var rem = mbx.close();`.
+//!   - A copy is a second queue over the same chain. Both would release it.
 //!
-//! Where a caller meets one: `Mbox.close` and `Mbox.receiveAll` hand one
-//! back, and a pool's close hook is handed one.
+//! You meet a queue in three places:
+//!
+//! - `Mbox.close` returns one.
+//! - `Mbox.receiveAll` returns one.
+//! - A pool's close hook gets one.
 //!
 //! Examples:
 //! https://g41797.github.io/matryoshka-ztk/examples/queue/
 const _doc_stub = void;
 
-/// A chain of parents, held by their Anchors.
+/// A chain of parents, linked through their Anchors.
 ///
-/// The operation set is what a real behaviour needs: append, append from a
-/// Slot, pop the first, is-empty, length, concat, and one counting read.
-///
-/// What it refuses, where runtime safety is on:
+/// It refuses these, where runtime safety is on:
 ///
 /// - a parent whose setTypeId was never called
-/// - a parent already on a chain, including a chain of one
+/// - a parent already on a chain, even a chain of one
 /// - an append from an empty Slot
 /// - a concat onto itself
 pub const Queue = struct {
-    /// True when the queue holds no items.
+    /// True when the queue has no parents.
     pub inline fn isEmpty(self: *const Queue) bool {
         return self._count == 0;
     }
 
-    /// Number of items. A stored count, so O(1).
+    /// The number of parents. O(1): the queue keeps a count.
     pub inline fn len(self: *const Queue) usize {
         return self._count;
     }
 
     /// Adds the parent at the end.
-    ///
-    /// The new last item points at itself, which is what makes the link test
-    /// exact.
     pub fn append(self: *Queue, anchor: *Anchor) void {
         self._guardInsert(anchor);
 
@@ -67,8 +65,7 @@ pub const Queue = struct {
 
     /// Adds the parent at the end and empties the Slot.
     ///
-    /// Refuses an empty Slot. An append is not a defer target, so it follows
-    /// a send rather than a put.
+    /// Refuses an empty Slot, as `send` does.
     pub fn appendFromSlot(self: *Queue, slot: *Slot) void {
         check(slot.* != null, "appendFromSlot from an empty Slot");
 
@@ -77,9 +74,9 @@ pub const Queue = struct {
         slot.* = null;
     }
 
-    /// Takes the first parent out, or null when the queue is empty.
+    /// Takes the first parent out. Null when the queue is empty.
     ///
-    /// The item comes back with a clear link. The caller repairs nothing.
+    /// The parent comes out with a clear link. You repair nothing.
     pub fn popFirst(self: *Queue) ?*Anchor {
         const anchor = self._head orelse return null;
 
@@ -96,13 +93,13 @@ pub const Queue = struct {
         return anchor;
     }
 
-    /// Moves every item of `other` onto the end of this queue.
+    /// Moves every parent of `other` to the end of this queue.
     ///
-    /// `other` is left empty.
+    /// `other` ends up empty.
     ///
-    /// Refuses a queue moved onto itself, and returns early where the check
-    /// is compiled out — the move would otherwise ring the chain and lose
-    /// every item on it.
+    /// Refuses a queue moved onto itself. With runtime safety off, it does
+    /// nothing. The move would turn the chain into a ring and lose every
+    /// parent.
     pub fn concat(self: *Queue, other: *Queue) void {
         check(self != other, "a queue cannot be moved onto itself");
         if (self == other) return;
@@ -124,17 +121,11 @@ pub const Queue = struct {
         other._count = 0;
     }
 
-    /// How many parents on the chain carry this id, counting no further than
-    /// `stop_at`.
-    ///
-    /// The one read that walks. It exists for the mailbox's send with a
-    /// limit, which asks *are there already this many of the sender's own
-    /// type* and does not care how many more there are.
+    /// Counts the parents with this id. It stops at `stop_at`.
     ///
     /// `stop_at` of zero counts the whole chain.
     ///
-    /// This is not an iterator and does not become one. The walk stays
-    /// inside the queue, and what a caller gets back is a number.
+    /// It walks the chain and returns a number. It is not an iterator.
     pub fn countOfId(self: *const Queue, id: TypeId, stop_at: usize) usize {
         var seen: usize = 0;
         var at: ?*Anchor = self._head;
@@ -153,9 +144,7 @@ pub const Queue = struct {
         return seen;
     }
 
-    /// The insert guard, stated once.
-    ///
-    /// Both checks read the item and cost one compare each.
+    /// The insert checks, in one place. Each costs one compare.
     inline fn _guardInsert(self: *const Queue, anchor: *Anchor) void {
         _ = self;
         check(anchor.typeId() != null, "setTypeId was never called on the parent: make it with create, or call setTypeId once");

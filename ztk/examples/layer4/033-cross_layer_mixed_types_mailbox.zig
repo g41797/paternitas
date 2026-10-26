@@ -1,21 +1,23 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Mixed types through shared mailbox.
+//! Title: Two types through one mailbox
+//!
+//! One mailbox carries an Event and a Sensor.
 //!
 //! - Send one Event and one Sensor into the same mailbox.
-//! - receiveAndDispatch pops both, dispatches on the type with fromSlot.
-//! - Verifies each payload, releases each parent.
-//!
+//! - Receive both, and dispatch by type with `fromSlot`:
+//!   `receiveAndDispatch`.
+//! - Check each value, and release each parent.
 //!
 //! ```
-//!  EventHelper.create ──► slot ──► mbx.send ──► mailbox
-//!  SensorHelper.create ──► slot ──► mbx.send ──► mailbox
+//!  EventHelper.create ──► Slot ──► mbx.send ──► mailbox
+//!  SensorHelper.create ──► Slot ──► mbx.send ──► mailbox
 //!  │
-//!  mbx.receive ──► slot (Event or Sensor)
-//!    dispatch on the id:
-//!    EventHelper.fromSlot  ──► *Event  ──► verify code==10 ──► destroySlot
-//!    SensorHelper.fromSlot ──► *Sensor ──► verify value==3.14 ──► destroySlot
+//!  mbx.receive ──► Slot (Event or Sensor)
+//!    dispatch by id:
+//!    EventHelper.fromSlot  ──► *Event  ──► check code==10 ──► destroySlot
+//!    SensorHelper.fromSlot ──► *Sensor ──► check value==3.14 ──► destroySlot
 //!  │
 //!  mbx.close ──► destroyQueue (empty: all received)
 //! ```

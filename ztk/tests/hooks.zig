@@ -8,13 +8,13 @@
 //! One recorder stands in for every policy the scenarios need — it keeps,
 //! it releases, or it keeps up to a cap — because what the tests read is
 //! the same in each case: what the pool asked, what it was told, and how
-//! many parents the close hook was handed.
+//! many parents the close hook got.
 //!
 //! It takes its own mutex around every count. A hook runs with the pool's
 //! lock released, and the close hook may be called twice at the same time,
-//! so the counts are written from more than one context.
+//! so the counts are written from more than one thread.
 
-/// What `on_put` does with the parent it is handed.
+/// What `on_put` does with the parent it gets.
 pub const Policy = enum {
     /// Leave it in the Slot, so the pool stores it.
     keep,
@@ -78,7 +78,7 @@ pub const Recorder = struct {
 
     mu: Io.Mutex = .init,
 
-    /// The three function pointers and the context, ready for `newPool`.
+    /// The three function pointers and the context, ready for `pool.new`.
     pub fn hooks(self: *Recorder) m.Pool.Hooks {
         return .{
             .ctx = self,
@@ -169,7 +169,7 @@ pub const Recorder = struct {
 
         // By value, so this copy is the only way to the items. The hook's
         // own count is bumped first: it may be called more than once, and
-        // twice at the same time, so it owns nothing it must tear down here.
+        // twice at the same time, so it keeps nothing it must tear down here.
         var mine: m.queue.Queue = remaining;
 
         {

@@ -1,24 +1,25 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! A parent from your own timeout list, through a mailbox, and back.
+//! Title: From your own timeout list and back
 //!
-//! - Three Deadlines sit in the application's `std.DoublyLinkedList`.
-//! - The middle one is removed, in O(1): what the DoublyTypedNode is for.
-//! - It crosses into a Slot, is sent, received into a Slot, and moved out.
-//! - It goes back into the timeout list, at the end.
+//! A parent leaves your `std.DoublyLinkedList`, goes through a mailbox, and
+//! comes back.
 //!
-//! The timeout list is a border, not a second home. While a parent sits on
-//! it the toolkit does not know about it. std's `remove` leaves both link
-//! words set, so they are cleared before `fillSlot`, which refuses a parent
-//! that still looks linked.
+//! - Put three Deadlines in your own `std.DoublyLinkedList`.
+//! - Remove the middle one, in O(1). That is what the DoublyTypedNode is for.
+//! - Clear its links, put it into a Slot, send it, and receive it into a Slot.
+//! - Move it out, and append it to the timeout list.
 //!
+//! While the parent is on your list, the toolkit does not know it. std's
+//! `remove` leaves both links set. Clear them before `fillSlot`, which refuses
+//! a parent that still looks linked.
 //!
 //! ```
-//!  timeouts ── remove + clear ──► toAnchor ── fillSlot ──► slot ──mbx.send──► mailbox
-//!     ▲                                                                          │ mbx.receive
-//!     │                                                                          ▼
-//!     └──────────── append ◄── node ◄── mustMoveFromSlot ◄──────────────────── slot
+//!  timeouts ── remove + clear ──► toAnchor ── fillSlot ──► Slot ──mbx.send──► mailbox
+//!     ▲                                                                         │ mbx.receive
+//!     │                                                                         ▼
+//!     └──────────── append ◄── node ◄── mustMoveFromSlot ◄─────────────────── Slot
 //! ```
 //!
 

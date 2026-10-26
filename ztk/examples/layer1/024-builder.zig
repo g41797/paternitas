@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Builder pattern.
+//! Title: A builder
 //!
-//! - Builder wraps an allocator and an Io, no other state.
-//! - createEvent / createSensor build a typed parent into a Slot.
-//! - mustFromSlot recovers the typed pointer for field access.
-//! - release frees whichever type the Slot holds.
+//! A small struct makes and releases parents for you.
 //!
+//! - Keep an allocator and an `Io` in a `Builder`. Nothing else.
+//! - Build a typed parent into a Slot with `createEvent` or `createSensor`.
+//! - Get the typed pointer with `mustFromSlot`, and set its fields.
+//! - Release whatever type the Slot has with `release`.
 //!
 //! ```
-//!  create ──► slot (non-null)
-//!       │
-//!  Builder.createEvent ──► field set (no transfer)
-//!       │
-//!  Builder.release ──► slot empty
+//!  Builder.createEvent ──► Slot (full)
+//!       │ mustFromSlot, set fields
+//!       ▼
+//!  Builder.release ──► Slot empty
 //! ```
 //!
 

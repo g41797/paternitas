@@ -1,27 +1,28 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Timer cancel → close → walk remaining.
+//! Title: Cancel, then close
 //!
-//! - Two mailboxes + timer in Select, both mailboxes empty.
-//! - Timer triggers first, calls sel.cancel() on both mailbox sources.
-//! - Both return .canceled; cancel and close are kept as separate operations.
-//! - Both mailboxes are then closed, remaining items freed via freeList.
+//! A cancel stops the waits. A close is a separate step.
 //!
+//! - Put two empty mailboxes and a timer in a Select.
+//! - When the timer ends, call `sel.cancel()`.
+//! - Both mailbox sources report `.canceled`. The mailboxes stay open.
+//! - Close both mailboxes, and release what each returns.
 //!
 //! ```
 //!  mbx1 (empty)    mbx2 (empty)
 //!  │ receiveResult  │ receiveResult
 //!  └────────┬───────┘
 //!           ▼
-//!  Select(MasterEvent) ◄── sleepFn (short timer triggers first)
+//!  Select(MasterEvent) ◄── sleepFn (the timer ends first)
 //!  │
 //!  .timer ──► sel.cancel() loop
 //!             .inbox1 .canceled ──► log
 //!             .inbox2 .canceled ──► log
 //!  │
-//!  mbx1.close() ──► freeList
-//!  mbx2.close() ──► freeList
+//!  mbx1.close() ──► destroyQueue
+//!  mbx2.close() ──► destroyQueue
 //! ```
 //!
 

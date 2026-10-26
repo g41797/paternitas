@@ -1,20 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Select direct queue push.
+//! Title: Push a value straight into a Select
 //!
-//! - A separate thread pushes a value directly into the Select queue via putOneUncancelable.
-//! - This bypasses the usual sel.concurrent path — it's a raw queue push.
-//! - sel.await() receives the .direct value directly, then cancels the blocked inbox source.
+//! Another thread puts a value into the Select's own queue.
 //!
+//! - Push a value from another thread with `putOneUncancelable`. It skips
+//!   `sel.concurrent`.
+//! - Get the `.direct` value from `sel.await()`.
+//! - Cancel the inbox source, which still waits.
 //!
 //! ```
-//!  wild thread ──sel.queue.putOneUncancelable──► Select queue
-//!               (bypasses concurrent fn mechanism)
+//!  other thread ──sel.queue.putOneUncancelable──► Select queue
+//!               (no concurrent function)
 //!  │
 //!  sel.await() ──► .direct u32 value
 //!  │
-//!  sel.cancelDiscard() ──► cancels blocking .inbox source
+//!  sel.cancelDiscard() ──► cancels the waiting .inbox source
 //! ```
 //!
 

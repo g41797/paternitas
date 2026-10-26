@@ -1,33 +1,32 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool fan-in: many workers return.
+//! Title: Many workers give back to one pool
 //!
-//! - Seed the pool with N empty containers, one per worker mailbox.
-//! - dispatch fills each container from the Master's job array, sends it to its worker.
-//! - Each worker doubles the value, writes it to its results slot, returns the
-//!   (now-processed) container to the pool for reuse.
-//! - on_put resets the container's data on return — the pool lends reusable
-//!   containers, it does not carry results back. Results travel through a
-//!   dedicated results array instead, written before each worker's container
-//!   goes back to the pool.
-//! - collectResults sums the N results array entries after all workers finish.
+//! Containers go out to workers and come back. The results go aside.
 //!
+//! - Fill the pool with N empty containers, one per worker mailbox.
+//! - Fill each container from the Master's job array, and send it to its
+//!   worker: `dispatch`.
+//! - Double the value in each worker. Write it to the worker's place in a
+//!   results array. Put the container back.
+//! - Add up the results once every worker is done: `collectResults`.
+//!
+//! `on_put` resets a container when it comes back. The pool lends
+//! containers. It does not carry results. So each worker writes its result
+//! aside before it puts the container back.
 //!
 //! ```
 //!  Master jobs: [10, 20, 30]
-//!  pool (N empty containers seeded)
+//!  pool (N empty containers)
 //!  │
 //!  master: pl.get ──► fill from jobs ──► mbx.send ──► mbx[0..N]
-//!                                                              │ worker[i] (io.concurrent)
-//!                                                              │ mbx.receive ──► process ──► results[i] ──► pl.put (on_put resets) ──► pool
+//!                                                        │ worker[i] (io.concurrent)
+//!                                                        │ mbx.receive ──► double ──► results[i] ──► pl.put (on_put resets) ──► pool
 //!  master: fut[i].await ──► all workers done
-//!  master: sum results[0..N] ──► verify results
+//!  master: add up results[0..N] ──► check
 //!  pl.close ──► on_close ──► destroyQueue
 //! ```
-//!
-//!  Transfers: Master jobs → pool containers → worker mailboxes → workers → pool → master.
-//!  Pool parents are empty containers: Master fills from jobs, worker writes the result aside.
 //!
 
 pub fn pool_fan_in_many_workers_return(allocator: std.mem.Allocator, io: std.Io) !void {

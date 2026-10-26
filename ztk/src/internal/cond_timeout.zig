@@ -1,4 +1,9 @@
-// https://codeberg.org/ziglang/zig/issues/31278
+//! A copy of std's `Condition.waitTimeout`, until std has its own.
+//!
+//! - The Zig issue: https://codeberg.org/ziglang/zig/issues/31278
+//! - The code and its comments are std's. Keep them as std has them.
+//!
+//! Internal. `@import("matryoshka")` does not reach it.
 
 const Condition = Io.Condition;
 const Mutex = Io.Mutex;

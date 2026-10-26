@@ -1,34 +1,30 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Table dispatch — the third way, where the choice is data.
+//! Title: Dispatch through a table
 //!
-//! 023 and 026 write the choice as code. This one writes it as a value.
+//! The choice of handler is data, not code.
 //!
-//! - 023 has the parent and asks each type to cast it: fromAnchor.
-//! - 026 has the id and asks each type to confirm it: isIt.
-//! - Both put the choice in the chain, so the choice is fixed where the
-//!   chain is written. Two receivers that treat an Event differently write
-//!   two chains.
-//! - A table is `{id, handler}` pairs the receiver owns. Change the table
-//!   and the same id reaches a different handler.
+//! Examples 023 and 026 write the choice as an if-chain. The chain is fixed
+//! where it is written. Two receivers that treat an Event differently need two
+//! chains. A table of `{id, handler}` pairs is a value. Change the table, and
+//! the same id reaches a different handler.
 //!
-//! - Append an Event, a Sensor and a Timer to one mixed queue.
-//! - Dispatch each through a table that names all three.
-//! - Then dispatch an Event through a second table, which maps the same
-//!   id to a different handler. No chain can express that.
-//! - An id no table names gives error.NoHandler with the parent still in the
-//!   Slot, so the caller releases it. The last branch of a chain cannot.
-//!
+//! - Append an Event, a Sensor and a Timer to one queue.
+//! - Dispatch each one through a table that names all three.
+//! - Dispatch an Event through a second table. It sends the same id to a
+//!   different handler.
+//! - Dispatch an id no table names. It gives `error.NoHandler`, and the parent
+//!   stays in the Slot for you to release.
 //!
 //! ```
 //!  create (Event, Sensor, Timer)  ──► queue
 //!       │ queue.popFirst
 //!       ▼
 //!  table.dispatch(&recorder, &slot)
-//!       │ find: entry.id == inner.id
+//!       │ find: entry.id == the parent's id
 //!       ▼
-//!  handler(recorder, slot) ──► Slot says where the parent went
+//!  handler(recorder, slot) ──► the Slot says where the parent went
 //!       │ destroySlot per parent
 //! ```
 //!

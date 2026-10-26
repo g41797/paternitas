@@ -1,25 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Mixed mailbox + pool event sources in Select.
+//! Title: A mailbox and a pool in one Select
 //!
-//! - Mailbox pre-loaded with 2 Events, pool seeded with 1 Event, both are Select sources.
-//! - eventLoop handles each with a uniform switch, re-spawning after mailbox items.
-//! - Timer ticks independently; the loop exits once both targets are met.
+//! One switch handles parents from a mailbox and from a pool.
 //!
+//! - Put two Events in the mailbox, and one Event in the pool, first.
+//! - Wait on both, next to a timer.
+//! - Handle each in one switch, and restart the mailbox source: `eventLoop`.
+//! - Stop once both targets are met.
 //!
 //! ```
-//!  mailbox (pre-loaded: Event×2)   pool (seeded: Event×1)
+//!  mailbox (Event×2, sent first)   pool (Event×1)
 //!     │ receiveResult                  │ getWaitResult
 //!     └────────────┬───────────────────┘
 //!                  ▼
 //!         Select(MasterEvent) ◄── sleepFn (timer)
 //!                  │ sel.await()
 //!                  ▼
-//!  .inbox .item ──► freeSlot
-//!  .pool_ev .item ──► pl.put
-//!  .timer         ──► log tick, re-spawn
-//!  done when inbox×2 + pool×1 received ──► sel.cancelDiscard()
+//!  .inbox .anchor   ──► destroySlot
+//!  .pool_ev .anchor ──► pl.put
+//!  .timer           ──► log the tick, restart
+//!  done after inbox×2 + pool×1 ──► sel.cancelDiscard()
 //! ```
 //!
 

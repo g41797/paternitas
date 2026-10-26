@@ -13,7 +13,7 @@ Change from 001, kept: ZTK 01 closed, 2026-10-22. Its items are marked done.
 `findTypedNode` is public in paternitas, and its "not a struct" message is
 neutral.
 
-The stages that use it: [implementation-plan-025.md](implementation-plan-025.md),
+The stages that use it: [implementation-plan-034.md](implementation-plan-034.md),
 "ZTK".
 
 ## Names: outside plan → today

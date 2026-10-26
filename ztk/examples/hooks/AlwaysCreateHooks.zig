@@ -14,7 +14,7 @@ pub fn poolHooks(self: *Self) Pool.Hooks {
 pub fn onGet(ptr: *anyopaque, want: TypeId, _: usize, slot: *Slot) void {
     const self: *Self = @ptrCast(@alignCast(ptr));
 
-    // The pool hands over an id and an empty Slot. There is no parent to look
+    // The pool gives an id and an empty Slot. There is no parent to look
     // at, so the id is the only thing to dispatch on.
     parents.createById(want, self.alloc, self.io, slot) catch return;
 }

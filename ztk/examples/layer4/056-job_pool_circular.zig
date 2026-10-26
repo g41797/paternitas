@@ -1,29 +1,28 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Job pool circular flow.
+//! Title: One container goes round
 //!
-//! - Master pre-loads a job list, seeds the pool with 1 container.
-//! - runEventLoop: pool availability triggers the next dispatch from the job list.
-//! - Worker doubles the value, returns the container — which triggers the next dispatch.
-//! - Loop ends once all jobs are dispatched and the last result returns.
+//! One container in the pool sets the pace of the jobs.
 //!
-//! Transfers (circular):
+//! - Load a job list in the Master, and put one empty container in the pool.
+//! - When the container is free, send the next job in it: `runEventLoop`.
+//! - Double the value in the worker, and put the container back. That
+//!   starts the next job.
+//! - Stop when every job went out and the last one came back.
+//!
+//! The container goes round: pool, Master, mailbox, worker, pool.
 //!
 //! ```
 //!  Master job list: [{code=10},{code=20},{code=30}]
-//!  pool (1 empty container seeded)
-//!  │ getWaitResult drives pace
+//!  pool (1 empty container)
+//!  │ getWaitResult sets the pace
 //!  ▼
-//!  master: fill container from job list ──► mbx.send ──► mbx
+//!  master: fill the container from the list ──► mbx.send ──► mbx
 //!                                                              │ worker
-//!                                                              │ process (code *= 2) ──► pl.put ──► pool
-//!  pool triggers again ──► master dispatches next job (or breaks when all N sent + last returned)
+//!                                                              │ code *= 2 ──► pl.put ──► pool
+//!  the container is free again ──► the next job (or stop: all sent, the last one back)
 //! ```
-//!
-//!  Container circulates: pool → master fills → mailbox → worker → pool.
-//!  Work input: Master's pre-loaded job list. Pool provides the container and controls pacing.
-//!  Master counter tracks completed jobs.
 //!
 
 pub fn job_pool_circular_flow(allocator: std.mem.Allocator, io: std.Io) !void {

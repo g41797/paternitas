@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Fan-out.
+//! Title: Fan-out
 //!
-//! - Main sends 5 Events and 4 Sensors into one mailbox.
-//! - 3 worker threads share the mailbox, compete for items.
-//! - Main closes the mailbox, frees any items left unclaimed.
-//! - Verifies every item was either received or freed.
+//! Three workers share one mailbox. Each parent goes to one of them.
 //!
+//! - Send five Events and four Sensors from main into one mailbox.
+//! - Let three worker threads receive from it at once.
+//! - Close the mailbox in main, and release what nobody received.
+//! - Check that every parent was received or released.
 //!
 //! ```
 //!  main ──Event×5 + Sensor×4──► mailbox ──► worker A
-//!                                      ├──► worker B  (compete; each item goes to one)
-//!                                      └──► worker C
+//!                                     ├──► worker B  (each parent goes to one)
+//!                                     └──► worker C
 //!  mbx.close ──► remaining queue ──► destroySlot (main)
 //! ```
 //!

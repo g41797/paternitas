@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Timer via mailbox.
+//! Title: A timer through the mailbox
 //!
-//! - Separate timer task sends 2 Timer ticks into the master's inbox.
-//! - Main sends 2 Events into the same inbox.
-//! - Worker dispatches on id: counts Events separately from Timer ticks.
-//! - Worker exits after receiving the expected total — no Select needed.
+//! Timer ticks arrive as parents, in the same inbox as the work.
 //!
+//! - Send two Timer ticks from a timer task into the Master's inbox.
+//! - Send two Events from main into the same inbox.
+//! - Count Events and ticks apart in the worker, by id.
+//! - Stop the worker after the expected total. No Select is needed.
 //!
 //! ```
 //!  main ──Event×2──►
-//!  timerFn ──Timer×2──► mailbox ──► workerFn (id dispatch; fixed count)
-//!  (workerFn exits after receiving N_EVENTS + N_TICKS items)
+//!  timerFn ──Timer×2──► mailbox ──► workerFn (dispatch by id; a fixed count)
+//!  (workerFn stops after N_EVENTS + N_TICKS parents)
 //!  fut_timer.await → fut_worker.await
 //! ```
 //!

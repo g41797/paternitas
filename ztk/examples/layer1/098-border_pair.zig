@@ -1,27 +1,28 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! The border pair: a Slot and a std list, one parent at a time.
+//! Title: A parent on a std list
 //!
-//! - The helper moves the parent out of the Slot, and gives its std Node.
-//! - The Node goes onto a plain std.SinglyLinkedList.
-//! - fromNode turns a popped Node back into the parent, checked by type.
-//! - fillSlot puts the parent's Anchor into an empty Slot.
+//! A parent leaves the toolkit for a plain std list, and comes back.
 //!
-//! A std list is a border, not a second home. While a parent sits on it the
-//! toolkit does not know about it. std's popFirst leaves the Node's link
-//! set, so the link must be cleared before fillSlot, which refuses a parent
-//! that still looks linked.
+//! - Move the parent out of its Slot, and get its std Node.
+//! - Put the Node onto a plain `std.SinglyLinkedList`.
+//! - Pop the Node, and clear its link.
+//! - Turn the Node back into the parent with `fromNode`. It checks the type.
+//! - Put the parent's Anchor into an empty Slot with `fillSlot`.
 //!
+//! While the parent is on the std list, the toolkit does not know it. std's
+//! `popFirst` leaves the link set. Clear it before `fillSlot`, which refuses a
+//! parent that still looks linked.
 //!
 //! ```
-//!  slot ── mustMoveFromSlot ──► *Event ── node ──► list.prepend
+//!  Slot ── mustMoveFromSlot ──► *Event ── node ──► list.prepend
 //!                                                       │
 //!                                                       ▼
 //!                                               std.SinglyLinkedList
 //!                                                       │ popFirst + clear link
 //!                                                       ▼
-//!  slot ◄── fillSlot ── toAnchor ◄── fromNode ◄──── *Node
+//!  Slot ◄── fillSlot ── toAnchor ◄── fromNode ◄──── *Node
 //! ```
 //!
 

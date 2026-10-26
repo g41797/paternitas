@@ -72,7 +72,7 @@ test "023 - oob signal" {
     var threaded: std.Io.Threaded = std.Io.Threaded.init(allocator, .{});
     defer threaded.deinit();
     const io: std.Io = threaded.io();
-    examples.layer4.a.oob_signal.oob_via_send_oob(allocator, io) catch |err| {
+    examples.layer4.a.oob_signal.shutdown_ahead_of_the_queue(allocator, io) catch |err| {
         std.log.err("example failed: {s}", .{@errorName(err)});
         return err;
     };

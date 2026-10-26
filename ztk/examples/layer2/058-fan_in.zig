@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Fan-in.
+//! Title: Fan-in
 //!
-//! - 3 concurrent senders: Events, Sensors, and a mixed sender.
-//! - All send into one shared mailbox.
-//! - Single receiver empties it with mbx.receiveAll.
-//! - Counts events and sensors received, verifies the total.
+//! Three senders, one mailbox, one receiver.
 //!
+//! - Start three senders at once: Events, Sensors, and a mix.
+//! - Send everything into one shared mailbox.
+//! - Empty it in one receiver with `mbx.receiveAll`.
+//! - Count the Events and Sensors, and check the total.
 //!
 //! ```
 //!  eventSenderFn ──Event×5──►
-//!  sensorSenderFn ──Sensor×5──► mailbox ──receiveAll──► destroyItem per node
+//!  sensorSenderFn ──Sensor×5──► mailbox ──receiveAll──► release each
 //!  altSenderFn ──mixed×4──►
-//!  (3 concurrent senders fan-in to one mailbox)
 //! ```
 //!
 

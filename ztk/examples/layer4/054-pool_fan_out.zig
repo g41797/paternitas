@@ -1,19 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool fan-out: many workers acquire.
+//! Title: Many workers take from one pool
 //!
-//! - Seed the pool with 3 parents.
-//! - Spawn 3 workers, each calls get with available_only — no parent is shared.
-//! - Verify all 3 workers got a parent, then all 3 put it back.
+//! Three workers each get their own parent.
 //!
+//! - Put three parents into the pool.
+//! - Start three workers. Each gets one with `.available_only`. No parent is
+//!   shared.
+//! - Check that every worker got one, and that all three were put back.
 //!
 //! ```
-//!  master: pl.get (×3, new_only) ──► pool (3 parents seeded)
+//!  master: pl.get (×3, new_only) ──► pool (3 parents)
 //!  │
-//!  worker1 ──pl.get (.available_only)──► slot ──► verify ──► pl.put
-//!  worker2 ──pl.get (.available_only)──► slot ──► verify ──► pl.put
-//!  worker3 ──pl.get (.available_only)──► slot ──► verify ──► pl.put
+//!  worker1 ──pl.get (.available_only)──► Slot ──► check ──► pl.put
+//!  worker2 ──pl.get (.available_only)──► Slot ──► check ──► pl.put
+//!  worker3 ──pl.get (.available_only)──► Slot ──► check ──► pl.put
 //!  │
 //!  fut1.await + fut2.await + fut3.await
 //!  pl.close ──► on_close ──► destroyQueue

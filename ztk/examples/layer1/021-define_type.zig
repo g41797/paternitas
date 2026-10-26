@@ -1,28 +1,28 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Define a parent type.
+//! Title: Define a parent type
 //!
-//! - Message struct embeds an Anchor field. Its name is free.
-//! - ParentHelper(Message) gives the id, setTypeId, and toAnchor.
-//! - setTypeId sets the id on a stack value, no heap.
-//! - isIt checks the id.
-//! - toAnchor reaches the embedded Anchor — the way in.
-//! - The inner carries the id and starts unlinked, ready to be placed.
+//! A struct becomes a parent: one TypedNode field and a helper.
 //!
-//! Coming back the other way is fromAnchor. It needs an inner whose type is
-//! not known statically, so it is shown in 023-tag_dispatch.
+//! - Embed a SinglyTypedNode in `Message`. The field's name is yours.
+//! - Make the helper: `ParentHelper(Message)`.
+//! - Call setTypeId on a `Message` on the stack. No heap.
+//! - Check the id with `isIt`.
+//! - Get the embedded Anchor with `toAnchor`.
 //!
+//! The parent now has its id, and is on no chain. The way back, `fromAnchor`,
+//! needs a parent whose type you do not know yet. Example 023 shows it.
 //!
 //! ```
 //!  stack: var msg: Message
 //!       │
-//!  MessageHelper.setTypeId ──► msg.hdr.anchor._type_id set (no alloc)
+//!  MessageHelper.setTypeId ──► the id is written (no allocation)
 //!       │
-//!  MessageHelper.toAnchor ──► *Anchor (the way in)
+//!  MessageHelper.toAnchor ──► *Anchor
 //!       │
-//!  inner carries the id, not linked yet
-//!  (stack-allocated — no release needed)
+//!  the parent has its id, on no chain
+//!  (on the stack: nothing to release)
 //! ```
 //!
 

@@ -199,8 +199,8 @@ test "329 — on a chain, the Node's next word holds an Anchor" {
     q.append(ma);
     q.append(ta);
 
-    // The raw word, read through Paternitas's location only, and through
-    // the std field it overlays.
+    // The raw word, read through its location only, and through the std
+    // field it overlays.
     const m_raw: *?*anyopaque = ma.info().?.nextField(ma);
     const t_raw: *?*anyopaque = ta.info().?.nextField(ta);
     try expect(m_raw.*.? == @as(*anyopaque, ta));

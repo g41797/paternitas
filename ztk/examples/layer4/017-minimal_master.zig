@@ -1,20 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Minimal Master.
+//! Title: A minimal Master
 //!
-//! - Master spawns one worker via io.concurrent.
-//! - sendItems pushes 3 Events into the shared mailbox.
-//! - awaitWorker closes the mailbox, frees anything left, awaits the worker.
-//! - Shutdown cleanup uses a plain stdlib list — no Matryoshka-specific cleanup API.
+//! A Master runs one worker and shuts it down.
 //!
+//! - Start one worker with `io.concurrent`.
+//! - Send three Events into the shared mailbox: `sendItems`.
+//! - Close the mailbox, release what is left, and wait for the worker:
+//!   `awaitWorker`.
+//!
+//! The cleanup needs no special call. A plain loop over the returned queue
+//! does it.
 //!
 //! ```
-//!  master ──alloc.create──► slot ──mbx.send──► mailbox
-//!                                                      │ worker (io.concurrent)
-//!                                                      │ mbx.receive ──► freeSlot
-//!  mbx.close ──► remaining list ──► freeList
-//!  fut.await ──► worker done
+//!  master ──create──► Slot ──mbx.send──► mailbox
+//!                                            │ worker (io.concurrent)
+//!                                            │ mbx.receive ──► destroySlot
+//!  mbx.close ──► remaining queue ──► destroyQueue
+//!  fut.await ──► the worker is done
 //! ```
 //!
 

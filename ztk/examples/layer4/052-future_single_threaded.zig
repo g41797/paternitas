@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! ConcurrencyUnavailable on single-threaded.
+//! Title: Futures need concurrency
 //!
-//! - On a single-threaded Io backend, mbx.receive_future returns error.ConcurrencyUnavailable.
-//! - No concurrent task can be spawned to service the future.
-//! - Synchronous mbx.receive still works — it needs no concurrency.
+//! On a single-threaded `Io`, `receiveFuture` cannot start.
 //!
+//! - Call `mbx.receiveFuture` on a single-threaded `Io` backend. It returns
+//!   `error.ConcurrencyUnavailable`. No task can run the future.
+//! - Call `mbx.receive`. It still works. It needs no concurrency.
 //!
 //! ```
-//!  mailbox (single-threaded io)
+//!  mailbox (single-threaded Io)
 //!  │
-//!  receive_future ──► error.ConcurrencyUnavailable
-//!  (no concurrent task can be spawned on single-threaded backend)
+//!  receiveFuture ──► error.ConcurrencyUnavailable
 //!  │
-//!  mbx.receive (synchronous) still works
+//!  mbx.receive still works
 //! ```
 //!
 
@@ -36,7 +36,7 @@ fn testFutureUnavailable(mbx: *Mbox) !void {
     if (mbx.receiveFuture(null)) |_| {
         return error.FutureSingleThreadedFailed;
     } else |_| {}
-    std.log.info("receive_future: ConcurrencyUnavailable on single-threaded backend as expected", .{});
+    std.log.info("receiveFuture: ConcurrencyUnavailable on single-threaded backend as expected", .{});
 }
 
 fn testSynchronousReceive(mbx: *Mbox, alloc: std.mem.Allocator, io: std.Io) !void {

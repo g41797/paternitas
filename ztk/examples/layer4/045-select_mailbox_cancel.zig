@@ -1,21 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Select cancel propagation.
+//! Title: A cancel reaches the Select
 //!
-//! - Mailbox is empty; receiveResult blocks as a Select event source.
-//! - A timer triggers first, calls sel.cancel().
-//! - The blocked receive reports .canceled, propagated through the cancel loop.
+//! `sel.cancel()` stops a waiting `receiveResult` with `.canceled`.
 //!
+//! - Wait on an empty mailbox with `receiveResult`, as a Select source.
+//! - Let a timer end first, and call `sel.cancel()`.
+//! - The waiting receive returns `.canceled`, through the cancel loop.
 //!
 //! ```
 //!  mailbox (empty)
-//!  │ receiveResult (blocking)
+//!  │ receiveResult (waits)
 //!  ▼
 //!  Select(MasterEvent) ◄── sleepFn (timer)
 //!  │
 //!  .timer ──► sel.cancel() loop ──► .inbox .canceled
-//!             (group.cancel signals receiveResult to stop)
 //!  │
 //!  mbx.close ──► destroyQueue ──► mbx.destroy
 //! ```

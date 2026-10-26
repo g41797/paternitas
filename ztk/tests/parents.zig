@@ -5,10 +5,10 @@
 //!
 //! Shared test infrastructure, not part of any layer's public surface.
 //!
-//! No inner field is called `inner`, and they are not all at the same offset.
-//! The helper finds the field by type, and these types are what says so.
+//! The TypedNode fields have different names and different offsets. The
+//! helper finds the field by type. These types show it.
 
-/// Fields ahead of the inner, so its offset is not zero.
+/// Fields ahead of the TypedNode, so its offset is not zero.
 pub const Msg = struct {
     seq: u32 = 0,
     payload: u64 = 0,
@@ -28,7 +28,7 @@ pub const Msg = struct {
     }
 };
 
-/// The inner first, so its offset is zero.
+/// The TypedNode first, so its offset is zero.
 pub const Chunk = struct {
     mtk: SinglyTypedNode = .{},
     size: usize = 0,
@@ -138,8 +138,8 @@ pub fn newNote(alloc: std.mem.Allocator, io: Io, slot: *m.inner.Slot) !void {
 /// Releases one parent, whatever of these four types it is.
 ///
 /// Test infrastructure, and a small stand-in for what a real caller does
-/// with what `close` hands back: it knows its own types, and it dispatches
-/// on the id.
+/// with what `close` returns. It knows its own types, and it dispatches on
+/// the id.
 pub fn release(anchor: *Anchor, alloc: std.mem.Allocator, io: Io) void {
     var slot: m.inner.Slot = null;
     m.inner.fillSlot(&slot, anchor);
@@ -157,7 +157,7 @@ pub fn releaseAll(q: *m.queue.Queue, alloc: std.mem.Allocator, io: Io) void {
     while (q.popFirst()) |anchor| release(anchor, alloc, io);
 }
 
-/// Releases what the Slot holds, if anything, leaving it empty.
+/// Releases what the Slot has, if anything, and leaves it empty.
 pub fn releaseSlot(slot: *m.inner.Slot, alloc: std.mem.Allocator, io: Io) void {
     const anchor = slot.* orelse return;
     slot.* = null;

@@ -6,7 +6,7 @@ text: Text = .{},
 
 pub const GreetingHelper = matryoshka.helper.ParentHelper(Self);
 
-/// A short text that is copied by value. It holds no pointer.
+/// A short text, copied by value. It has no pointer.
 pub const Text = struct {
     buf: [32]u8 = undefined,
     len: usize = 0,

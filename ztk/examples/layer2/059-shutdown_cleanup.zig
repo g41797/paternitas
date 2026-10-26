@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Shutdown with remaining item cleanup.
+//! Title: Close with parents still queued
 //!
-//! - Send 5 Events and 3 Sensors into a mailbox, none received.
-//! - Close the mailbox — all items come back in the returned queue.
-//! - Walk the list with popFirst, free every item.
+//! `close` returns every parent nobody received.
 //!
+//! - Send five Events and three Sensors into a mailbox. Receive none.
+//! - Close the mailbox. Every parent comes back in the returned queue.
+//! - Pop each one with `popFirst`, and release it.
 //!
 //! ```
-//!  alloc.create × (n_events + n_sensors) ──► mailbox
-//!       │ mbx.close (no receive — all items returned)
+//!  create × (n_events + n_sensors) ──► mailbox
+//!       │ mbx.close (nothing received: all come back)
 //!       ▼
-//!  Queue ──► destroyItem × N
+//!  Queue ──► release × N
 //! ```
 //!
 

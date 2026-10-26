@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool teardown.
+//! Title: Close a pool
 //!
-//! - Seed the pool with 4 Events via get (new_only) + pl.put.
+//! `on_close` gets every stored parent and releases them.
+//!
+//! - Fill the pool with four Events: get with `.new_only`, then put.
 //! - Close the pool.
-//! - on_close receives every stored parent as a Queue, by value, and
-//!   releases them.
-//!
+//! - `on_close` gets every stored parent as one queue, by value, and releases
+//!   them.
 //!
 //! ```
 //!  pl.get (new_only) × 4 ──► pl.put × 4
-//!  (pool holds 4 parents)
+//!  (the pool keeps 4 parents)
 //!       │ pl.close
 //!       ▼
 //!  on_close ──► AlwaysCreateHooks: releases all 4

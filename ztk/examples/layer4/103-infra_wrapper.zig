@@ -1,19 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Infrastructure wrapper.
+//! Title: Wrap a mailbox in your own parent
 //!
-//! - Channel is a parent of your own. Its `init` makes a mailbox, its `finish` closes it.
-//! - The helper creates and releases a Channel like any other parent.
-//! - Nobody outside Channel closes or destroys the mailbox — one owner, one place.
-//! - Whatever is still queued at the end is released by `finish`, so a Channel
-//!   dropped with traffic in flight leaks nothing.
+//! Your parent makes its mailbox in `init`, and closes it in `finish`.
 //!
+//! - Make `Channel`, a parent of your own. Its `init` makes a mailbox. Its
+//!   `finish` closes it.
+//! - Create and release a Channel with its helper, like any other parent.
+//! - Close and destroy the mailbox only inside Channel. One place does it.
+//! - Let `finish` release whatever is still queued. A Channel dropped with
+//!   traffic in flight leaks nothing.
 //!
 //! ```
-//!  ChannelHelper.create ──► Channel.init ──► newMbox
+//!  ChannelHelper.create ──► Channel.init ──► mbox.new
 //!       │ channel.send(Event) ──► inbox
-//!       │ channel.receive ──► slot
+//!       │ channel.receive ──► Slot
 //!       ▼
 //!  ChannelHelper.destroy ──► Channel.finish ──► close + destroyQueue + destroy
 //! ```
@@ -49,7 +51,7 @@ pub fn infra_wrapper(allocator: std.mem.Allocator, io: std.Io) !void {
     std.log.info("channel: received code={d}, one still queued for finish", .{ev.code});
 }
 
-/// A parent that owns a mailbox.
+/// A parent that keeps a mailbox.
 const Channel = struct {
     inner: SinglyTypedNode = .{},
     inbox: *Mbox = undefined,

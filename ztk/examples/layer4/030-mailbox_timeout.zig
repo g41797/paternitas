@@ -1,22 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Timeout on mailbox.
+//! Title: Receive with a timeout
 //!
-//! - receiveTimeouts calls mbx.receive with a non-null timeout, twice, on an empty mailbox.
-//! - Each call returns error.Timeout; Io.sleep runs between retries.
-//! - sendAndReceive sends one Event, then receives it back within the same timeout.
+//! `receive` with a timeout returns `error.Timeout` on an empty mailbox.
 //!
+//! - Receive twice from an empty mailbox, with a timeout: `receiveTimeouts`.
+//!   Each call returns `error.Timeout`. Sleep between the two.
+//! - Send one Event, then receive it within the same timeout:
+//!   `sendAndReceive`.
 //!
 //! ```
-//!  mailbox (initially empty)
+//!  mailbox (empty at first)
 //!  │
-//!  master: receive(50ms) ──► error.Timeout ──► Io.sleep retry
-//!          receive(50ms) ──► error.Timeout ──► (second retry)
+//!  master: receive(50ms) ──► error.Timeout ──► Io.sleep
+//!          receive(50ms) ──► error.Timeout
 //!  │
-//!  EventHelper.create ──► slot ──mbx.send──► mailbox
+//!  EventHelper.create ──► Slot ──mbx.send──► mailbox
 //!  │
-//!  master: receive(50ms) ──► slot ──► freeSlot
+//!  master: receive(50ms) ──► Slot ──► destroySlot
 //! ```
 //!
 

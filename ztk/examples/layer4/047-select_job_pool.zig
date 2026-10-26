@@ -1,34 +1,36 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Job pool pattern.
+//! Title: A job pool
 //!
-//! - Master pre-loads a job queue, seeds the pool with N empty containers.
-//! - dispatchJobs: pool availability (getWaitResult) gates dispatch to N workers.
-//! - Each worker doubles its job's code, returns the container via pl.put.
-//! - shutdown closes all worker mailboxes, awaits every worker future.
+//! Free containers in the pool decide when the next job goes out.
 //!
+//! - Load a job queue in the Master, and fill the pool with N empty containers.
+//! - Wait for a free container with `getWaitResult`. Fill it with the next job,
+//!   and send it to a worker: `dispatchJobs`.
+//! - Double the job's code in the worker, and put the container back. That
+//!   frees it for the next job.
+//! - Close every worker mailbox, and wait for every worker: `shutdown`.
+//!
+//! One container per job in flight. The Master sends jobs until the queue is
+//! empty, then stops the workers.
 //!
 //! ```
-//!  Master job queue: [{code=10},{code=20},{code=30}] (pre-loaded before loop)
-//!  pool (N empty containers seeded)
-//!  │ getWaitResult — triggers when a container is returned by a worker (or initially available)
+//!  Master job queue: [{code=10},{code=20},{code=30}] (loaded first)
+//!  pool (N empty containers)
+//!  │ getWaitResult: a container is free (at first, or after a worker)
 //!  ▼
 //!  Select(MasterEvent)
 //!  │
-//!  .pool_ev .item ──► pop job from Master queue ──► fill container ──► mbx.send ──► mbx[worker_i]
-//!                 ──► re-spawn getWaitResult (until queue exhausted)
-//!                 ──► break (queue empty — no more jobs to dispatch)
+//!  .pool_ev .anchor ──► pop a job ──► fill the container ──► mbx.send ──► mbx[worker_i]
+//!                   ──► restart getWaitResult (until the queue is empty)
+//!                   ──► stop (no jobs left)
 //!  │
-//!  worker[i]: mbx.receive ──► process (code *= 2) ──► pl.put ──► pool (triggers next pool_ev)
+//!  worker[i]: mbx.receive ──► code *= 2 ──► pl.put ──► pool (a container is free)
 //!  │
-//!  master: mbx.close (×N) ──► workers exit ──► futs.await
-//!  pl.close ──► on_close ──► freeList (returns all remaining containers)
+//!  master: mbx.close (×N) ──► the workers stop ──► futs.await
+//!  pl.close ──► on_close ──► destroyQueue (the containers left)
 //! ```
-//!
-//!  Pool availability gates job submission. Work input: Master's pre-loaded queue.
-//!  Pool provides empty containers. One container per in-flight job.
-//!  Master dispatches jobs until queue exhausted, then shuts down workers.
 //!
 
 pub fn job_pool_pattern(allocator: std.mem.Allocator, io: std.Io) !void {

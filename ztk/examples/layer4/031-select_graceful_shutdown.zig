@@ -1,27 +1,30 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Graceful shutdown with in-flight items.
+//! Title: Shut down without losing a parent
 //!
-//! - Master has 2 event sources: mailbox (Events + ShutdownCommand) and pool.
-//! - eventLoop processes Events, then a ShutdownCommand triggers graceful shutdown.
-//! - gracefulShutdown empties sel.cancel(), frees inbox items, recycles pool items.
-//! - No item is lost across cancellation, at whatever stage each source was in.
+//! A ShutdownCommand starts the shutdown. Nothing in flight is lost.
 //!
+//! - Wait on two sources: a mailbox with Events and a ShutdownCommand, and a
+//!   pool.
+//! - Handle Events in `eventLoop`. The ShutdownCommand starts the shutdown.
+//! - Cancel the Select in `gracefulShutdown`. Release what the inbox
+//!   returned. Put back what the pool returned.
+//! - Every source may be at any stage when the cancel comes. No parent is lost.
 //!
 //! ```
-//!  mbx (Event items + ShutdownCommand)    pool (Event items)
-//!  │ receiveResult                         │ getWaitResult
-//!  └──────────────────────┬───────────────┘
-//!                         ▼
-//!                 Select(MasterEvent) ◄── sleepFn (timer)
-//!                         │ event loop
-//!                         ▼
-//!  .inbox .item (Event)   ──► process, re-spawn inbox
-//!  .inbox .item (Shutdown)──► initiate graceful shutdown:
-//!                              sel.cancel() loop
-//!                              .inbox  .item ──► freeSlot   (no item lost)
-//!                              .pool_ev .item──► pl.put    (no item lost)
+//!  mbx (Events + ShutdownCommand)    pool (Events)
+//!  │ receiveResult                    │ getWaitResult
+//!  └──────────────────┬───────────────┘
+//!                     ▼
+//!             Select(MasterEvent) ◄── sleepFn (timer)
+//!                     │ event loop
+//!                     ▼
+//!  .inbox .anchor (Event)    ──► handle, restart inbox
+//!  .inbox .anchor (Shutdown) ──► start the shutdown:
+//!                               sel.cancel() loop
+//!                               .inbox   .anchor ──► destroySlot (nothing lost)
+//!                               .pool_ev .anchor ──► pl.put      (nothing lost)
 //!  sel.cancelDiscard() ──► pl.close ──► mbx.close
 //! ```
 //!

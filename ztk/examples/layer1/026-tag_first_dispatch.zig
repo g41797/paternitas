@@ -1,21 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Id-first dispatch, the other way round from 023.
+//! Title: Dispatch by the id first
 //!
-//! - 023 has the parent. It asks each type to cast: fromAnchor.
-//! - This one starts from the id alone. It asks each type to confirm: isIt.
-//! - Only after an id is confirmed does mustFromAnchor reach the parent.
-//! - A pool hook works this way because it has no parent — see AlwaysCreateHooks.
+//! Find the type from the id alone, then reach the parent.
 //!
-//! - Append an Event, a Sensor and a Timer to one mixed queue.
-//! - Read each id once, confirm it, then reach the parent.
-//! - The last branch handles an id nobody claimed. Always write it.
+//! Example 023 has the parent, and asks each type for it with `fromAnchor`.
+//! This one starts from the id, and asks each type with `isIt`. A pool hook
+//! works this way, because it has an id and no parent. See
+//! `AlwaysCreateHooks`.
 //!
+//! - Append an Event, a Sensor and a Timer to one queue.
+//! - Pop each parent, and read its id once.
+//! - Ask each type with `isIt`.
+//! - Reach the parent with `mustFromAnchor`, only after a type said yes.
+//! - Handle an id no type claimed in the last branch. Always write it.
 //!
 //! ```
-//!  queue.popFirst ──► inner
-//!       │ inner.id (one read)
+//!  queue.popFirst ──► *Anchor
+//!       │ typeId() (one read)
 //!       ▼
 //!  id ──► isIt ──► mustFromAnchor ──► parent
 //!       │ destroySlot per parent

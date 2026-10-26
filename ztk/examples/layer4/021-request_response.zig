@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Request-response between Masters.
+//! Title: Request and response between Masters
 //!
-//! - Master A sends an Event request to Master B's inbox.
-//! - Master B computes a response, sends a Sensor to Master A's inbox.
-//! - Both masters run concurrently; runMasters awaits both.
+//! Two Masters, each with an inbox, ask and answer.
 //!
+//! - Send an Event request from Master A to Master B's inbox.
+//! - Compute an answer in Master B, and send a Sensor to Master A's inbox.
+//! - Run both at once, and wait for both: `runMasters`.
 //!
 //! ```
 //!  master A ──Event(request)──► b_inbox ──► master B
 //!  master A ◄──Sensor(response)── a_inbox ◄── master B
-//!  (fut_a + fut_b run concurrently; fut_a.await → fut_b.await)
+//!  (both run at once; fut_a.await → fut_b.await)
 //! ```
 //!
 

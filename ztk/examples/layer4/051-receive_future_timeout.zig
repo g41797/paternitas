@@ -1,25 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! receive_future with timeout.
+//! Title: Await a receive with a timeout
 //!
-//! - receiveWithTimeout: receive_future on an empty mailbox with a 50ms timeout, resolves .timeout.
-//! - sendAndReceiveItem: sends one Event, then receiveFuture(null) resolves .item.
-//! - Confirms the future resolves to whichever result actually occurs.
+//! The future returns whatever happens first: a timeout or a parent.
 //!
+//! - Await `receiveFuture` with a 50 ms timeout on an empty mailbox. It
+//!   returns `.timeout`: `receiveWithTimeout`.
+//! - Send one Event, then await `receiveFuture(null)`. It returns the parent:
+//!   `sendAndReceiveItem`.
 //!
 //! ```
 //!  mailbox (empty)
 //!  │
 //!  receiveFuture(50ms) ──► Future(Mbox.Result)
-//!  fut.await ──► Mbox.Result .timeout
+//!  fut.await ──► .timeout
 //!  │
-//!  EventHelper.create ──► slot ──mbx.send──► mailbox
-//!  receiveFuture(null) ──► fut.await ──► Mbox.Result .item ──► freeSlot
+//!  EventHelper.create ──► Slot ──mbx.send──► mailbox
+//!  receiveFuture(null) ──► fut.await ──► .anchor ──► destroySlot
 //! ```
 //!
 
-pub fn receive_future_with_timeout(allocator: std.mem.Allocator, io: std.Io) !void {
+pub fn await_a_receive_with_timeout(allocator: std.mem.Allocator, io: std.Io) !void {
     var mbx_slot: Slot = null;
     try matryoshka.mbox.new(allocator, io, &mbx_slot);
     const mbx: *Mbox = Mbox.moveFromSlot(&mbx_slot).?;
@@ -45,7 +47,7 @@ const Ctx = struct {
         var fut_t: std.Io.Future(Mbox.Result) = try self.mbx.receiveFuture(TIMEOUT_NS);
         const r_timeout: Mbox.Result = fut_t.await(self.io);
         try helpers.expect(error.ReceiveFutureTimeoutFailed, r_timeout == .timeout, "expected .timeout");
-        std.log.info("receive_future timeout: got .timeout as expected", .{});
+        std.log.info("receiveFuture with a timeout: got .timeout as expected", .{});
     }
 
     fn sendAndReceiveItem(self: *Ctx) !void {
@@ -61,7 +63,7 @@ const Ctx = struct {
             .anchor => |handle| {
                 var received: Slot = handle;
                 defer parents.destroySlot(&received, self.alloc, self.io);
-                std.log.info("receive_future after timeout: got Event code={d}", .{parents.Event.EventHelper.mustFromSlot(&received).code});
+                std.log.info("receiveFuture after the timeout: got Event code={d}", .{parents.Event.EventHelper.mustFromSlot(&received).code});
             },
             else => return error.ReceiveFutureTimeoutFailed,
         }

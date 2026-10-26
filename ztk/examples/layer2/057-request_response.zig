@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Request-response.
+//! Title: Request and response
 //!
-//! - Main sends an Event (code=42) to the worker's request mailbox.
-//! - Worker adds 1000 to the code, sends it to the response mailbox.
-//! - Main receives the response, verifies the value.
+//! Main asks a worker, and the worker answers through a second mailbox.
 //!
+//! - Send an Event with code 42 to the worker's request mailbox.
+//! - Add 1000 to the code in the worker, and send it to the response mailbox.
+//! - Receive the response in main, and check the value.
 //!
 //! ```
 //!  main ──Event(code=42)──► req_mbx ──► worker
-//!                                          │ code += 1000
-//!                                          ▼
+//!                                         │ code += 1000
+//!                                         ▼
 //!  main ◄──Event(code=1042)── resp_mbx ◄── worker
 //! ```
 //!

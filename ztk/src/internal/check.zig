@@ -1,27 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! What the toolkit refuses, stated once.
+//! What the toolkit refuses, in one place.
 //!
 //! - `check` panics where runtime safety is on.
 //! - It is compiled out where runtime safety is off.
-//! - So a broken contract is never an assumption the optimizer may act on.
+//! - A broken contract never becomes something the optimizer may assume.
 //!
-//! Internal. Not reachable from `@import("matryoshka")`.
+//! Internal. `@import("matryoshka")` does not reach it.
 //!
 const _doc_stub = void;
 
 /// Panics with `msg` when `ok` is false and runtime safety is on.
 ///
-/// Compiled out of ReleaseFast and ReleaseSmall. There the body is dead at
-/// comptime: no call, no branch, no message in the binary.
+/// ReleaseFast and ReleaseSmall compile it out. No call, no branch and no
+/// message stay in the binary.
 ///
-/// Why not `std.debug.assert`: it is `unreachable` in those two modes, so a
-/// broken contract becomes undefined behaviour and the optimizer may reason
-/// from it. This leaves nothing behind instead.
+/// It is not `std.debug.assert`. In those two modes `assert` is
+/// `unreachable`. A broken contract then becomes undefined behaviour, and the
+/// optimizer may build on it. `check` leaves nothing behind.
 ///
-/// `ok` is evaluated by the caller in every mode. A condition that costs
-/// something goes inside `if (std.debug.runtime_safety)`.
+/// The caller evaluates `ok` in every mode. Put a costly condition inside
+/// `if (std.debug.runtime_safety)`.
 pub inline fn check(ok: bool, msg: []const u8) void {
     if (std.debug.runtime_safety and !ok) @panic(msg);
 }

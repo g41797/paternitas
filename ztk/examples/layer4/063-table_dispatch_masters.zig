@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Two Masters, the same parents, two different tables.
+//! Title: Two Masters, two tables
 //!
-//! The case a chain cannot express. An TypeId says what a parent **is**, not
-//! what a Master should **do** with it. The same Event is a log line to one
-//! Master and a counter bump to another, so the handler belongs to the pair
-//! (Master, id) — which is what a table holds.
+//! The same parents mean different work to different Masters.
 //!
-//! - Two Masters, one mailbox each. Neither knows about the other.
-//! - The producer sends the same three parent types to both.
-//! - LogMaster names all three ids. CountMaster names Event and Sensor,
-//!   and has no handler for a Timer — a normal state of affairs, not a
-//!   defect. It sees error.NoHandler and frees the item itself.
-//! - EventHelper.ID sits in both tables against different handlers.
+//! A TypeId says what a parent **is**, not what a Master should **do** with
+//! it. The same Event is a log line to one Master, and a count to another.
+//! So the handler belongs to the pair (Master, id). A table keeps that pair.
 //!
+//! - Give each Master its own mailbox. Neither knows about the other.
+//! - Send the same three parent types to both.
+//! - Name all three ids in LogMaster's table.
+//! - Name only Event and Sensor in CountMaster's table. A Timer gives
+//!   `error.NoHandler`, and CountMaster releases it. That is normal.
+//! - Put `EventHelper.ID` in both tables, with different handlers.
 //!
 //! ```
 //!  producer ──► LogMaster.mailbox   ──► log_table   ──► logEvent
@@ -26,14 +26,11 @@
 //!                                       Timer: no entry ──► NoHandler
 //! ```
 //!
-//! Each Master runs the identical loop:
+//! Both Masters run the same loop. Only the table differs:
 //!
 //! ```
 //!  tryReceive ──► table.dispatch(self, &slot) ──► destroySlot whatever is left
 //! ```
-//!
-//! Only the table differs. Changing what a Master does is changing data, not
-//! rewriting a chain.
 //!
 
 pub fn table_dispatch_two_masters(allocator: std.mem.Allocator, io: std.Io) !void {

@@ -4,8 +4,8 @@
 //! The one root of the test build. Every test file is imported from here.
 
 test "the module builds and imports" {
-    // The setup stage's whole claim: the build graph holds together from the
-    // module root to a test binary, in all four optimization modes.
+    // The build works from the module root to a test binary, in all four
+    // optimization modes.
     try std.testing.expect(@TypeOf(matryoshka) == type);
 }
 

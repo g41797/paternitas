@@ -6,14 +6,16 @@
 //! Scenarios 18, 20, 26 to 49 and 260 to 266. The several-threads
 //! scenarios 50 to 52 are in `layer2_threads.zig`.
 //!
-//! Every parent sent here is allocated. What the mailbox hands back has to be
-//! a pointer the allocator gave out.
+//! Every parent sent here is allocated. What the mailbox returns has to be a
+//! pointer the allocator gave out.
 
 /// One mailbox, its `Io`, and the teardown, in one place.
 ///
-/// The order matters and is easy to get wrong by hand: close first — it
-/// hands the remainder back and that queue must be released — then destroy,
-/// and only then the `Io` the mailbox was using.
+/// The order matters, and is easy to get wrong by hand.
+///
+/// - Close first. It returns the rest, and that queue must be released.
+/// - Then destroy.
+/// - Only then the `Io` the mailbox was using.
 const Fixture = struct {
     threaded: std.Io.Threaded,
     io: Io = undefined,
@@ -234,7 +236,7 @@ test "34 — close is repeatable" {
     try expect(first.len() == 1);
     o.releaseAll(&first, alloc, f.io);
 
-    // The second hands back nothing, and is not a failure.
+    // The second returns nothing. That is not a failure.
     var second: m.queue.Queue = f.mbx.close();
     try expect(second.isEmpty());
 
@@ -473,8 +475,8 @@ test "49 — sending a parent already on a chain is refused" {
     if (!std.debug.runtime_safety) return error.SkipZigTest;
 
     // The refusal itself aborts, so it is negative program 304's business.
-    // What this holds is the exactness the refusal rests on: a parent alone
-    // on a chain reads as linked, which is what a send looks at.
+    // This test checks what the refusal relies on: a parent alone on a
+    // chain reads as linked. A send looks at that.
     var f: Fixture = undefined;
     try f.start();
     defer f.finish();
@@ -635,10 +637,6 @@ test "265 — a send with a limit of zero is an ordinary send" {
     }
 
     try expect(f.mbx.len() == 4);
-}
-
-test "317 — the toolkit states its version" {
-    try expect(m.VERSION.len > 0);
 }
 
 const a_second: u64 = 1_000_000_000;

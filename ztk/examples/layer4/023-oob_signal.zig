@@ -1,25 +1,27 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! OOB via send_oob.
+//! Title: A ShutdownCommand ahead of the queue
 //!
-//! - Send 3 Events via mbx.send, queued in order.
-//! - Send a ShutdownCommand via mbx.send_oob, jumps to queue front.
-//! - processingLoop receives 4 items: OOB signal first, then the 3 Events.
-//! - Free every received item, verify the arrival order.
+//! A ShutdownCommand sent with `sendOob` comes out first.
 //!
+//! - Send three Events with `mbx.send`. They queue in order.
+//! - Send a ShutdownCommand with `mbx.sendOob`. It goes ahead of them.
+//! - Receive four parents in `processingLoop`: the ShutdownCommand first, then
+//!   the Events.
+//! - Release each one, and check the order.
 //!
 //! ```
-//!  mbx.send (Event×3) ──► queue tail
-//!  mbx.send_oob (ShutdownCommand) ──► queue front
+//!  mbx.send (Event×3) ──► the ordinary queue
+//!  mbx.sendOob (ShutdownCommand) ──► ahead of it
 //!       │ mbx.receive ×4
 //!       ▼
-//!  OOB ShutdownCommand arrives first, then Events in send order
-//!  freeSlot per item
+//!  the ShutdownCommand first, then the Events in send order
+//!  destroySlot per parent
 //! ```
 //!
 
-pub fn oob_via_send_oob(allocator: std.mem.Allocator, io: std.Io) !void {
+pub fn shutdown_ahead_of_the_queue(allocator: std.mem.Allocator, io: std.Io) !void {
     var mbx_slot: Slot = null;
     try matryoshka.mbox.new(allocator, io, &mbx_slot);
     const mbx: *Mbox = Mbox.moveFromSlot(&mbx_slot).?;

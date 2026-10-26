@@ -1,28 +1,29 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool hooks + mailbox flow.
+//! Title: Pool hooks and a mailbox
 //!
-//! - round1: on_get creates a parent, mailbox carries it, on_put keeps it (cap
-//!   not yet reached) and resets its data.
-//! - round2: on_get creates a fresh parent, mailbox carries it, on_put releases
-//!   it (cap reached).
-//! - verifyRecycled confirms the kept parent is still in the pool, holding
-//!   reset data — not the value round1 set.
+//! `on_put` keeps a parent under the cap, and releases one over it.
 //!
+//! - Round 1: `on_get` makes a parent, the mailbox carries it, and `on_put`
+//!   keeps it and resets its data. The cap is not reached yet.
+//! - Round 2: `on_get` makes a new parent, the mailbox carries it, and
+//!   `on_put` releases it. The cap is reached.
+//! - Check that the kept parent is still in the pool, with its data reset:
+//!   `verifyRecycled`.
 //!
 //! ```
-//!  pl.get (new_only) ──► on_get creates ──► slot (code=1)
-//!  mbx.send ──► mailbox holds the parent
-//!  mbx.receive ──► slot (same parent)
-//!  pl.put ──► on_put: count<cap → keep, reset data ──► pool store
+//!  pl.get (new_only) ──► on_get makes one ──► Slot (code=1)
+//!  mbx.send ──► the mailbox has it
+//!  mbx.receive ──► Slot (the same parent)
+//!  pl.put ──► on_put: under the cap → keep, reset the data
 //!  │
-//!  pl.get (new_only) ──► on_get creates fresh ──► slot (code=2)
-//!  mbx.send ──► mailbox holds the parent
-//!  mbx.receive ──► slot (same parent)
-//!  pl.put ──► on_put: count>=cap → release ──► released
+//!  pl.get (new_only) ──► on_get makes a new one ──► Slot (code=2)
+//!  mbx.send ──► the mailbox has it
+//!  mbx.receive ──► Slot (the same parent)
+//!  pl.put ──► on_put: at the cap → release
 //!  │
-//!  pl.get (.available_only) ──► recycled (data reset) ──► verify
+//!  pl.get (.available_only) ──► the kept parent (data reset) ──► check
 //!  pl.close ──► on_close ──► destroyQueue
 //! ```
 //!

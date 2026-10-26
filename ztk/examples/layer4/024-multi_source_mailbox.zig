@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Multiple event sources, one mailbox.
+//! Title: Many sources, one mailbox
 //!
-//! - Timer task, event sender, and signal sender all send into one mailbox.
-//! - Worker has a single receive loop, dispatches on id.
-//! - Senders finish, then the mailbox is closed to end the worker.
-//! - Ctx groups the flow: spawnSenders, then awaitSendersAndClose.
+//! A timer, an event sender and a signal sender share one inbox.
 //!
+//! - Send from all three into one mailbox.
+//! - Receive in one loop in the worker, and dispatch by id.
+//! - When the senders finish, close the mailbox. That ends the worker.
+//! - Keep the flow in `Ctx`: `spawnSenders`, then `awaitSendersAndClose`.
 //!
 //! ```
 //!  timerSenderFn ──Timer×2──►
-//!  eventSenderFn ──Event×3──► mailbox ──► workerFn (id dispatch; close-based exit)
+//!  eventSenderFn ──Event×3──► mailbox ──► workerFn (dispatch by id; stops on close)
 //!  signalSenderFn ──ShutdownCommand──►
-//!  senders await → mbx.close → workerFn exits → fut_worker.await
+//!  senders done → mbx.close → workerFn stops → fut_worker.await
 //! ```
 //!
 

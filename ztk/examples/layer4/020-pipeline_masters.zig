@@ -1,20 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pipeline of Masters.
+//! Title: A pipeline of Masters
 //!
-//! - 3 Masters chained: producer, transformer, consumer.
-//! - Producer sends Events, then a ShutdownCommand sentinel.
-//! - Transformer converts each Event to a Sensor, forwards the sentinel, exits.
-//! - Consumer sums received Sensors, exits on the sentinel.
+//! Three stages, two mailboxes. A ShutdownCommand stops the chain.
 //!
+//! - Send Events from the producer, then a ShutdownCommand.
+//! - Turn each Event into a Sensor in the transformer. Pass the
+//!   ShutdownCommand on, then stop.
+//! - Add up the Sensors in the consumer. Stop on the ShutdownCommand.
 //!
 //! ```
 //!  producer ──Event──► transformer_mbx ──► transformer
-//!                                              │ Event→Sensor conversion
+//!                                              │ Event → Sensor
 //!                                              ▼
 //!  consumer ◄──Sensor── consumer_mbx ◄── transformer
-//!  (ShutdownCommand sentinel propagates: producer→transformer→consumer)
+//!
+//!  ShutdownCommand goes down the same way and stops each stage.
 //!  fut_prod.await → fut_trans.await → fut_cons.await
 //! ```
 //!
@@ -61,23 +63,19 @@ fn transformerFn(ctx: *TransformerCtx) anyerror!void {
         var slot: Slot = null;
         defer parents.destroySlot(&slot, ctx.alloc, ctx.io);
         ctx.in_mbx.receive(&slot, null) catch return;
-        const poly: *Anchor = slot.?;
+        const anchor: *Anchor = slot.?;
 
-        if (parents.Event.EventHelper.fromAnchor(poly)) |ev| {
+        if (parents.Event.EventHelper.fromAnchor(anchor)) |ev| {
             const value: f64 = @floatFromInt(ev.code);
             parents.destroySlot(&slot, ctx.alloc, ctx.io);
             parents.Sensor.SensorHelper.create(ctx.alloc, ctx.io, &slot) catch continue;
             parents.Sensor.SensorHelper.mustFromSlot(&slot).value = value;
-            ctx.out_mbx.send(&slot) catch {
-                parents.destroySlot(&slot, ctx.alloc, ctx.io);
-            };
+            ctx.out_mbx.send(&slot) catch {};
             std.log.info("transformer: Event→Sensor value={d}", .{value});
-        } else if (parents.ShutdownCommand.ShutdownCommandHelper.fromAnchor(poly)) |_| {
+        } else if (parents.ShutdownCommand.ShutdownCommandHelper.fromAnchor(anchor)) |_| {
             ctx.out_mbx.send(&slot) catch {};
             std.log.info("transformer: forwarded ShutdownCommand, done", .{});
             return;
-        } else {
-            parents.destroySlot(&slot, ctx.alloc, ctx.io);
         }
     }
 }
@@ -94,22 +92,20 @@ fn consumerFn(ctx: *ConsumerCtx) anyerror!void {
         var slot: Slot = null;
         defer parents.destroySlot(&slot, ctx.alloc, ctx.io);
         ctx.in_mbx.receive(&slot, null) catch return;
-        const poly: *Anchor = slot.?;
+        const anchor: *Anchor = slot.?;
 
-        if (parents.Sensor.SensorHelper.fromAnchor(poly)) |sn| {
+        if (parents.Sensor.SensorHelper.fromAnchor(anchor)) |sn| {
             ctx.count += 1;
             std.log.info("consumer: Sensor value={d} (total={d})", .{ sn.value, ctx.count });
-            parents.destroySlot(&slot, ctx.alloc, ctx.io);
-        } else if (parents.ShutdownCommand.ShutdownCommandHelper.fromAnchor(poly)) |_| {
+        } else if (parents.ShutdownCommand.ShutdownCommandHelper.fromAnchor(anchor)) |_| {
             std.log.info("consumer: ShutdownCommand received, done", .{});
-            parents.destroySlot(&slot, ctx.alloc, ctx.io);
             return;
-        } else {
-            parents.destroySlot(&slot, ctx.alloc, ctx.io);
         }
     }
 }
 
+// A Master is your code, not ztk's: the struct that keeps the mailboxes
+// and runs the workers.
 const PipelineMaster = struct {
     fn run(self: *PipelineMaster) !void {
         try self.runWorkers();

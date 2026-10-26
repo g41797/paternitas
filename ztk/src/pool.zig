@@ -3,36 +3,36 @@
 
 //! Keeps used parents so they can be used again.
 //!
-//! Many contexts share one pool. It does its own locking. It keeps each
-//! identity apart, in a store of its own, and it works with an `*Anchor`, so
-//! it never learns your types.
+//! Many threads and tasks share one pool. It does its own locking.
+//!
+//! - It keeps each identity apart, in a store of its own.
+//! - It works with an `*Anchor`, so it never learns your types.
 //!
 //! The pool manages the collection. Your hooks decide what reuse means.
 //!
 //! ## Making one
 //!
-//! - `newPool` takes the allocator, the `Io`, the identities it will keep,
-//!   and your hooks.
-//! - The set of identities is fixed there, is not empty, and has no
-//!   duplicate. Both are refused where runtime safety is on.
-//! - `Pool.destroy` gives the memory back, after `close` and after every
-//!   call has returned.
+//! - `new` takes the allocator, the `Io`, the identities it will keep, and
+//!   your hooks.
+//! - The set of identities is fixed there. It is not empty, and has no
+//!   duplicate. Where runtime safety is on, both are refused.
+//! - `Pool.destroy` frees the pool, after `close` and after every call has
+//!   returned.
 //! - `Pool.ID`, `toAnchor` and `fromAnchor` let a pool travel inside a mailbox
 //!   or another pool.
 //!
 //! ## Getting one out
 //!
-//! `get` takes a mode, and the mode is the whole policy.
+//! `get` takes a mode. The mode is the whole policy.
 //!
-//! - `.available_or_new` — a stored parent if there is one, otherwise your
+//! - `.available_or_new`: a stored parent if there is one, otherwise your
 //!   `on_get`.
-//! - `.new_only` — always your `on_get`, even with parents stored.
-//! - `.available_only` — a stored parent, or `error.NotAvailable`. It never
-//!   reaches `on_get`.
+//! - `.new_only`: always your `on_get`, even with parents stored.
+//! - `.available_only`: a stored parent, or `error.NotAvailable`. It never
+//!   calls `on_get`.
 //! - `get` fills an empty Slot. A full one is refused.
-//! - `error.NotCreated` is what your `on_get` said by leaving the Slot
-//!   empty.
-//! - `getWait` waits up to a timeout for a stored parent. It never reaches
+//! - `error.NotCreated` means your `on_get` left the Slot empty.
+//! - `getWait` waits up to a timeout for a stored parent. It never calls
 //!   `on_get`.
 //!
 //! ## Giving one back
@@ -44,9 +44,9 @@
 //!
 //! ## Shutting down
 //!
-//! - `close` moves everything stored into one queue and hands it to
+//! - `close` moves everything stored into one queue, and gives it to
 //!   `on_close`.
-//! - `close` on an already closed pool does nothing.
+//! - `close` on a closed pool does nothing.
 //! - Every waiter in `getWait` comes back with `error.Closed`.
 //! - `isClosed` is the state. `isIdle` says closed with no call still
 //!   inside.
@@ -54,24 +54,26 @@
 //!
 //! ## What it stores them on
 //!
-//! A stack per identity, so reuse is last in, first out: the parent that came
-//! back most recently goes out next, and a writer that went stale meets its
-//! next owner at once. The queue keeps its place at the border — `on_close`
-//! is handed one, because what leaves the pool leaves in one piece.
+//! A stack per identity. So reuse is last in, first out.
+//!
+//! - The parent that came back last goes out first.
+//! - A parent that went bad comes back out at once, and the next user sees
+//!   it.
+//! - What leaves the pool leaves as one queue: `on_close` gets one.
 //!
 //! Examples:
 //! https://g41797.github.io/matryoshka-ztk/examples/pool/
 const _doc_stub = void;
 
-/// A pool — the tool for keeping parents and handing them out again.
+/// A pool. It keeps used parents and gives them out again.
 ///
 /// A pool is itself a parent. Use `toAnchor` and `fromAnchor` to send one
 /// through a mailbox or another pool.
 ///
-/// The fields are internal. Their names start with `_` for that reason;
-/// Zig has no private field.
+/// The fields are internal. Their names start with `_`, because Zig has no
+/// private fields.
 pub const Pool = struct {
-    /// Which parents `get` will answer with.
+    /// Which parents `get` gives you.
     pub const GetMode = enum {
         /// A stored parent if there is one, otherwise `on_get`.
         available_or_new,
@@ -79,13 +81,13 @@ pub const Pool = struct {
         /// `on_get`, even with parents stored.
         new_only,
 
-        /// A stored parent, or `error.NotAvailable`. Never `on_get`.
+        /// A stored parent, or `error.NotAvailable`. It never calls `on_get`.
         available_only,
     };
 
     /// Everything `get` can end with.
     ///
-    /// `NotCreated` is the get hook's own answer, not a failure of the pool.
+    /// `NotCreated` is your `on_get`'s answer, not a failure of the pool.
     pub const GetError = error{ Closed, NotAvailable, NotCreated, UnknownIdentity };
 
     /// Every outcome of a `getWait`, packed into one value.
@@ -99,18 +101,16 @@ pub const Pool = struct {
         unknown_identity: void,
     };
 
-    /// The one page about code you write, not code you call.
+    /// Code you write, not code you call.
     ///
-    /// Three functions and the context they are called with. You implement
-    /// them, and the pool calls them. The rules of reuse are yours, and this
-    /// is where you state them.
+    /// Three functions and a context. You write them, and the pool calls them.
+    /// The rules of reuse are yours, and this is where you state them.
     ///
     /// ## What each one is for
     ///
-    /// - `on_get` — a caller asked for a parent and none are stored.
-    /// - `on_put` — a parent came back, and you decide whether it stays.
-    /// - `on_close` — the pool is closing, and everything it still keeps is
-    ///   handed to you.
+    /// - `on_get`: a caller asked for a parent, and none are stored.
+    /// - `on_put`: a parent came back. You decide whether it stays.
+    /// - `on_close`: the pool is closing. You get everything it still keeps.
     ///
     /// ## How to answer
     ///
@@ -121,38 +121,39 @@ pub const Pool = struct {
     /// - Empty the Slot yourself, and release the parent, to let it go.
     /// - Add more parents to `extra`, and they are taken back the same way,
     ///   with the same checks.
-    /// - `on_close` is handed one queue, by value, flattened across every
-    ///   identity. No order is promised, and releasing everything on it is
-    ///   your job.
+    /// - `on_close` gets one queue, by value, with every identity in it.
+    ///   - No order is promised.
+    ///   - Releasing everything on it is your job.
     ///
     /// ## What to know before you write one
     ///
-    /// - A hook runs with the pool's lock released, so another context can
+    /// - A hook runs with the pool's lock released. Another thread or task can
     ///   be inside the pool while yours runs.
-    /// - MUST NOT call `Pool.isIdle` from a hook. It takes the mutex, and a
-    ///   hook is caller code running inside a call, so that deadlocks.
-    ///   `isClosed` takes no lock and answers the other half.
-    /// - `in_pool` is a count read before the lock was given up. It is a
-    ///   hint, and it is stale: the count after the removal in `on_get`, and
-    ///   before the addition in `on_put`.
+    /// - A hook MUST NOT call `Pool.isIdle`. It takes the lock, and a hook runs
+    ///   inside a call, so it deadlocks. `isClosed` takes no lock.
+    /// - `in_pool` is a hint, read before the lock was released. It is already
+    ///   stale.
+    ///   - In `on_get`, it is the count after the removal.
+    ///   - In `on_put`, it is the count before the addition.
     /// - `on_get` fills the Slot with a parent of the identity it was asked
     ///   for. Another one is refused.
     /// - **`on_close` may be called more than once, and twice at the same
-    ///   time.** `close` calls it, and so does every `put` that was still
-    ///   running its own hook when the pool closed — that is how those
-    ///   parents are kept from being lost. So a close hook does not release
-    ///   its own state on the first call, and it survives being re-entered.
+    ///   time.**
+    ///   - `close` calls it.
+    ///   - So does every `put` whose hook was still running when the pool
+    ///     closed. That way those parents are not lost.
+    ///   - So do not release the hook's own state on the first call. Expect to
+    ///     be called again, even while running.
     /// - Clearing a parent means your own fields. The toolkit keeps the
     ///   TypedNode.
     pub const Hooks = struct {
-        /// Yours, handed back to every call. The pool does not read it.
+        /// Yours. Every hook call gets it. The pool does not read it.
         ctx: *anyopaque,
 
         /// None are stored. Make one, or leave the Slot empty.
         ///
-        /// The Slot is **always empty on entry**: this hook is reached only
-        /// when nothing was stored, so it is never asked to look at what is
-        /// already there.
+        /// The Slot is **always empty on entry**. The pool calls this hook only
+        /// when nothing is stored.
         on_get: *const fn (ctx: *anyopaque, want: TypeId, in_pool: usize, slot: *Slot) void,
 
         /// One came back. Keep it in the Slot, or empty the Slot and
@@ -164,10 +165,10 @@ pub const Pool = struct {
 
         /// The pool is closing, and these are yours.
         ///
-        /// The queue arrives **by value**, so after the call there is no way
-        /// back to the items. Release every one of them.
+        /// The queue arrives **by value**. After the call there is no way back to
+        /// the parents. Release every one of them.
         ///
-        /// May be called more than once, and twice at the same time.
+        /// It may be called more than once, and twice at the same time.
         on_close: *const fn (ctx: *anyopaque, remaining: Queue) void,
     };
 
@@ -196,38 +197,36 @@ pub const Pool = struct {
         return helper.mustFromAnchor(anchor);
     }
 
-    /// The pool, from the Slot holding it. Leaves the Slot full.
+    /// The pool, from the Slot it sits in. The Slot stays full.
     pub inline fn fromSlot(slot: *const Slot) ?*Pool {
         return helper.fromSlot(slot);
     }
 
-    /// The pool, from the Slot holding it. Panics on an empty Slot or
-    /// another type.
+    /// The pool, from the Slot it sits in. Panics on an empty Slot or another
+    /// type.
     pub inline fn mustFromSlot(slot: *const Slot) *Pool {
         return helper.mustFromSlot(slot);
     }
 
-    /// Takes the pool out of the Slot, leaving it empty.
+    /// Takes the pool out of the Slot. On success the Slot is empty.
     ///
-    /// Null when the Slot is empty or holds another type, and then the Slot
-    /// is untouched.
+    /// Null when the Slot is empty or has another type. The Slot is untouched
+    /// then.
     pub inline fn moveFromSlot(slot: *Slot) ?*Pool {
         return helper.moveFromSlot(slot);
     }
 
     /// Fetches a parent of `want`, by the policy `mode` names.
     ///
-    /// On success the Slot holds it. On every failure the Slot is left
-    /// empty, so one look at the Slot says whether you have one.
+    /// On success the parent is in the Slot. On every failure the Slot stays
+    /// empty. One look at the Slot tells you whether you have one.
     ///
-    /// - `error.Closed` — the pool is closed.
-    /// - `error.NotAvailable` — `.available_only`, and none are stored.
-    /// - `error.NotCreated` — your `on_get` left the Slot empty.
-    /// - `error.UnknownIdentity` — an identity the pool was not made with.
-    ///   An error in **every** build, and a check besides where runtime
-    ///   safety is on: it is a caller's mistake about the pool's own shape,
-    ///   and a fast build that carried on would call your hook with an
-    ///   identity the pool never knew.
+    /// - `error.Closed`: the pool is closed.
+    /// - `error.NotAvailable`: `.available_only`, and none are stored.
+    /// - `error.NotCreated`: your `on_get` left the Slot empty.
+    /// - `error.UnknownIdentity`: the pool was not made with this identity. It
+    ///   is an error in **every** build. Where runtime safety is on, it also
+    ///   panics.
     ///
     /// Refuses a Slot that is not empty on entry.
     pub fn get(self: *Pool, want: TypeId, mode: GetMode, slot: *Slot) GetError!void {
@@ -285,13 +284,13 @@ pub const Pool = struct {
 
     /// Fetches a stored parent, waiting up to `timeout_ns` for one.
     ///
-    /// Never reaches `on_get`. Waiting is for a parent another context gives
-    /// back, and a hook that could make one would make the wait pointless.
+    /// It never calls `on_get`. It waits for a parent another thread or task
+    /// gives back.
     ///
     /// - `timeout_ns` null waits forever.
-    /// - `timeout_ns` zero comes back at once with `error.Timeout`.
+    /// - `timeout_ns` zero returns at once with `error.Timeout`.
     ///
-    /// A `close` wakes every waiter, which come back with `error.Closed`.
+    /// A `close` wakes every waiter, with `error.Closed`.
     ///
     /// Refuses a Slot that is not empty on entry.
     pub fn getWait(
@@ -356,21 +355,19 @@ pub const Pool = struct {
 
     /// Gives a parent back and runs your `on_put`.
     ///
-    /// The parent leaves your Slot **before** the hook runs, so afterwards
-    /// the Slot is empty whatever the hook decided. An empty Slot on entry
-    /// is not an error and does nothing.
+    /// The parent leaves your Slot **before** the hook runs. So afterwards the
+    /// Slot is empty, whatever the hook decided.
     ///
-    /// A closed pool is silent: the Slot is untouched and the parent stays
-    /// with you. That is a race you cannot avoid, so it is not reported.
+    /// An empty Slot on entry is not an error. It does nothing.
     ///
-    /// `error.UnknownIdentity` is the other half of the pair and is
-    /// reported, in every build: it is a caller's mistake about the pool's
-    /// own shape, not a race. The Slot is untouched then too.
+    /// A closed pool is silent. The Slot is untouched, and the parent stays
+    /// with you. You cannot avoid this race, so it is not reported.
     ///
-    /// **A close while your hook runs loses nothing.** If the pool closed
-    /// while `on_put` was running, the parent this call took and everything
-    /// the hook added to `extra` go to `on_close` — which is why that hook
-    /// may be called more than once, and twice at the same time.
+    /// `error.UnknownIdentity` is reported, in every build. It is your mistake,
+    /// not a race. The Slot is untouched then too.
+    ///
+    /// **A close while your hook runs loses nothing.** The parent this call
+    /// took, and everything the hook added to `extra`, go to `on_close`.
     pub fn put(self: *Pool, slot: *Slot) error{UnknownIdentity}!void {
         const anchor = slot.* orelse return;
 
@@ -408,7 +405,7 @@ pub const Pool = struct {
         self._mu.lockUncancelable(io);
 
         if (self._closed) {
-            // Closed while the hook ran. Everything this call still holds
+            // Closed while the hook ran. Everything this call still has
             // goes to the close hook rather than being dropped.
             var stragglers: Queue = .{};
 
@@ -445,15 +442,15 @@ pub const Pool = struct {
         self._mu.unlock(io);
     }
 
-    /// Closes the pool and hands everything still stored to `on_close`.
+    /// Closes the pool, and gives everything still stored to `on_close`.
     ///
-    /// Wakes every waiter in `getWait`, which come back with `error.Closed`.
+    /// Every waiter in `getWait` wakes up, with `error.Closed`.
     ///
-    /// Safe to call more than once. A later call does nothing and the hook
-    /// is not called again by it.
+    /// You may call it more than once. A later call does nothing, and does not
+    /// call the hook.
     ///
-    /// Cannot fail. Every parent handed to the hook is yours to release —
-    /// what those parents are is knowledge the pool does not have.
+    /// It cannot fail. Every parent the hook gets is yours to release. Only you
+    /// know what each one is.
     pub fn close(self: *Pool) void {
         const io: Io = self._io;
 
@@ -482,22 +479,20 @@ pub const Pool = struct {
 
     /// True when the pool is closed.
     ///
-    /// One atomic read. It takes no lock, so a hook or a call already inside
-    /// the pool may ask it.
+    /// It takes no lock. So a hook, or a call already inside the pool, may ask
+    /// it.
     pub inline fn isClosed(self: *Pool) bool {
         return self._closedFast();
     }
 
     /// True when the pool is closed **and** no call is inside it.
     ///
-    /// The readable form of `destroy`'s own precondition: `destroy` aborts
-    /// the process when it is wrong, so without this there is no way to ask
-    /// whether freeing is allowed yet other than to try it and be right.
+    /// Ask it before `destroy`. `destroy` aborts the process when this is
+    /// false.
     ///
-    /// MUST: it takes the mutex. Never call it from inside a call on the
-    /// same pool, and **never from a hook** — a hook is caller code running
-    /// inside a call, so asking there deadlocks. `isClosed` answers the
-    /// other half and takes no lock.
+    /// It takes the lock. You MUST NOT call it from inside a call on the same
+    /// pool, and **never from a hook**. A hook runs inside a call, so it
+    /// deadlocks. `isClosed` takes no lock.
     pub fn isIdle(self: *Pool) bool {
         const io: Io = self._io;
 
@@ -509,11 +504,11 @@ pub const Pool = struct {
 
     /// How many parents of one identity are stored now.
     ///
-    /// `error.UnknownIdentity` for an identity the pool was not made with,
-    /// so the whole surface answers a wrong identity one way.
+    /// `error.UnknownIdentity` when the pool was not made with this identity,
+    /// as everywhere else in the pool.
     ///
-    /// A hint the moment you have it: another context may take one or give
-    /// one back before you read it.
+    /// It is a hint. Another thread or task may take one, or give one back,
+    /// before you read it.
     pub fn countOf(self: *Pool, id: TypeId) error{UnknownIdentity}!usize {
         const io: Io = self._io;
 
@@ -530,20 +525,18 @@ pub const Pool = struct {
         return bucket.free.len();
     }
 
-    /// Frees the pool, with the allocator it has held since `newPool`.
+    /// Frees the pool, with the allocator it got in `new`.
     ///
-    /// MUST: closed first, and no call still inside it. Both halves are
-    /// checked, **in every optimization mode**, and a broken one aborts.
-    /// This is not a `check`: freeing a pool another context is still inside
-    /// is not a contract a fast build may assume away.
+    /// The pool MUST be closed first, with no call still inside it. Both are
+    /// checked **in every optimization mode**. A broken one aborts the process.
     ///
-    /// A hook still running counts as a call inside the pool, so a `destroy`
-    /// racing one aborts rather than freeing under it.
+    /// A hook still running counts as a call inside the pool. So `destroy`
+    /// during a hook aborts. It does not free the pool under the hook.
     ///
     /// `isIdle` asks the same question without the abort.
     ///
-    /// Closing is not done here. `close` hands the stored parents to your
-    /// close hook, and they are yours — so doing it here would drop them.
+    /// `destroy` does not close. Call `close` first. Your `on_close` gets the
+    /// stored parents.
     pub fn destroy(self: *Pool) void {
         const io: Io = self._io;
         const alloc = self._alloc;
@@ -597,7 +590,7 @@ pub const Pool = struct {
         self._cv.broadcast(self._io);
     }
 
-    /// Stores what the Slot holds, if anything, and empties it.
+    /// Stores what the Slot has, if anything, and empties it.
     ///
     /// Called with the mutex held.
     fn _takeBackSlot(self: *Pool, slot: *Slot) void {
@@ -658,13 +651,12 @@ pub const Pool = struct {
 
 /// Makes a pool and puts it in the Slot.
 ///
-/// The allocator is kept for life, and `Pool.destroy` gives the memory back
-/// with it.
+/// The pool keeps the allocator. `Pool.destroy` frees the pool with it.
 ///
-/// `ids` is the fixed set of identities this pool keeps. It is copied into
-/// the pool's own buckets, so the caller's slice does not have to outlive
-/// the call. Where runtime safety is on, an empty set and a duplicate are
-/// both refused.
+/// `ids` is the fixed set of identities this pool keeps.
+///
+/// - The pool copies it, so your slice may go away after the call.
+/// - Where runtime safety is on, an empty set and a duplicate are refused.
 ///
 /// Refuses a Slot that is not empty on entry. On failure the Slot is
 /// unchanged.
@@ -716,8 +708,8 @@ pub fn new(
 
 /// Packs every outcome of a `getWait` into a `Pool.Result`.
 ///
-/// Waits. The building block for `Io.Select`, `io.concurrent` and
-/// `Io.Group`. The pool's state does not change because of the packing.
+/// It waits. Use it with `Io.Select`, `io.concurrent` and `Io.Group`. The
+/// packing does not change the pool.
 pub fn getWaitResult(pool: *Pool, want: TypeId, timeout_ns: ?u64) Pool.Result {
     var slot: Slot = null;
 

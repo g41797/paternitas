@@ -3,7 +3,7 @@
 
 //! Layer 1 — the id, setTypeId and the Slot.
 //!
-//! Scenarios 1 to 5, 9, 200 to 209, 317.
+//! Scenarios 1 to 5, 9, 200 to 209.
 
 const MSG = m.helper.ParentHelper(o.Msg);
 const CHUNK = m.helper.ParentHelper(o.Chunk);
@@ -59,8 +59,8 @@ test "5 — the crossing back is refused on the wrong id" {
     try expect(NOTE.fromAnchor(MSG.toAnchor(&msg)) == null);
 }
 
-test "200 — the inner is found by type, not by name" {
-    // Msg.hdr, Chunk.mtk, Note.chain. None of them is called `inner`.
+test "200 — the TypedNode is found by type, not by name" {
+    // Msg.hdr, Chunk.mtk, Note.chain. The fields have different names.
     var msg: o.Msg = .{};
     var chunk: o.Chunk = .{};
     var note: o.Note = .{};
@@ -74,10 +74,10 @@ test "200 — the inner is found by type, not by name" {
     try expect(NOTE.fromAnchor(&note.chain.anchor).? == &note);
 }
 
-test "201 — the inner may sit anywhere in the parent" {
-    // Msg has fields before its inner and Chunk has none, so the two offsets
-    // differ. The offset itself is the toolkit's to know; what a caller sees is
-    // that the crossing back lands on the parent either way.
+test "201 — the TypedNode may sit anywhere in the parent" {
+    // Msg has fields before its TypedNode and Chunk has none, so the two
+    // offsets differ. A caller never sees the offset. It sees that the way
+    // back lands on the parent either way.
     var chunk: o.Chunk = .{};
     CHUNK.setTypeId(&chunk);
     try expect(CHUNK.fromAnchor(CHUNK.toAnchor(&chunk)).? == &chunk);
@@ -88,7 +88,7 @@ test "201 — the inner may sit anywhere in the parent" {
     try expect(MSG.fromAnchor(MSG.toAnchor(&msg)).?.seq == 3);
 }
 
-test "203 — an inner with no type id reads as no type" {
+test "203 — a TypedNode with no type id reads as no type" {
     var msg: o.Msg = .{};
 
     // Null is the id before setTypeId, so a declared parent has no type with
@@ -96,8 +96,8 @@ test "203 — an inner with no type id reads as no type" {
     try expect(msg.hdr.anchor.typeId() == null);
     try expect(std.mem.zeroes(o.Msg).hdr.anchor.typeId() == null);
 
-    // The typed read is what a caller has: it answers null for an inner with
-    // no type id exactly as it does for another type's.
+    // The typed read returns null for a TypedNode with no type id, the same
+    // as for another type's.
     try expect(MSG.fromAnchor(&msg.hdr.anchor) == null);
 }
 
@@ -193,10 +193,6 @@ test "209 — a look is not a take" {
 
     try expect(MSG.moveFromSlot(&slot).? == &msg);
     try expect(slot == null);
-}
-
-test "317 — the toolkit states its version" {
-    try expect(m.VERSION.len > 0);
 }
 
 const expect = std.testing.expect;

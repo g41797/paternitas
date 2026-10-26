@@ -1,22 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! getWaitFuture awaited directly.
+//! Title: Await a pool get
 //!
-//! - Seed the pool with one Event.
-//! - pl.getWaitFuture returns an Io.Future(Pool.Result), no Select needed.
-//! - fut.await blocks until the item is available.
-//! - on_put already reset it to defaults when it was seeded — no fixed
-//!   value survives a put/get pass, regardless of what was set before put.
+//! `getWaitFuture` gives a future you can await. No Select is needed.
 //!
+//! - Put one Event into the pool.
+//! - Get an `Io.Future(Pool.Result)` with `pl.getWaitFuture`.
+//! - Await it until the parent is free.
+//!
+//! `on_put` reset the parent when it went in. So no value you set before the
+//! put comes back out.
 //!
 //! ```
-//!  pl.get ──► slot ──► pl.put ──► on_put resets data ──► pool
+//!  pl.get ──► Slot ──► pl.put ──► on_put resets the data ──► pool
 //!  │
 //!  getWaitFuture ──► Future(Pool.Result)
-//!  fut.await ──► Pool.Result .item ──► slot (default data, master owns)
+//!  fut.await ──► .anchor ──► Slot (data reset, yours now)
 //!  │
-//!  pl.put ──► pool ──pl.close──► on_close ──► freeList
+//!  pl.put ──► pool ──pl.close──► on_close ──► destroyQueue
 //! ```
 //!
 

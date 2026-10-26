@@ -1,28 +1,25 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool + Group: worker pool.
+//! Title: A pool and an Io.Group, no mailbox
 //!
-//! - Pool seeded with N empty containers, N workers spawned via Io.Group with a task index each.
-//! - Each worker gets its own container, writes its index, returns it.
-//! - group.cancel stops any workers still running, then pl.close frees the rest.
-//! - No mailbox — each worker's own container is the coordination surface.
+//! Each worker gets its own container, writes its index, and gives it back.
 //!
-//! Transfers (mailbox-less):
+//! - Fill the pool with N empty containers.
+//! - Start N workers in an `Io.Group`. Give each its index.
+//! - Get a container in each worker, write the index, and put it back.
+//! - Cancel the group to stop any worker still running. Then close the pool.
 //!
 //! ```
-//!  pool (N_WORKERS empty containers seeded — code=0)
-//!  │ Io.Group (N_WORKERS workers, each with own task index at spawn time)
-//!  ├──► worker 0 ──pl.get──► slot ──► ev.code = 0 ──► pl.put ──► pool
-//!  ├──► worker 1 ──pl.get──► slot ──► ev.code = 1 ──► pl.put ──► pool
-//!  └──► worker 2 ──pl.get──► slot ──► ev.code = 2 ──► pl.put ──► pool
+//!  pool (N_WORKERS empty containers: code=0)
+//!  │ Io.Group (N_WORKERS workers, each with its index)
+//!  ├──► worker 0 ──pl.get──► Slot ──► ev.code = 0 ──► pl.put ──► pool
+//!  ├──► worker 1 ──pl.get──► Slot ──► ev.code = 1 ──► pl.put ──► pool
+//!  └──► worker 2 ──pl.get──► Slot ──► ev.code = 2 ──► pl.put ──► pool
 //!  │
-//!  group.cancel ──► any worker that has not yet returned exits (all likely done)
-//!  pl.close ──► on_close ──► destroyQueue (remaining parents freed)
+//!  group.cancel ──► any worker still running stops (most are done)
+//!  pl.close ──► on_close ──► destroyQueue
 //! ```
-//!
-//!  Work input: task index passed at spawn time. A pool parent is an empty container.
-//!  Each worker gets its own container, writes its index, returns it. No mailbox needed.
 //!
 
 pub fn pool_group_worker_pool(allocator: std.mem.Allocator, io: std.Io) !void {

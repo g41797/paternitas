@@ -1,9 +1,9 @@
 # ZTK 01 — intent (002)
 
 The stage: ztk green on today's paternitas. Charter:
-[implementation-plan-025.md](implementation-plan-025.md), "ZTK".
+[implementation-plan-034.md](implementation-plan-034.md), "ZTK".
 The file plan: [ztk-plan-002.md](backup/ztk-plan-002.md).
-Design: [paternitas-design-017.md](paternitas-design-017.md), "ztk on paternitas".
+Design: [paternitas-design-018.md](paternitas-design-018.md), "ztk on paternitas".
 
 The owner named it, 2026-10-22.
 
@@ -157,7 +157,7 @@ D. Close.
   link); the errors page, for the messages that come from paternitas; one
   optional pointer for writing your own container. Each says it need not be
   read. Nowhere else. For ZTK DOCS. The rules live in a new
-  `ztk/design/rules-001.md`, with a pointer in `STATUS.md`.
+  `ztk/design/rules-003.md`, with a pointer in `STATUS.md`.
 
 ---
 

@@ -1,19 +1,22 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Pool holds pools at teardown.
+//! Title: A pool that keeps pools
 //!
-//! - A carrier pool's hooks accept Pool parents (Pool.ID).
-//! - Two inner pools are stored in the carrier via put.
-//! - close on the carrier hands the stored pools to on_close, which closes and destroys each.
-//! - Shows uniform cleanup of infrastructure parents — no per-instance role discrimination needed.
+//! Pools are parents too, so one pool can keep others until shutdown.
 //!
+//! - Give a carrier pool hooks for `Pool.ID`.
+//! - Put two inner pools into the carrier.
+//! - Close the carrier. `on_close` gets the stored pools, and closes and
+//!   destroys each one.
+//!
+//! Every pool is cleaned up the same way. No pool needs special handling.
 //!
 //! ```
-//!  newPool × 2 ──► carrier.put ──► carrier pool (holds inner pools as parents)
+//!  pool.new × 2 ──► carrier.put ──► carrier pool (keeps the inner pools)
 //!       │ carrier.close
 //!       ▼
-//!  on_close ──► close + destroy per inner pool
+//!  on_close ──► close + destroy each inner pool
 //! ```
 //!
 

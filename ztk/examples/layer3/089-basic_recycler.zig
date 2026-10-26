@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Basic recycler.
+//! Title: Reuse a parent
 //!
-//! - Create a pool with hooks for the Event id.
-//! - pl.get with available_or_new makes a fresh parent through on_get.
-//! - pl.put returns it — the hook resets it to defaults on put.
-//! - pl.get again recycles the same parent, now holding default data.
+//! A pool gives back the same parent, reset by your hook.
 //!
+//! - Make a pool with hooks for the Event id.
+//! - Get a parent with `.available_or_new`. `on_get` makes a new one.
+//! - Put it back. `on_put` resets it.
+//! - Get again. You get the same parent, with its data reset.
 //!
 //! ```
-//!  pl.get (available_or_new) ──► slot (new via on_get)
-//!       │ pl.put ──► on_put resets data ──► pool (recycled)
-//!       │ pl.get (available_or_new) ──► slot (same parent, data reset)
+//!  pl.get (available_or_new) ──► Slot (new, from on_get)
+//!       │ pl.put ──► on_put resets the data ──► pool
+//!       │ pl.get (available_or_new) ──► Slot (the same parent, reset)
 //!       │ EventHelper.destroy ──► released
 //! ```
 //!

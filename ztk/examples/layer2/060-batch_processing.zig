@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! Batch processing.
+//! Title: Receive in batches
 //!
-//! - Main sends 10 Events, then a ShutdownCommand sentinel.
-//! - Worker blocks on the first item via mbx.receive.
-//! - Worker then empties the rest with mbx.receiveAll.
-//! - Sentinel found in either place ends the worker.
+//! A worker waits for the first parent, then takes the rest at once.
 //!
+//! - Send ten Events from main, then a ShutdownCommand.
+//! - Wait for the first parent in the worker with `mbx.receive`.
+//! - Take the rest with `mbx.receiveAll`.
+//! - Stop when the ShutdownCommand shows up, in either place.
 //!
 //! ```
 //!  main ──Event×10 + ShutdownCommand──► mailbox
 //!       │
-//!  worker: receive (first item) ──► destroySlot
-//!          receiveAll (rest) ──► walk + destroyItem
-//!          (ShutdownCommand in batch → exit)
+//!  worker: receive (the first) ──► destroySlot
+//!          receiveAll (the rest) ──► pop + release each
+//!          (ShutdownCommand in the batch: stop)
 //! ```
 //!
 

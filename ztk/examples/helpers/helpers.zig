@@ -8,7 +8,7 @@ pub fn expect(comptime err: anyerror, ok: bool, comptime msg: []const u8) anyerr
     }
 }
 
-/// Dispatch table: `{id, handler}` pairs owned by a receiver.
+/// Dispatch table: `{id, handler}` pairs that a receiver keeps.
 pub const IdTable = @import("IdTable.zig").IdTable;
 
 const log = std.log;

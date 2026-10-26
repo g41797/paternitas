@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! A queue between contexts that answers the hard questions.
+//! A queue between threads and tasks that answers the hard questions.
 //!
 //! Many senders, many receivers. It does its own locking. It moves an
 //! `*Anchor` and never learns your type.
 //!
-//! The mailbox keeps items. It never touches them. Nothing is allocated when
+//! The mailbox keeps parents. It never touches them. Nothing is allocated when
 //! a parent is sent and nothing is freed when one arrives.
 //!
 //! - No inspection.
@@ -15,11 +15,13 @@
 //!
 //! ## Making one
 //!
-//! - `new` fills a Slot, and keeps the allocator for life.
-//! - `Mbox.destroy` is a method and gives that memory back.
-//! - A mailbox is made by this call, not by the helper: it allocates itself,
-//!   so it declares no `init` and no `finish`, and asking `ParentHelper` for
-//!   `create` does not compile.
+//! - `new` fills a Slot with the new mailbox. The mailbox keeps the
+//!   allocator until it is destroyed.
+//! - `Mbox.destroy` is a method. It frees the mailbox with that allocator.
+//! - Only `new` makes a mailbox, not the helper.
+//!   - The mailbox allocates itself.
+//!   - It declares no `init` and no `finish`.
+//!   - So `ParentHelper(Mbox).create` does not compile.
 //! - `Mbox.ID`, `toAnchor` and `fromAnchor` let a mailbox travel inside
 //!   another mailbox or pool.
 //!
@@ -35,24 +37,23 @@
 //!
 //! - `tryReceive` takes what is there and does not wait.
 //! - `receive` waits up to a timeout, or forever.
-//! - `receiveAll` hands back everything queued, in receive order.
+//! - `receiveAll` returns everything queued, in receive order.
 //! - `wakeUpAll` returns every waiter at once.
 //! - Out-of-band parents come out first.
 //!
 //! ## Where the parent is afterwards
 //!
 //! - A send that worked leaves your Slot empty.
-//! - A send refused leaves the parent in your Slot, whichever refusal it was.
-//!   So the Slot answers it, and you do not have to remember which failure
-//!   took the item.
+//! - A refused send leaves the parent in your Slot, whatever the reason.
+//!   - Look at the Slot to know where the parent is.
+//!   - No error ever takes it from you.
 //! - `tryReceive` and `receive` fill an empty Slot. A full one is refused.
 //!
 //! ## Shutting down
 //!
-//! - `close` hands back everything still queued, and loses nothing.
+//! - `close` returns everything still queued. It loses nothing.
 //! - You release those parents by your own rules, or give them back to a pool.
-//! - `close` on an already closed mailbox hands back an empty queue, and is
-//!   not an error.
+//! - `close` on a closed mailbox returns an empty queue. It is not an error.
 //! - Every waiter in `receive` comes back with `error.Closed`.
 //! - `isClosed` is the state. `isIdle` says closed with no call still inside.
 //! - `len` is how many parents are queued now.
@@ -61,13 +62,13 @@
 //! https://g41797.github.io/matryoshka-ztk/examples/mailbox/
 const _doc_stub = void;
 
-/// A mailbox — the tool for moving parents between contexts.
+/// A mailbox. It moves parents between threads and tasks.
 ///
 /// A mailbox is itself a parent. Use `toAnchor` and `fromAnchor` to send one
 /// through another mailbox or pool.
 ///
-/// The fields are internal. Their names start with `_` for that reason;
-/// Zig has no private field.
+/// The fields are internal. Their names start with `_`, because Zig has no
+/// private fields.
 pub const Mbox = struct {
     /// Every outcome of a receive, packed into one value.
     ///
@@ -105,21 +106,21 @@ pub const Mbox = struct {
         return helper.mustFromAnchor(anchor);
     }
 
-    /// The mailbox, from the Slot holding it. Leaves the Slot full.
+    /// The mailbox, from the Slot it sits in. The Slot stays full.
     pub inline fn fromSlot(slot: *const Slot) ?*Mbox {
         return helper.fromSlot(slot);
     }
 
-    /// The mailbox, from the Slot holding it. Panics on an empty Slot or
+    /// The mailbox, from the Slot it sits in. Panics on an empty Slot or
     /// another type.
     pub inline fn mustFromSlot(slot: *const Slot) *Mbox {
         return helper.mustFromSlot(slot);
     }
 
-    /// Takes the mailbox out of the Slot, leaving it empty.
+    /// Takes the mailbox out of the Slot. On success the Slot is empty.
     ///
-    /// Null when the Slot is empty or holds another type, and then the Slot
-    /// is untouched.
+    /// Null when the Slot is empty or has another type. The Slot is untouched
+    /// then.
     pub inline fn moveFromSlot(slot: *Slot) ?*Mbox {
         return helper.moveFromSlot(slot);
     }
@@ -139,23 +140,24 @@ pub const Mbox = struct {
 
     /// Sends a parent, unless this many of its own type are already queued.
     ///
-    /// The count is of the sender's own parent type among the **ordinary**
-    /// queued parents. Other types do not count toward it, and out-of-band
-    /// parents are not counted.
+    /// It counts only the sender's own type, and only **ordinary** queued
+    /// parents.
+    ///
+    /// - Other types do not count.
+    /// - Out-of-band parents do not count.
     ///
     /// A limit of zero is an ordinary `send`.
     ///
-    /// On `error.Limit` the Slot is unchanged, exactly as on `error.Closed`.
-    /// So one look at the Slot says whether the parent moved.
+    /// On `error.Limit` the Slot is unchanged, as on `error.Closed`. One look
+    /// at the Slot tells you whether the parent moved.
     pub fn sendLimited(self: *Mbox, slot: *Slot, limit: usize) error{ Closed, Limit }!void {
         return self._sendAt(slot, .ordinary, limit);
     }
 
     /// Sends a parent ahead of every ordinary one.
     ///
-    /// Out-of-band parents keep their own order among themselves, and every
-    /// one of them sits ahead of every ordinary one. Two queues do that, so
-    /// nothing is inserted into the middle of a chain.
+    /// Out-of-band parents keep their order among themselves. Every one of
+    /// them comes out before every ordinary one.
     ///
     /// ```text
     /// send(R1), send(R2):   oob []        ordinary [R1, R2]
@@ -176,15 +178,14 @@ pub const Mbox = struct {
     /// Receives a parent, waiting until one is there.
     ///
     /// - `timeout_ns` null waits forever.
-    /// - `timeout_ns` zero comes back at once on an empty mailbox, with
-    ///   `error.Timeout`. The same reach as `tryReceive`, reported as an
-    ///   error rather than as false.
+    /// - `timeout_ns` zero returns at once on an empty mailbox, with
+    ///   `error.Timeout`. It is `tryReceive`, with an error in place of false.
     ///
-    /// It breaks on a timeout, on a cancel, and on `wakeUpAll`. On every
-    /// break the Slot stays empty. A cancel does not close the mailbox.
+    /// It stops waiting on a timeout, a cancel or `wakeUpAll`. The Slot stays
+    /// empty then. A cancel does not close the mailbox.
     ///
-    /// Several receivers compete for each parent and one gets it. The order
-    /// among them is the `Io` runtime's, and it is not first in, first out.
+    /// When several receivers wait, one of them gets each parent. The `Io`
+    /// runtime picks which. It is not first in, first out.
     ///
     /// Refuses a Slot that is not empty on entry.
     pub fn receive(
@@ -244,7 +245,7 @@ pub const Mbox = struct {
         }
     }
 
-    /// Receives a parent if one is there now. Never waits.
+    /// Receives a parent if one is there now. It never waits.
     ///
     /// True when a parent was received, false when the mailbox was empty.
     /// An empty mailbox is not an error.
@@ -269,13 +270,13 @@ pub const Mbox = struct {
         return true;
     }
 
-    /// Hands back every queued parent at once, in receive order.
+    /// Returns every queued parent at once, in receive order.
     ///
-    /// The mailbox stays open and is empty afterwards. An empty mailbox
-    /// hands back an empty queue, which is not an error. This never waits.
+    /// The mailbox stays open, and is empty afterwards. An empty mailbox
+    /// returns an empty queue. That is not an error. It never waits.
     ///
-    /// The queue is **moved** to you, and every parent on it is yours to
-    /// release — free them, or give them back to a pool.
+    /// The queue is **moved** to you. Every parent on it is yours to release:
+    /// free it, or give it back to a pool.
     pub fn receiveAll(self: *Mbox) error{Closed}!Queue {
         if (self._closedFast()) return error.Closed;
         const io: Io = self._io;
@@ -291,20 +292,19 @@ pub const Mbox = struct {
         return self._takeAll();
     }
 
-    /// Closes the mailbox and hands back everything still queued.
+    /// Closes the mailbox and returns everything still queued.
     ///
-    /// Wakes every waiting receiver, which come back with `error.Closed`.
+    /// Every waiting receiver wakes up, with `error.Closed`.
     ///
-    /// Safe to call more than once. A later call hands back an empty queue.
+    /// You may call it more than once. A later call returns an empty queue.
     ///
     /// Cannot fail.
     ///
-    /// Every parent on the returned queue is yours to release. What those
-    /// parents are — heap parents to free, pool parents to give back — is
-    /// knowledge the mailbox does not have and never had.
+    /// Every parent on the returned queue is yours to release. Only you know
+    /// what each one is: a heap parent to free, or a pool parent to give back.
     ///
-    /// Run the release loop unconditionally. An empty queue costs nothing,
-    /// so no call site has to know whether the mailbox was emptied first:
+    /// Always run the release loop. An empty queue costs nothing, so you never
+    /// need to know whether the mailbox was emptied first:
     ///
     /// ```zig
     /// var rem: Queue = mbx.close();
@@ -338,12 +338,12 @@ pub const Mbox = struct {
         return out;
     }
 
-    /// Wakes every blocked receiver, which come back with `error.Wakeup`.
+    /// Wakes every waiting receiver, with `error.Wakeup`.
     ///
-    /// Receivers that start waiting later are not affected: the effect does
-    /// not outlive the call. The mailbox stays open.
+    /// A receiver that starts waiting later is not affected. The mailbox stays
+    /// open.
     ///
-    /// Not a cancel.
+    /// It is not a cancel.
     pub fn wakeUpAll(self: *Mbox) error{Closed}!void {
         if (self._closedFast()) return error.Closed;
         const io: Io = self._io;
@@ -362,21 +362,19 @@ pub const Mbox = struct {
 
     /// True when the mailbox is closed.
     ///
-    /// One atomic read. It takes no lock, so a hook or a call already inside
-    /// the mailbox may ask it.
+    /// It takes no lock. So a hook, or a call already inside the mailbox, may
+    /// ask it.
     pub inline fn isClosed(self: *Mbox) bool {
         return self._closedFast();
     }
 
     /// True when the mailbox is closed **and** no call is inside it.
     ///
-    /// This is the readable form of `destroy`'s own precondition, and that
-    /// is what it is for: `destroy` aborts the process when it is wrong, so
-    /// without this there is no way to ask whether freeing is allowed yet
-    /// other than to try it and be right.
+    /// Ask it before `destroy`. `destroy` aborts the process when this is
+    /// false.
     ///
-    /// MUST: it takes the mutex. Never call it from inside a call on the
-    /// same mailbox. `isClosed` answers the other half and takes no lock.
+    /// It takes the lock. You MUST NOT call it from inside a call on the same
+    /// mailbox. `isClosed` takes no lock.
     pub fn isIdle(self: *Mbox) bool {
         const io: Io = self._io;
 
@@ -399,22 +397,19 @@ pub const Mbox = struct {
         return self._oob.len() + self._regular.len();
     }
 
-    /// Frees the mailbox, with the allocator it has held since `new`.
+    /// Frees the mailbox, with the allocator it got in `new`.
     ///
-    /// MUST: closed first, and no call still inside it. Both halves are
-    /// checked, **in every optimization mode**, and a broken one aborts.
-    /// This is not a `check`: freeing a mailbox another context is still
-    /// inside is not a contract a fast build may assume away.
+    /// The mailbox MUST be closed first, with no call still inside it. Both
+    /// are checked **in every optimization mode**. A broken one aborts the
+    /// process.
     ///
     /// `isIdle` asks the same question without the abort.
     ///
-    /// Closing is not done here. `close` hands back the parents the mailbox
-    /// keeps, and that queue belongs to the caller — so doing it here would
-    /// drop them.
+    /// `destroy` does not close. Call `close` first, and release the parents
+    /// it returns.
     ///
-    /// The mailbox's own TypedNode is not consulted. A mailbox that is still
-    /// on a chain is a caller who freed something another container holds,
-    /// and the chain is the place that notices.
+    /// `destroy` does not look at the mailbox's own TypedNode. Do not free a
+    /// mailbox that is still on a chain.
     pub fn destroy(self: *Mbox) void {
         const io: Io = self._io;
         const alloc = self._alloc;
@@ -531,8 +526,8 @@ pub const Mbox = struct {
 
 /// Makes a mailbox and puts it in the Slot.
 ///
-/// The allocator is kept for life, and `Mbox.destroy` gives the memory back
-/// with it.
+/// The mailbox keeps the allocator. `Mbox.destroy` frees the mailbox with
+/// it.
 ///
 /// Refuses a Slot that is not empty on entry. On failure the Slot is
 /// unchanged.
@@ -565,8 +560,8 @@ pub fn new(alloc: std.mem.Allocator, io: Io, slot: *Slot) !void {
 
 /// Packs every outcome of a `receive` into a `Mbox.Result`.
 ///
-/// Waits. The building block for `Io.Select`, `io.concurrent` and
-/// `Io.Group`. The mailbox's state does not change because of the packing.
+/// It waits. Use it with `Io.Select`, `io.concurrent` and `Io.Group`. The
+/// packing does not change the mailbox.
 pub fn receiveResult(mbx: *Mbox, timeout_ns: ?u64) Mbox.Result {
     var slot: Slot = null;
 

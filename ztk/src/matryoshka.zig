@@ -1,25 +1,28 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 g41797
 // SPDX-License-Identifier: MIT
 
-//! A toolkit for Zig 0.16: items move between holders, and are created and
-//! released.
+//! A toolkit for Zig 0.16. Your threads and tasks pass structs to each
+//! other, and reuse them.
 //!
-//! Three layers, each optional above the first:
+//! A parent is your struct. It embeds one TypedNode: the field the toolkit
+//! links your struct by, and reads its type from.
 //!
-//! - the core — a parent, its TypedNode, the id, the helper, the queue
-//! - the mailbox — items move from one context to another
-//! - the pool — items are kept and handed out again
+//! Three layers. You need the first. The other two are optional.
 //!
-//! Five namespaces, one per file, each with a page of its own:
+//! - The core: your parent, its helper, the queue.
+//! - The mailbox: your threads and tasks send parents to each other.
+//! - The pool: used parents wait there until you need one again.
 //!
-//! - `inner` — the TypedNode, the Anchor, the Slot, the id, what a parent is
-//! - `queue` — a first in, first out chain of parents
-//! - `helper` — one helper per parent type, and the borders out of the toolkit
-//! - `mbox` — a queue between contexts
-//! - `pool` — parents kept so they can be used again
+//! Five namespaces, one file each. Each has a page of its own.
 //!
-//! `Mbox` and `Pool` are also here, flat, because application code keeps one
-//! for the life of the program.
+//! - `inner`: the TypedNode, the Anchor, the Slot, the type id.
+//! - `queue`: a first in, first out chain of parents.
+//! - `helper`: one helper per parent type.
+//! - `mbox`: the mailbox.
+//! - `pool`: the pool.
+//!
+//! `Mbox` and `Pool` are here at the top too. You usually keep one of each
+//! for the whole program.
 //!
 //! Examples:
 //! https://g41797.github.io/matryoshka-ztk/examples/flow/
@@ -30,11 +33,8 @@ pub const helper = @import("helper.zig");
 pub const mbox = @import("mbox.zig");
 pub const pool = @import("pool.zig");
 
-/// The toolkit's version. Matches `build.zig.zon`.
-pub const VERSION = "0.1.0";
-
-/// A queue between contexts. Application code keeps `*Mbox`.
+/// The mailbox. You keep a `*Mbox`.
 pub const Mbox = mbox.Mbox;
 
-/// Keeps used parents so they can be used again. Application code keeps `*Pool`.
+/// The pool. You keep a `*Pool`.
 pub const Pool = pool.Pool;
