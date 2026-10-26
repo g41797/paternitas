@@ -265,5 +265,4 @@ No open handoffs. ztk lives in matryoshka-ztk; a jump follows
    [docs-02-intent-006.md](docs-02-intent-006.md).
 3. README 02: the owner reads iteration 7, README-012. The plan:
    [implementation-plan-036.md](implementation-plan-036.md), "README 02".
-4. The last state, 2026-10-26, H25: six gates pass. The owner commits and
-   pushes.
+4. The last state, 2026-10-26, H25: six gates pass. Both repos pushed.
