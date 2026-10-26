@@ -4,6 +4,35 @@ Append-only. Newest entries at top. Only the head is read.
 
 ---
 
+## 2026-10-26 — H25, cleanup after ztk left (Sonnet, effort low)
+
+- The owner removed `ztk/`, `kitchen/ztk_gates.sh` and `design/source/`.
+- Plan 036: the ZTK section is one line and a pointer to matryoshka-ztk.
+  Design 019: "ztk on paternitas" is a pointer. 035 and 018 in `design/backup/`.
+  Live references repointed.
+- STATUS: the ZTK rows and state collapse to a pointer.
+- CI: no workflow named `ztk/`. Nothing to change.
+
+
+## 2026-10-26 — ZTK HOME (Opus 5.5, effort high)
+
+- The owner named it. Intent: [ztk-home-intent-001.md](ztk-home-intent-001.md).
+  The owner's answers: the old tree `mv` to `old-tree/`, `stories/` too;
+  one `zig fetch`; commands allowed in matryoshka-ztk; `docs.yml` to 0.16;
+  rules there new, from 015 and ztk 003; the old design docs to
+  `secondary/`; the pre-existing dead link fixed.
+- matryoshka-ztk: the full account is the head of its `design/STATUS-LOG.md`.
+  Four ztk gates, `check_design.sh`, strict site build: pass.
+- Here: rules 016 (the jump exception, "Cross-repo" in STATUS), plan 035,
+  `cross-repo-001.md`, a copy of the source in matryoshka-ztk. Live
+  references to rules 015 and plan 034 repointed; this log untouched.
+- Claude's call: `check_next_docs.sh` and the two NEXT history links stay,
+  a record of NEXT.
+- Not done, waits for the owner's removal of `ztk/`: H25, design 018 and
+  STATUS shrink to a pointer.
+- Post-stage cleanup: none.
+
+---
 
 ## 2026-10-26 — ZTK PREP 02 (Opus 5.5, effort medium, unattended)
 

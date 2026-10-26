@@ -1,3 +1,0 @@
-# Patterns
-
-To come.

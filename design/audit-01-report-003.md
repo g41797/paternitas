@@ -9,8 +9,8 @@ is open.
 Change from 001, kept: the owner's rulings, 2026-10-02, in "The rulings"
 below. A1 and A11 have a second probe and Claude's advice.
 
-- Rules: [rules-015.md](rules-015.md).
-- Plan: [implementation-plan-034.md](implementation-plan-034.md).
+- Rules: [rules-016.md](rules-016.md).
+- Plan: [implementation-plan-036.md](implementation-plan-036.md).
 - Intake: [paternitas-intake-001.md](paternitas-intake-001.md).
 - The outside design: `design/source/paternitas-design.md`.
 - The outside code: `design/source/paternitas-and-ztk/paternitas/`.
@@ -319,7 +319,7 @@ Not taken.
 
 ## After the rulings
 
-- [paternitas-design-018.md](paternitas-design-018.md), in rules style.
+- [paternitas-design-019.md](paternitas-design-019.md), in rules style.
   - It absorbs the outside design, with the approved fixes.
   - It keeps what design 003 records.
   - 003 moves to `backup/`.

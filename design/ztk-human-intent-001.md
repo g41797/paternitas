@@ -5,7 +5,7 @@ The owner named the stage, 2026-10-26. B43. Model: Opus, effort high.
 - ztk only: `//!`, `///`, example headers, test comments.
 - Comments only. The meaning is kept. Text moved out goes to a site page or
   the backlog.
-- The rules: [rules-015.md](rules-015.md) Parts 3, 4, 5;
+- The rules: [rules-016.md](rules-016.md) Parts 3, 4, 5;
   [ztk/design/rules-003.md](../ztk/design/rules-003.md); matryoshka-ztk
   rules-050 Part 4 and Staccato.
 

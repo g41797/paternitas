@@ -1,7 +1,7 @@
 # ZTK DOCS 03 — the page inventory (002)
 
 The owner named the stage, 2026-10-26. Item B28.
-The plan: [implementation-plan-034.md](implementation-plan-034.md), "ZTK".
+The plan: [implementation-plan-036.md](implementation-plan-036.md), "ZTK".
 The backlog: [ztk-docs-backlog-016.md](ztk-docs-backlog-016.md).
 
 One line per hand-written page of the matryoshka-ztk site,

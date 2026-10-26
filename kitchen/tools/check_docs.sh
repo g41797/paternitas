@@ -34,6 +34,9 @@
 # A reference into ztk is written from ZTK/ or NEXT/, as in
 # design/paternitas-design-NNN.md. It is checked only where the ztk repo is on
 # disk; elsewhere it is counted and skipped.
+#
+# A reference into ztk/ or design/source/ is counted and skipped too. The
+# owner removed both in H25; the closed ZTK records keep their paths.
 set -uo pipefail
 
 repo_root="$(cd "$(dirname "$(readlink -f "$0")")/../.." && pwd)"
@@ -67,6 +70,8 @@ docs() {
 resolve() {
     local from_dir="$1" target="$2" c
     case "$target" in
+        ztk/*|../ztk/*|design/source/*|../design/source/*)
+            return 2 ;;
         ZTK/*|NEXT/*)
             [ -d "$ztk_root" ] || return 2
             target="${target/#ZTK/$ztk_root}"
@@ -140,7 +145,7 @@ while IFS= read -r f; do
 done < <(docs)
 
 if [ "$skipped" -gt 0 ]; then
-    echo "  $skipped ztk reference(s) not checked: no ztk repo at $ztk_root"
+    echo "  $skipped reference(s) not checked: into removed ztk/ or design/source/, or no ztk repo at $ztk_root"
 fi
 
 if [ "$generated" -gt 0 ]; then

@@ -1,7 +1,7 @@
 # ZTK DOCS 02 — the frame (intent 001)
 
 The owner named the stage, 2026-10-22. Items B27, B14, B32.
-The plan: [implementation-plan-034.md](implementation-plan-034.md), "ZTK".
+The plan: [implementation-plan-036.md](implementation-plan-036.md), "ZTK".
 
 ## Owner's answers, 2026-10-22
 

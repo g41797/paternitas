@@ -6,17 +6,14 @@ Current state only. Updated in place. The narrative is in
 ## Start here — every session
 
 1. Read this file in full.
-2. Read Part 0 of [rules-015.md](rules-015.md).
-3. Read the plan, [implementation-plan-034.md](implementation-plan-034.md), for
+2. Read Part 0 of [rules-016.md](rules-016.md).
+3. Read the plan, [implementation-plan-036.md](implementation-plan-036.md), for
    the stage the owner names. Not before they name it.
-4. Read the design, [paternitas-design-018.md](paternitas-design-018.md), for
+4. Read the design, [paternitas-design-019.md](paternitas-design-019.md), for
    a stage that writes code or docs.
-5. Read [paternitas-intake-001.md](paternitas-intake-001.md) for the ztk
-   stage: the outside work and the questions left for it.
-6. Read the head of [STATUS-LOG.md](STATUS-LOG.md) when the stage needs the
+5. Read the head of [STATUS-LOG.md](STATUS-LOG.md) when the stage needs the
    last stage's account.
-7. For a ZTK stage, read [ztk/design/rules-003.md](../ztk/design/rules-003.md)
-   too: the ztk-only rules.
+6. For a jump into matryoshka-ztk, read [cross-repo-001.md](cross-repo-001.md).
 
 **No stage starts because a document says it is next.** The owner names it.
 
@@ -24,112 +21,37 @@ Current state only. Updated in place. The narrative is in
 
 | what | where |
 |---|---|
-| rules | [rules-015.md](rules-015.md) |
-| ztk-only rules, during ZTK | [ztk/design/rules-003.md](../ztk/design/rules-003.md) |
-| design decisions, and what paternitas keeps from ztk | [paternitas-design-018.md](paternitas-design-018.md) |
-| the plan | [implementation-plan-034.md](implementation-plan-034.md) |
+| rules | [rules-016.md](rules-016.md) |
+| design decisions, and what paternitas keeps from ztk | [paternitas-design-019.md](paternitas-design-019.md) |
+| the plan | [implementation-plan-036.md](implementation-plan-036.md) |
 | the audit: findings, evidence, rulings | [audit-01-report-003.md](audit-01-report-003.md) |
 | the outside work: findings, rulings, open questions | [paternitas-intake-001.md](paternitas-intake-001.md) |
-| the outside work itself, as it came | `design/source/` |
 | NAME 01: the new names and what they touch | [name-01-intent-002.md](name-01-intent-002.md) |
-| ZTK HOME: what changes when ztk goes back | [ztk-home-audit-003.md](ztk-home-audit-003.md) |
-| ZTK DOCS: the backlog, every item kept | [ztk-docs-backlog-016.md](ztk-docs-backlog-016.md) |
-| ZTK DOCS: the audit findings | [ztk-docs-01-findings-001.md](ztk-docs-01-findings-001.md) |
 | DOCS 01: the site pages | [docs-01-intent-010.md](docs-01-intent-010.md) |
 | DOCS 02: the opening pages | [docs-02-intent-006.md](docs-02-intent-006.md) |
 | LOOK 03: the logo's "in" side | [look-03-intent-001.md](look-03-intent-001.md) |
 | SYNC 01: the comments follow the site | [sync-01-intent-002.md](sync-01-intent-002.md) |
+| ztk: its state, plan, rules, and the ZTK stage records | `/home/g41797/dev/root/github.com/g41797/matryoshka-ztk/design/STATUS.md` |
 | the narrative | [STATUS-LOG.md](STATUS-LOG.md) |
 | the advice collected by the owner, read in AUDT 01 | `paternitas-001.md` |
 | superseded versions | `design/backup/` |
 
+## Cross-repo
+
+No open handoffs. ztk lives in matryoshka-ztk; a jump follows
+[cross-repo-001.md](cross-repo-001.md), a copy of the source there.
+
 ## Current state
 
-- ZTK PREP 02, ready to move, is done, 2026-10-26, unattended. B37 to B40.
-  - `ztk/kitchen/gates.sh` runs the four ztk gates from inside ztk.
-  - ztk's design notes and log are in `ztk/design/`.
-  - Seven questions for the owner, before ZTK HOME:
-    [ztk-human-review-001.md](ztk-human-review-001.md).
-  - Four ztk gates, six gates pass.
-- ZTK HUMAN, the ztk comments made human, is done, 2026-10-26. B43, B34.
-  The intent: [ztk-human-intent-001.md](ztk-human-intent-001.md).
-  - Unattended from `mbox.zig` on, the owner's ruling, until ZTK HOME.
-  - What changed, and four questions for the owner:
-    [ztk-human-review-001.md](ztk-human-review-001.md).
-  - The files before: `design/backup/ztk-human-before/`.
-  - Four ztk gates, six gates pass.
-- ZTK DOCS 05, the README, is done, 2026-10-26. B10, B11, B45. The intent:
-  [ztk-docs-05-intent-001.md](ztk-docs-05-intent-001.md). Ideas not yet
-  agreed: [ztk-docs-05-ideas-001.md](ztk-docs-05-ideas-001.md).
-  - `ztk/README.md` is the new README, 75 lines. The old one:
-    `design/backup/ztk-README-temp-001.md`.
-  - z4_readme, a fourth ztk gate: the "about 800 lines" claim (B45).
-  - Four ztk gates, six gates, the ztk strict build pass. ztk rules 002:
-    the rule 2 check is z5.
-- ZTK DOCS 04, rule 2 in `src/`, is done, 2026-10-26. B1, B2, B3, F2.4.
-  - Four comments in `ztk/` no longer name paternitas: `inner.zig` (two),
-    `helper.zig`, `tests/layer1_any.zig`. No code changed.
-  - g4 had four dead links to removed backup files. Gone, owner's ruling:
-    docs-01-intent-010, docs-02-intent-006, design 018.
-  - New stage ZTK HUMAN, B43: the ztk comments made human. ztk only.
-  - Six gates pass, three ztk gates pass.
-- ZTK DOCS 03, the page inventory, is done, 2026-10-26. B28. The
-  inventory: [ztk-docs-03-inventory-002.md](ztk-docs-03-inventory-002.md).
-  - 60 hand-written pages: take 31, rewrite 15, merge 12, drop 2. The 88
-    example pages: generated. The order of the page stages is set.
-  - No page written. The owner's answers, 2026-10-26: verdicts agreed;
-    Background splits into Ideas and Comparisons; `slot-idiom` merges;
-    the order agreed. Inventory 002.
-- ZTK DOCS 02, the frame, is done, 2026-10-22. B14, B27, B32. The intent:
-  [ztk-docs-02-intent-001.md](ztk-docs-02-intent-001.md).
-  - The ztk hero in the paternitas style: the logo, "Get Started", the
-    lines-of-code button to `apidocs/`. Nav groups, each page "to come".
-  - paternitas's `new_tab_links.py` and `fix_md_*` in `ztk/kitchen/`.
-    `build_site.sh` builds `--strict`; the examples generator is out of
-    the build until B30.
-  - Open, the owner: does ztk keep the Master concept? The site name
-    follows. B42.
-  - Six gates pass, three ztk gates pass, the ztk strict build passes.
-- ZTK PREP 01 is done, 2026-10-22. B35, B36.
-  - matryoshka-ztk, two writes with the owner's permission: root
-    `design/STATUS.md` line 12 names staging plan 019; next-status.md
-    names paternitas `design/STATUS.md` as the state. Nothing else there.
-  - `ztk/`: `VERSION` and its `///` gone; the two "317" tests gone.
-    ztk: 200/201 tests, 1 skipped. Six paternitas gates pass.
-  - z2 failed once: `312_destroy_while_receiving`, Debug, exited 0, not
-    ABRT. Three reruns pass. Timing. Backlog B41.
-- ZTK DOCS 01, the audit, is done, 2026-10-22. The findings:
-  [ztk-docs-01-findings-001.md](ztk-docs-01-findings-001.md). Nothing
-  fixed. Six questions wait for the owner. NEXT's 002 plans are in
-  `ztk/design/`. All gates pass.
-  - The owner: the fixes are iterative, small steps. Nothing important is
-    lost: every item is in [ztk-docs-backlog-016.md](ztk-docs-backlog-016.md).
-- ZTK 02 is closed, 2026-10-22. The intent is
-  [ztk-02-intent-001.md](ztk-02-intent-001.md).
-  - Examples 104, a DoublyTypedNode parent from a timeout list through a
-    mailbox and back, and 105, a handler map that keeps the Slot to the
-    end. A demo parent, `Deadline`.
-  - No `AnyParent` receive form: Slot usage is MUST (the owner).
-  - ztk: three gates, 202/203 tests, 1 skipped. Six paternitas gates.
-  - The plan: [ztk-plan-003.md](ztk-plan-003.md).
-- ZTK 01 is closed, 2026-10-22. The intent was
-  [ztk-01-intent-002.md](ztk-01-intent-002.md).
-  - ztk is green on today's paternitas: all three ztk gates, four modes,
-    200/201 tests, 1 skipped. All six paternitas gates.
-  - `AnyParent = paternitas.Any`, ztk's narrower view. `ParentHelper`
-    refuses zero TypedNodes through the public `findTypedNode`.
-  - paternitas: `findTypedNode` public; `<P>: not a struct`. Design 017.
-  - The requirement: a ztk user needs to know only how to embed one
-    TypedNode. paternitas names are fine; the docs stand alone. The rules:
-    [ztk/design/rules-003.md](../ztk/design/rules-003.md). The docs audit
-    goes into ZTK DOCS.
-  - Carried over, intent 002: question 4, NEXT's newer README-stage docs;
-    question 6, the z4 check; question 7, `anchor.typeId()` in examples.
-- ZTK 00 is closed, 2026-10-22. The intent was
-  [ztk-00-intent-003.md](ztk-00-intent-003.md).
-  - `ztk/` at the root, on `.path = ".."`. `kitchen/ztk_gates.sh`: z1
-    test, z2 negative, z3 fmt.
-  - The current plan: [ztk-plan-003.md](ztk-plan-003.md).
+- H25 is done, 2026-10-26. The owner removed `ztk/`, `kitchen/ztk_gates.sh`
+  and `design/source/`. Plan 036, design 019. paternitas CI never built
+  `ztk/`: no workflow names it.
+- ZTK 00 to ZTK HOME are done, 2026-10-22 to 2026-10-26. ztk lives in
+  matryoshka-ztk, on paternitas `v0.0.2`. Its state and plan are there:
+  `/home/g41797/dev/root/github.com/g41797/matryoshka-ztk/design/STATUS.md`.
+  The record here: [STATUS-LOG.md](STATUS-LOG.md), `design/backup/implementation-plan-035.md`.
+- paternitas is tagged `v0.0.2`. The tag's `build.zig.zon` says `0.0.1`;
+  `main` says `0.0.2` since `20a6280`.
 - SYNC 01: the comments in `src/`, `examples/` and `negative/` follow the
   README and the site. The owner named it, 2026-10-07. The intent is
   [sync-01-intent-002.md](sync-01-intent-002.md).
@@ -182,11 +104,11 @@ Current state only. Updated in place. The narrative is in
   - No two NAQs back to back. Each sits right after the text it is about,
     not at the end of a section.
 - README 02: a smaller README. The owner named it, 2026-10-07. The plan is
-  [implementation-plan-034.md](implementation-plan-034.md), "README 02".
+  [implementation-plan-036.md](implementation-plan-036.md), "README 02".
   - The README before it: `design/backup/README-004.md`.
   - Each new iteration is copied to `design/backup/`, from README-005 on.
   - A new MUST rule: text cut from the README or a site page stays on the
-    site. [rules-015.md](rules-015.md), Part 0.
+    site. [rules-016.md](rules-016.md), Part 0.
   - Done: the setup, iterations 1 to 7, and a fix to "Where it came
     from". Copies: `design/backup/README-005.md` to
     `design/backup/README-012.md`.
@@ -257,7 +179,7 @@ Current state only. Updated in place. The narrative is in
   - `AnyParent` is `Any`. A comparison row, "type id without a list".
   - The old README is `design/backup/README-002.md`.
   - Open: the owner's review. Trimming waits for the site pages.
-  - The owner's rulings are in [implementation-plan-034.md](implementation-plan-034.md), "README 01".
+  - The owner's rulings are in [implementation-plan-036.md](implementation-plan-036.md), "README 01".
 - Comments in `src/` took four items from a ChatGPT revision, 2026-10-06.
   The owner said go. Comments only; the code is unchanged.
   - The module doc opens with the problem: "An intrusive list gives you a
@@ -308,7 +230,6 @@ Current state only. Updated in place. The narrative is in
 - Every `pub` declaration has a `///`. The root `//!` has a usage block.
 - Seven examples in `examples/`, each with a test wrapper and a site page.
   `before_paternitas.zig` has a test wrapper and no page.
-- The ztk copy in `design/source/` has the new names in its code and text.
 - Gates: all six pass.
 - Tests: 27 pass, in all four optimization modes, on LLVM and on Zig's own
   backend. 19 unit, 8 examples.
@@ -321,8 +242,7 @@ Current state only. Updated in place. The narrative is in
 
 1. CI and GitHub Pages: accepted by the owner as they are, not checked by
    Claude. To look at again later.
-2. `design/source/` stays until after the ztk stage. Owner's ruling,
-   2026-10-02. Then the owner removes it.
+2. `design/source/` is removed, the owner, 2026-10-26.
 3. The old ztk favicon, `kitchen/docs/assets/images/favicon.ico`, is no
    longer used. The owner deletes it.
 4. The logo is tuned with the owner, in rounds. The choices are in
@@ -344,17 +264,6 @@ Current state only. Updated in place. The narrative is in
 2. DOCS 02: the owner's look goes on, then the stage closes.
    [docs-02-intent-006.md](docs-02-intent-006.md).
 3. README 02: the owner reads iteration 7, README-012. The plan:
-   [implementation-plan-034.md](implementation-plan-034.md), "README 02".
-4. ZTK HOME waits for the owner. First: read
-   [ztk-human-review-001.md](ztk-human-review-001.md): the questions are
-   answered, two small items open (`check_next_docs.sh`, two NEXT links).
-   The owner tags paternitas. The unattended run stops here.
-   ZTK HOME also writes the cross-repo jump protocol (B50,
-   [ztk-home-audit-003.md](ztk-home-audit-003.md)).
-   Model: Opus, effort high: a move that replaces a tree.
-   - The plan: [implementation-plan-034.md](implementation-plan-034.md), "ZTK".
-   - Every item: [ztk-docs-backlog-016.md](ztk-docs-backlog-016.md).
-   - The audit: [ztk-docs-01-findings-001.md](ztk-docs-01-findings-001.md).
-   - Writes to matryoshka-ztk need the owner's permission each time.
-5. The last state, 2026-10-26: six gates pass, four ztk gates pass. The
-   owner commits and pushes.
+   [implementation-plan-036.md](implementation-plan-036.md), "README 02".
+4. The last state, 2026-10-26, H25: six gates pass. The owner commits and
+   pushes.

@@ -1,9 +1,9 @@
 # ZTK 01 — intent (002)
 
 The stage: ztk green on today's paternitas. Charter:
-[implementation-plan-034.md](implementation-plan-034.md), "ZTK".
+[implementation-plan-036.md](implementation-plan-036.md), "ZTK".
 The file plan: [ztk-plan-002.md](backup/ztk-plan-002.md).
-Design: [paternitas-design-018.md](paternitas-design-018.md), "ztk on paternitas".
+Design: [paternitas-design-019.md](paternitas-design-019.md), "ztk on paternitas".
 
 The owner named it, 2026-10-22.
 

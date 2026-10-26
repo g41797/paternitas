@@ -1,3 +1,0 @@
-# Mailbox
-
-To come.

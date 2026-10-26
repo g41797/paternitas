@@ -1,14 +1,14 @@
 # ZTK 00 — intent and the owner's answers (003)
 
 The stage: ztk on paternitas, set up and checked. Charter:
-[implementation-plan-034.md](implementation-plan-034.md), "ZTK".
-Design: [paternitas-design-018.md](paternitas-design-018.md), "ztk on paternitas".
+[implementation-plan-036.md](implementation-plan-036.md), "ZTK".
+Design: [paternitas-design-019.md](paternitas-design-019.md), "ztk on paternitas".
 
 Owner's ruling, 2026-10-22: the ZTK stages run in this repo. Writes to the
 matryoshka-ztk repo are allowed, with the owner's permission each time.
 
 Change from 002: the later stages moved to the plan,
-[implementation-plan-034.md](implementation-plan-034.md), "ZTK". This file is
+[implementation-plan-036.md](implementation-plan-036.md), "ZTK". This file is
 ZTK 00 only.
 
 Change from 001, kept: the owner's answers. The NEXT survey shrinks to a light
@@ -95,7 +95,7 @@ The outside plan.
 Status files.
 
 - `STATUS.md`: a ZTK section. Current state and next only.
-- Plan: [implementation-plan-034.md](implementation-plan-034.md). One line under "Completed stages" when ZTK 00 closes.
+- Plan: [implementation-plan-036.md](implementation-plan-036.md). One line under "Completed stages" when ZTK 00 closes.
 - `STATUS-LOG.md`: one entry per stage, as now.
 - matryoshka-ztk: the next-status and next-log files, pointer written,
   2026-10-22, with the owner's permission.
@@ -105,4 +105,4 @@ Status files.
 ## After ZTK 00
 
 The next stages are in the plan,
-[implementation-plan-034.md](implementation-plan-034.md), "ZTK".
+[implementation-plan-036.md](implementation-plan-036.md), "ZTK".
